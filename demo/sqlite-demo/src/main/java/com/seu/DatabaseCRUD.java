@@ -4,11 +4,23 @@ import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-
+/**
+ * DatabaseCRUD 提供对 SQLite 数据库中 Student 表的基本增删改查（CRUD）操作。
+ * <p>
+ * 支持创建表、插入学生、查询所有学生、更新学生信息、删除学生。
+ * 通过 JDBC 连接 SQLite 数据库。
+ * </p>
+ *
+ * @param dbPath 数据库文件路径
+ */
 public record DatabaseCRUD(String dbPath) {
     private static final Logger LOGGER = Logger.getLogger(DatabaseCRUD.class.getName());
 
-    // 测试 CRUD
+    /**
+     * 主方法，演示 CRUD 操作流程。
+     *
+     * @param args 命令行参数
+     */
     public static void main(String[] args) {
         String dbPath = "./test.db";
         DatabaseCRUD db = new DatabaseCRUD(dbPath);
@@ -29,12 +41,22 @@ public record DatabaseCRUD(String dbPath) {
         db.readStudents();
     }
 
+    /**
+     * 获取数据库连接。
+     *
+     * @return 数据库连接对象
+     * @throws SQLException 数据库连接异常
+     */
     private Connection connect() throws SQLException {
         String url = "jdbc:sqlite:" + dbPath;
         return DriverManager.getConnection(url);
     }
 
-    // 创建表（可选，首次运行）
+    /**
+     * 创建 Student 表（如不存在）。
+     * <p>
+     * 若表已存在则不做任何操作。
+     */
     public void createTable() {
         String sql = """
                 CREATE TABLE IF NOT EXISTS Student (
@@ -53,7 +75,12 @@ public record DatabaseCRUD(String dbPath) {
         }
     }
 
-    // 插入记录
+    /**
+     * 向 Student 表插入一条学生记录。
+     *
+     * @param name 学生姓名
+     * @param age  学生年龄
+     */
     public void createStudent(String name, int age) {
         String sql = "INSERT INTO Student(Name, Age) VALUES(?, ?)";
         try (Connection conn = connect();
@@ -67,7 +94,9 @@ public record DatabaseCRUD(String dbPath) {
         }
     }
 
-    // 查询所有记录
+    /**
+     * 查询并打印 Student 表中的所有学生记录。
+     */
     public void readStudents() {
         String sql = "SELECT * FROM Student";
         try (Connection conn = connect();
@@ -87,7 +116,13 @@ public record DatabaseCRUD(String dbPath) {
         }
     }
 
-    // 更新记录
+    /**
+     * 根据 ID 更新学生信息。
+     *
+     * @param id   学生ID
+     * @param name 新姓名
+     * @param age  新年龄
+     */
     public void updateStudent(int id, String name, int age) {
         String sql = "UPDATE Student SET Name=?, Age=? WHERE ID=?";
         try (Connection conn = connect();
@@ -106,7 +141,11 @@ public record DatabaseCRUD(String dbPath) {
         }
     }
 
-    // 删除记录
+    /**
+     * 根据 ID 删除学生记录。
+     *
+     * @param id 学生ID
+     */
     public void deleteStudent(int id) {
         String sql = "DELETE FROM Student WHERE ID=?";
         try (Connection conn = connect();
