@@ -1,0 +1,7 @@
+*.db
+
+.vscode/
+
+.idea/
+
+*.class
