@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.LoginController" style="-fx-font-family: 'Microsoft YaHei';">
+    <Label text="虚拟校园登录" />
+    <TextField fx:id="usernameField" promptText="用户名" />
+    <PasswordField fx:id="passwordField" promptText="密码" />
+    <Button text="登录" onAction="#handleLogin" />
+    <Label fx:id="msgLabel" textFill="red" />
+</VBox>
