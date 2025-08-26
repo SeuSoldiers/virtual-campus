@@ -1,10 +1,10 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0" version="28.1.1">
+<mxfile host="app.diagrams.net" modified="2025-08-26T14:33:21.000Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36 Edg/139.0.0.0" version="28.1.1">
   <diagram name="第 1 页" id="JiUpI6hv0vBJvtDWEYGz">
     <mxGraphModel dx="869" dy="1060" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="Blr8LIOK72sx-GVthxVn-6" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-1" target="Blr8LIOK72sx-GVthxVn-5">
+        <mxCell id="Blr8LIOK72sx-GVthxVn-6" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=极简1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-1" target="Blr8LIOK72sx-GVthxVn-5">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-1" value="前端 UI (&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;JFX)&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -52,7 +52,7 @@
         <mxCell id="Blr8LIOK72sx-GVthxVn-52" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-20" target="Blr8LIOK72sx-GVthxVn-18">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="Blr8LIOK72sx-GVthxVn-53" value="申请转账" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-52">
+        <mxCell id="Blr8LIOK72sx-GVthxVn-53" value="余额支付/分期支付" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-52">
           <mxGeometry x="0.5949" y="4" relative="1" as="geometry">
             <mxPoint y="1" as="offset" />
           </mxGeometry>
@@ -60,7 +60,7 @@
         <mxCell id="Blr8LIOK72sx-GVthxVn-20" value="商店管理" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="534" y="660" width="80" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="Blr8LIOK72sx-GVthxVn-21" value="图书馆管理&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22%E5%95%86%E5%BA%97%E7%AE%A1%E7%90%86%22%20style%3D%22rounded%3D1%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22520%22%20y%3D%22340%22%20width%3D%2280%22%20height%3D%22100%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="Blr8LIOK72sx-GVthxVn-21" value="图书馆管理&lt;span style=&quot;color: rgba(0, 0, 0, 0); font-family: monospace; font-size: 0px; text-align: start; text-wrap-mode: nowrap;&quot;&gt;%3CmxGraphModel%3E%3Croot%3极简E%3CmxCell%20id%3D%220%22%2F%3E%3CmxCell%20id%3D%221%22%20parent%3D%220%22%2F%3E%3CmxCell%20id%3D%222%22%20value%3D%22%E5%95%86%E5%BA%97%E7%AE%A1%E7%90%86%22%20style%3D%22rounded%3D1%3BwhiteSpace%3Dwrap%3Bhtml%3D1%3B%22%20vertex%3D%221%22%20parent%3D%221%22%3E%3CmxGeometry%20x%3D%22520%22%20y%3D%22340%22%20width%3D%2280%22%20height%3D%22100%22%20as%3D%22geometry%22%2F%3E%3C%2FmxCell%3E%3C%2Froot%3E%3C%2FmxGraphModel%3E&lt;/span&gt;" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="424" y="660" width="80" height="140" as="geometry" />
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-22" value="选课系统" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
@@ -117,7 +117,7 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-34" value="身份认证" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-33">
-          <mxGeometry x="0.1109" y="-3" relative="1" as="geometry">
+          <mxGeometry x="0.1109" y="-3" relative极简="1" as="geometry">
             <mxPoint y="1" as="offset" />
           </mxGeometry>
         </mxCell>
@@ -128,10 +128,10 @@
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-40" value="存取查（all）" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-36">
           <mxGeometry x="-0.0212" y="-1" relative="1" as="geometry">
-            <mxPoint x="19" y="6" as="offset" />
+            <mxPoint x="19" y="6极简" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="Blr8LIOK72sx-GVthxVn-44" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-35" target="Blr8LIOK72sx-GVthxVn-19">
+        <mxCell id="Blr8LIOK72sx-GVthxVn-44" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.75;entryY=1;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-35" target="Blr8LIOK72s极简x-GVthxVn-19">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-45" value="查改" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-44">
@@ -232,6 +232,24 @@
         </mxCell>
         <mxCell id="Blr8LIOK72sx-GVthxVn-71" value="系统管理员" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
           <mxGeometry x="10" y="920" width="120" height="80" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="Blr8LIOK72sx-GVthxVn-200" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-9" target="Blr8LIOK72sx-GVthxVn-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Blr8LIOK72sx-GVthxVn-201" value="推送学籍状态" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-200">
+          <mxGeometry x="0.5" y="-3" relative="1" as="geometry">
+            <mxPoint y="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="Blr8LIOK72sx-GVthxVn-202" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="1" source="Blr8LIOK72sx-GVthxVn-10" target="Blr8LIOK72sx-GVthxVn-9">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="Blr8LIOK72sx-GVthxVn-203" value="账号失效通知" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=12;" vertex="1" connectable="0" parent="Blr8LIOK72sx-GVthxVn-202">
+          <mxGeometry x="0.5" y="-3" relative="1" as="geometry">
+            <mxPoint y="10" as="offset" />
+          </mxGeometry>
         </mxCell>
       </root>
     </mxGraphModel>
