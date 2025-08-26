@@ -1,7 +1,7 @@
 PRAGMA foreign_keys = ON;
 
 
-CREATE TABLE users
+CREATE TABLE IF NOT EXISTS users
 (
     username INTEGER PRIMARY KEY,
     password TEXT NOT NULL,
