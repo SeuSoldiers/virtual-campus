@@ -5,25 +5,26 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
-
 import java.io.IOException;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class LoginController {
-    @FXML private TextField usernameField;
-    @FXML private PasswordField passwordField;
-    @FXML private Label msgLabel;
-
-
-    private final OkHttpClient client = new OkHttpClient();
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
-
+    private final OkHttpClient client = new OkHttpClient();
+    @FXML
+    private TextField usernameField;
+    @FXML
+    private PasswordField passwordField;
+    @FXML
+    private Label msgLabel;
 
     @FXML
     private void handleLogin() {
@@ -72,8 +73,8 @@ public class LoginController {
                     try {
                         if ("student".equals(MainApp.role)) {
                             MainApp.switchToStudentScene();
-                        } else if ("teacher".equals(MainApp.role)) {
-                            MainApp.switchToTeacherScene();
+                        } else if ("registrar".equals(MainApp.role)) {
+                            MainApp.switchToRegistrarScene();
                         }
                     } catch (Exception ex) {
                         logger.log(Level.SEVERE, "切换场景时发生异常", ex);

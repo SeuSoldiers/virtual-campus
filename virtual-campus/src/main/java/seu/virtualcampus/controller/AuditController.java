@@ -29,7 +29,7 @@ public class AuditController {
     public ResponseEntity<?> pending(@RequestHeader("Authorization") String token) {
         User u = authService.getUserByToken(token);
         if (u == null) return ResponseEntity.status(401).build();
-        if (!"teacher".equals(u.getRole())) return ResponseEntity.status(403).build();
+        if (!"registrar".equals(u.getRole())) return ResponseEntity.status(403).build();
         List<AuditRecord> list = auditService.listPending();
         return ResponseEntity.ok(list);
     }
@@ -39,7 +39,7 @@ public class AuditController {
     public ResponseEntity<?> review(@RequestHeader("Authorization") String token, @PathVariable Long id, @RequestBody Map<String, Object> body) {
         User u = authService.getUserByToken(token);
         if (u == null) return ResponseEntity.status(401).build();
-        if (!"teacher".equals(u.getRole())) return ResponseEntity.status(403).build();
+        if (!"registrar".equals(u.getRole())) return ResponseEntity.status(403).build();
         boolean approve = Boolean.TRUE.equals(body.get("approve"));
         boolean ok = auditService.review(id, (long) u.getUsername(), approve);
         if (!ok) return ResponseEntity.badRequest().body(Map.of("msg", "cannot review"));

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TeacherController {
+public class RegistrarController {
     @FXML private ListView<String> auditList;
     @FXML private Label msgLabel;
 

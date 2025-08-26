@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.TeacherController" style="-fx-font-family: 'Microsoft YaHei';">
+<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.RegistrarController" style="-fx-font-family: 'Microsoft YaHei';">
     <Label text="待审核记录" />
     <ListView fx:id="auditList" prefHeight="200" prefWidth="400" />
     <Button text="通过选中项" onAction="#handleApprove" />
