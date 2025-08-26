@@ -5,9 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.AuditRecord;
 import seu.virtualcampus.domain.User;
-import seu.virtualcampus.service.AuthService;
 import seu.virtualcampus.service.AuditService;
-
+import seu.virtualcampus.service.AuthService;
 
 import java.util.List;
 import java.util.Map;
@@ -42,7 +41,7 @@ public class AuditController {
         if (u == null) return ResponseEntity.status(401).build();
         if (!"teacher".equals(u.getRole())) return ResponseEntity.status(403).build();
         boolean approve = Boolean.TRUE.equals(body.get("approve"));
-        boolean ok = auditService.review(id, u.getId(), approve);
+        boolean ok = auditService.review(id, (long) u.getUsername(), approve);
         if (!ok) return ResponseEntity.badRequest().body(Map.of("msg", "cannot review"));
         return ResponseEntity.ok(Map.of("msg", approve ? "approved" : "rejected"));
     }

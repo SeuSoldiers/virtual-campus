@@ -29,7 +29,7 @@ public class StudentInfoController {
         User u = authService.getUserByToken(token);
         if (u == null) return ResponseEntity.status(401).build();
         if (!"student".equals(u.getRole())) return ResponseEntity.status(403).build();
-        StudentInfo info = studentInfoService.getStudentInfo(u.getStudentId());
+        StudentInfo info = studentInfoService.getStudentInfo((long) u.getUsername());
         return ResponseEntity.ok(info == null ? Map.of() : info);
     }
 
@@ -40,8 +40,8 @@ public class StudentInfoController {
         User u = authService.getUserByToken(token);
         if (u == null) return ResponseEntity.status(401).build();
         if (!"student".equals(u.getRole())) return ResponseEntity.status(403).build();
-        payload.setStudentId(u.getStudentId());
-        studentInfoService.submitChanges(u.getStudentId(), payload);
+        payload.setStudentId((long) u.getUsername());
+        studentInfoService.submitChanges((long) u.getUsername(), payload);
         return ResponseEntity.ok(Map.of("msg", "submitted"));
     }
 }

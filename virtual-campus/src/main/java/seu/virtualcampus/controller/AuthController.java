@@ -31,8 +31,7 @@ public class AuthController {
         Map<String, Object> response = new java.util.HashMap<>();
         response.put("token", token);
         response.put("role", u.getRole());
-        response.put("userId", u.getId());
-        response.put("studentId", u.getStudentId());
+        response.put("username", u.getUsername());
         return ResponseEntity.ok(response);
     }
 }
