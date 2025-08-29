@@ -17,4 +17,7 @@ public class AuditRecord {
     private String newValue;
     private String status; // pending, approved, rejected
     private Long reviewerId;
+    private String remark; // 审核意见
+    private String createTime; // 创建时间，格式如 yyyy-MM-dd HH:mm:ss
+    private String reviewTime; // 审核时间，格式如 yyyy-MM-dd HH:mm:ss
 }

@@ -26,22 +26,23 @@ public class StudentInfoService {
 
 
     /**
-     * Submit changes as pending audit records. For simplicity we compare fields and create
+     * Submit changes as pending audit records. For simplicity, we compare fields and create
      * per-field audit records for changed fields.
      */
     public void submitChanges(Long studentId, StudentInfo updated) {
         StudentInfo original = studentInfoMapper.findById(studentId);
+        // 不论首次还是后续修改，都不直接写 student_info，只生成审核记录
         if (original == null) {
-// if no original, insert directly and also create 'pending' records for full data
-            studentInfoMapper.insert(updated);
-// create audit records for each non-null field
-            createAuditForField(studentId, "name", null, updated.getName());
-            createAuditForField(studentId, "major", null, updated.getMajor());
-            createAuditForField(studentId, "address", null, updated.getAddress());
-            createAuditForField(studentId, "phone", null, updated.getPhone());
+            if (notEmpty(updated.getName()))
+                createAuditForField(studentId, "name", null, updated.getName());
+            if (notEmpty(updated.getMajor()))
+                createAuditForField(studentId, "major", null, updated.getMajor());
+            if (notEmpty(updated.getAddress()))
+                createAuditForField(studentId, "address", null, updated.getAddress());
+            if (notEmpty(updated.getPhone()))
+                createAuditForField(studentId, "phone", null, updated.getPhone());
             return;
         }
-
 
         if (notEquals(original.getName(), updated.getName()))
             createAuditForField(studentId, "name", original.getName(), updated.getName());
@@ -61,6 +62,11 @@ public class StudentInfoService {
     }
 
 
+    private boolean notEmpty(String s) {
+        return s != null && !s.isEmpty();
+    }
+
+
     private void createAuditForField(Long studentId, String field, String oldValue, String newValue) {
         AuditRecord r = new AuditRecord();
         r.setStudentId(studentId);
@@ -68,6 +74,11 @@ public class StudentInfoService {
         r.setOldValue(oldValue);
         r.setNewValue(newValue);
         r.setStatus("pending");
+        r.setRemark("");
+        // 使用标准时间格式 yyyy-MM-dd HH:mm:ss
+        java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String now = java.time.LocalDateTime.now().format(formatter);
+        r.setCreateTime(now);
         auditRecordMapper.insert(r);
     }
 }
