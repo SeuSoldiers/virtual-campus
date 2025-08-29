@@ -85,4 +85,23 @@ public class BankAccountController {
         boolean result = bankAccountService.updateAccountStatus(accountNumber, newStatus);
         return ResponseEntity.ok(result);
     }
+
+    // 新增：验证账户密码
+    @PostMapping("/{accountNumber}/verify-password")
+    public ResponseEntity<Boolean> verifyPassword(
+            @PathVariable String accountNumber,
+            @RequestParam String password) {
+        boolean isValid = bankAccountService.verifyAccountPassword(accountNumber, password);
+        return ResponseEntity.ok(isValid);
+    }
+
+    // 新增：更新账户密码
+    @PutMapping("/{accountNumber}/password")
+    public ResponseEntity<Boolean> updatePassword(
+            @PathVariable String accountNumber,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        boolean result = bankAccountService.updateAccountPassword(accountNumber, oldPassword, newPassword);
+        return ResponseEntity.ok(result);
+    }
 }

@@ -1,4 +1,4 @@
-// BankAccountService.java
+// BankAccountService.java (部分更新)
 package seu.virtualcampus.service;
 
 import seu.virtualcampus.domain.BankAccount;
@@ -31,13 +31,14 @@ public class BankAccountService {
         BankAccount account = new BankAccount(
                 accountNumber,
                 userId,
+                "defaultPassword", // 需要设置默认密码或从参数获取
                 accountType,
                 initialDeposit,
                 "ACTIVE",
                 LocalDateTime.now()
         );
 
-        bankAccountMapper.insertAccount(account);
+        bankAccountMapper.insertAccount(account); // 使用正确的方法名
 
         // 记录初始存款交易
         if (initialDeposit.compareTo(BigDecimal.ZERO) > 0) {
@@ -61,7 +62,7 @@ public class BankAccountService {
     @Transactional
     public Transaction processDeposit(String accountNumber, BigDecimal amount) {
         // 验证账户存在且有效
-        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
@@ -71,7 +72,7 @@ public class BankAccountService {
 
         // 更新余额
         BigDecimal newBalance = account.getBalance().add(amount);
-        bankAccountMapper.updateBalance(accountNumber, newBalance);
+        bankAccountMapper.updateBalance(accountNumber, newBalance); // 使用正确的方法名
 
         // 创建交易记录
         Transaction transaction = new Transaction(
@@ -93,7 +94,7 @@ public class BankAccountService {
     @Transactional
     public Transaction processWithdrawal(String accountNumber, BigDecimal amount, String password) {
         // 验证账户存在且有效
-        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
@@ -101,8 +102,10 @@ public class BankAccountService {
             throw new RuntimeException("Account is not active");
         }
 
-        // 验证密码（此处简化，实际应用中应加密存储和验证）
-        // 假设密码验证通过
+        // 验证密码
+        if (!account.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
 
         // 检查余额是否充足
         if (account.getBalance().compareTo(amount) < 0) {
@@ -111,7 +114,7 @@ public class BankAccountService {
 
         // 更新余额
         BigDecimal newBalance = account.getBalance().subtract(amount);
-        bankAccountMapper.updateBalance(accountNumber, newBalance);
+        bankAccountMapper.updateBalance(accountNumber, newBalance); // 使用正确的方法名
 
         // 创建交易记录
         Transaction transaction = new Transaction(
@@ -133,7 +136,7 @@ public class BankAccountService {
     @Transactional
     public Transaction processTransfer(String fromAccount, String toAccount, BigDecimal amount, String password) {
         // 验证转出账户
-        BankAccount from = bankAccountMapper.selectByAccountNumber(fromAccount);
+        BankAccount from = bankAccountMapper.selectByAccountNumber(fromAccount); // 使用正确的方法名
         if (from == null) {
             throw new RuntimeException("From account not found");
         }
@@ -141,17 +144,19 @@ public class BankAccountService {
             throw new RuntimeException("From account is not active");
         }
 
+        // 验证密码
+        if (!from.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
         // 验证转入账户
-        BankAccount to = bankAccountMapper.selectByAccountNumber(toAccount);
+        BankAccount to = bankAccountMapper.selectByAccountNumber(toAccount); // 使用正确的方法名
         if (to == null) {
             throw new RuntimeException("To account not found");
         }
         if (!"ACTIVE".equals(to.getStatus())) {
             throw new RuntimeException("To account is not active");
         }
-
-        // 验证密码（此处简化）
-        // 假设密码验证通过
 
         // 检查余额是否充足
         if (from.getBalance().compareTo(amount) < 0) {
@@ -160,11 +165,11 @@ public class BankAccountService {
 
         // 更新转出账户余额
         BigDecimal fromNewBalance = from.getBalance().subtract(amount);
-        bankAccountMapper.updateBalance(fromAccount, fromNewBalance);
+        bankAccountMapper.updateBalance(fromAccount, fromNewBalance); // 使用正确的方法名
 
         // 更新转入账户余额
         BigDecimal toNewBalance = to.getBalance().add(amount);
-        bankAccountMapper.updateBalance(toAccount, toNewBalance);
+        bankAccountMapper.updateBalance(toAccount, toNewBalance); // 使用正确的方法名
 
         // 创建交易记录
         Transaction transaction = new Transaction(
@@ -184,7 +189,7 @@ public class BankAccountService {
 
     // 获取余额
     public BigDecimal getAccountBalance(String accountNumber) {
-        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
@@ -198,7 +203,7 @@ public class BankAccountService {
 
     // 更新账户状态
     public boolean updateAccountStatus(String accountNumber, String newStatus) {
-        int result = bankAccountMapper.updateStatus(accountNumber, newStatus);
+        int result = bankAccountMapper.updateStatus(accountNumber, newStatus); // 使用正确的方法名
         return result > 0;
     }
 
@@ -210,5 +215,33 @@ public class BankAccountService {
     // 生成交易ID
     private String generateTransactionId() {
         return "TX" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    }
+
+    // 验证账户密码
+    public boolean verifyAccountPassword(String accountNumber, String password) {
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+        return account.getPassword().equals(password);
+    }
+
+    // 更新账户密码
+    @Transactional
+    public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+
+        // 验证旧密码
+        if (!account.getPassword().equals(oldPassword)) {
+            throw new RuntimeException("Invalid old password");
+        }
+
+        // 更新密码
+        account.setPassword(newPassword);
+        int result = bankAccountMapper.updateAccount(account); // 使用正确的方法名
+        return result > 0;
     }
 }

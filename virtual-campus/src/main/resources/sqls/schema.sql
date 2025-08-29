@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS audit_record
 CREATE TABLE IF NOT EXISTS bank_account (
     accountNumber TEXT PRIMARY KEY,
     userId TEXT NOT NULL,
+    password TEXT NOT NULL,
     accountType TEXT NOT NULL,
     Balance REAL CHECK(Balance >= 0) DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'ACTIVE',
