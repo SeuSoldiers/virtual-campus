@@ -31,11 +31,11 @@ public class DashboardController {
     private void setupEntries() {
         entryBox.getChildren().clear();
         if ("student".equalsIgnoreCase(userRole)) {
-            Button studentBtn = new Button("学生功能入口");
+            Button studentBtn = new Button("学生个人信息维护");
             studentBtn.setOnAction(e -> openStudentUI());
             entryBox.getChildren().add(studentBtn);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
-            Button registrarBtn = new Button("教务功能入口");
+            Button registrarBtn = new Button("学生信息审核");
             registrarBtn.setOnAction(e -> openRegistrarUI());
             entryBox.getChildren().add(registrarBtn);
         } else {

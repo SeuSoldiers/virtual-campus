@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<VBox spacing="10" alignment="CENTER" xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.LoginController" style="-fx-font-family: 'Microsoft YaHei';">
-    <Label text="虚拟校园登录" />
-    <TextField fx:id="usernameField" promptText="用户名" />
-    <PasswordField fx:id="passwordField" promptText="密码" />
-    <Button text="登录" onAction="#handleLogin" />
-    <Label fx:id="msgLabel" textFill="red" />
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="24" alignment="CENTER"
+      fx:controller="seu.virtualcampus.ui.LoginController"
+      style="-fx-font-family: 'Microsoft YaHei'; -fx-background-color: linear-gradient(to bottom, #f8fafc, #e0e7ef); -fx-padding: 48 64; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, #b0b8c1, 16, 0.2, 0, 4);">
+    <Label text="虚拟校园登录"
+           style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #2d3a4a; -fx-padding: 0 0 16 0;"/>
+    <TextField fx:id="usernameField" promptText="用户名"
+               style="-fx-font-size: 18px; -fx-pref-width: 260; -fx-background-radius: 8; -fx-padding: 8;"/>
+    <PasswordField fx:id="passwordField" promptText="密码"
+                   style="-fx-font-size: 18px; -fx-pref-width: 260; -fx-background-radius: 8; -fx-padding: 8;"/>
+    <Button text="登录" onAction="#handleLogin"
+            style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #4f8cff; -fx-text-fill: white;"/>
+    <Label fx:id="msgLabel" textFill="red" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
 </VBox>
