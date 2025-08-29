@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,11 +75,12 @@ public class LoginController {
 
                 Platform.runLater(() -> {
                     try {
-                        if ("student".equals(MainApp.role)) {
-                            MainApp.switchToStudentScene();
-                        } else if ("registrar".equals(MainApp.role)) {
-                            MainApp.switchToRegistrarScene();
-                        }
+                        FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
+                        Parent root = loader.load();
+                        DashboardController controller = loader.getController();
+                        controller.setUserInfo(username, MainApp.role);
+                        Stage stage = (Stage) msgLabel.getScene().getWindow();
+                        stage.setScene(new Scene(root));
                     } catch (Exception ex) {
                         logger.log(Level.SEVERE, "切换场景时发生异常", ex);
                     }

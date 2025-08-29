@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/8"
+      fx:controller="seu.virtualcampus.ui.DashboardController" spacing="20" alignment="CENTER">
+    <Label fx:id="welcomeLabel" text="欢迎进入虚拟校园系统" style="-fx-font-size: 20px;"/>
+    <HBox fx:id="entryBox" spacing="15" alignment="CENTER">
+        <!-- 功能入口按钮将由Controller动态添加 -->
+    </HBox>
+</VBox>
+
