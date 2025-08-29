@@ -8,52 +8,310 @@ title Virtual Campus System - Complete Class Diagram
 ' Mapper Layer
 ' ========================
 package "Mapper" {
-  interface UserMapper
-  interface StudentInfoMapper
-  interface BankAccountMapper
-  interface TransactionMapper
-  interface BookMapper
-  interface BorrowRecordMapper
-  interface ReservationRecordMapper
-  interface ProductMapper
-  interface CartMapper
-  interface OrderMapper
-  interface OrderItemMapper
-  interface CourseMapper
-  interface AuditRecordMapper
+  interface UserMapper {
+    +findByUsername(username: int): User
+    +insert(user: User): int
+  }
+  interface StudentInfoMapper {
+    +findById(studentId: Long): StudentInfo
+    +insert(s: StudentInfo): void
+    +update(s: StudentInfo): void
+  }
+  interface BankAccountMapper {
+    +selectByAccountNumber(accountNumber: String): BankAccount
+    +selectByUserId(userId: String): BankAccount[]
+    +insertAccount(account: BankAccount): int
+    +updateAccount(account: BankAccount): int
+    +updateBalance(accountNumber: String, balance: Decimal): int
+    +updateStatus(accountNumber: String, status: String): int
+    +deleteAccount(accountNumber: String): int
+    +deposit(accountNumber: String, amount: Decimal): int
+    +withdraw(accountNumber: String, amount: Decimal): int
+  }
+  interface TransactionMapper {
+    +insertTransaction(transaction: Transaction): int
+    +selectByAccountNumber(accountNumber: String): Transaction[]
+    +selectByAccountNumberAndTimeRange(accountNumber: String, start: DateTime, end: DateTime): Transaction[]
+  }
+  interface BookMapper {
+    +insert(book: Book): void
+    +update(book: Book): void
+    +delete(bookId: String): void
+    +findById(bookId: String): Book
+    +findByTitle(title: String): Book[]
+    +findByAuthor(author: String): Book[]
+    +findByCategory(category: String): Book[]
+    +findAvailableBooks(): Book[]
+    +decreaseAvailableCount(bookId: String): int
+    +increaseAvailableCount(bookId: String): int
+    +increaseReservationCount(bookId: String): int
+    +decreaseReservationCount(bookId: String): int
+    +findByIsbn(isbn: String): Book
+    +findAll(): Book[]
+  }
+  interface BorrowRecordMapper {
+    +insert(record: BorrowRecord): void
+    +update(record: BorrowRecord): void
+    +findById(recordId: String): BorrowRecord
+    +findByUserId(userId: String): BorrowRecord[]
+    +findByBookId(bookId: String): BorrowRecord[]
+    +findActiveByUserId(userId: String): BorrowRecord[]
+    +findActiveByBookId(bookId: String): BorrowRecord[]
+    +returnBook(recordId: String, returnDate: String): void
+    +renewBook(recordId: String, dueDate: String): void
+    +findByUserAndBook(userId: String, bookId: String): BorrowRecord[]
+    +findAll(): BorrowRecord[]
+  }
+  interface ReservationRecordMapper {
+    +insert(record: ReservationRecord): void
+    +update(record: ReservationRecord): void
+    +findById(reservationId: String): ReservationRecord
+    +findByUserId(userId: String): ReservationRecord[]
+    +findByBookId(bookId: String): ReservationRecord[]
+    +findActiveByBookId(bookId: String): ReservationRecord[]
+    +countActiveByBookId(bookId: String): int
+    +cancelReservation(reservationId: String): void
+    +fulfillReservation(reservationId: String): void
+    +markAsNotified(reservationId: String): void
+    +decreaseQueuePositions(bookId: String, position: int): void
+    +findByUserAndBook(userId: String, bookId: String): ReservationRecord[]
+    +findAll(): ReservationRecord[]
+    +findByStatus(status: String): ReservationRecord[]
+    +findByNotifyStatus(notifyStatus: String): ReservationRecord[]
+  }
+  interface ProductMapper {
+    +insert(product: Product): int
+    +deleteById(productId: String): int
+    +update(product: Product): int
+    +selectById(productId: String): Product
+    +selectAll(): Product[]
+    +selectByType(productType: String): Product[]
+    +reduceStock(productId: String, quantity: int): int
+  }
+  interface CartMapper {
+    +insert(cart: Cart): int
+    +deleteById(cartItemId: String): int
+    +update(cart: Cart): int
+    +selectById(cartItemId: String): Cart
+    +selectByUserId(userId: String): Cart[]
+    +selectByUserAndProduct(userId: String, productId: String): Cart
+    +deactivateAllByUserId(userId: String): int
+  }
+  interface OrderMapper {
+    +insert(order: Order): int
+    +deleteById(orderId: String): int
+    +update(order: Order): int
+    +selectById(orderId: String): Order
+    +selectByUserId(userId: String): Order[]
+    +selectAll(): Order[]
+    +updateStatus(orderId: String, status: String, paymentStatus: String): int
+  }
+  interface OrderItemMapper {
+    +insert(orderItem: OrderItem): int
+    +deleteById(itemId: String): int
+    +deleteByOrderId(orderId: String): int
+    +update(orderItem: OrderItem): int
+    +selectById(itemId: String): OrderItem
+    +selectByOrderId(orderId: String): OrderItem[]
+    +selectAll(): OrderItem[]
+  }
+  interface CourseMapper {
+    +courseAdd(course: Course): void
+    +courseDelete(courseId: String): void
+    +courseUpdate(course: Course): void
+    +courseFind(courseId: String): Course
+    +findAllCourses(): Course[]
+    +getCourseStats(courseId: String): CourseStats
+  }
+  interface AuditRecordMapper {
+    +insert(r: AuditRecord): void
+    +findPending(): AuditRecord[]
+    +findById(id: Long): AuditRecord
+    +updateStatus(id: Long, status: String, reviewerId: Long): int
+  }
 }
 
 ' ========================
 ' Service Layer
 ' ========================
 package "Service" {
-  class AuthService
-  class StudentInfoService
-  class BankAccountService
-  class BookService
-  class BorrowRecordService
-  class ReservationRecordService
-  class ProductService
-  class CartService
-  class OrderService
-  class OrderItemService
-  class CourseService
-  class AuditService
+  class AuthService {
+    +login(username: String, password: String): String
+    +getUserByToken(token: String): User
+  }
+  class StudentInfoService {
+    +getStudentInfo(studentId: Long): StudentInfo
+    +submitChanges(studentId: Long, updated: StudentInfo): void
+  }
+  class BankAccountService {
+    +createAccount(userId: String, accountType: String, initialDeposit: Decimal): BankAccount
+    +processDeposit(accountNumber: String, amount: Decimal): Transaction
+    +processWithdrawal(accountNumber: String, amount: Decimal, password: String): Transaction
+    +processTransfer(fromAccount: String, toAccount: String, amount: Decimal, password: String): Transaction
+    +getAccountBalance(accountNumber: String): Decimal
+    +getTransactionHistory(accountNumber: String, start: DateTime, end: DateTime): Transaction[]
+    +updateAccountStatus(accountNumber: String, newStatus: String): bool
+    +verifyAccountPassword(accountNumber: String, password: String): bool
+    +updateAccountPassword(accountNumber: String, oldPassword: String, newPassword: String): bool
+  }
+  class BookService {
+    +addBook(book: Book): void
+    +updateBook(book: Book): void
+    +deleteBook(bookId: String): void
+    +getBookById(bookId: String): Book
+    +searchBooksByTitle(title: String): Book[]
+    +searchBooksByAuthor(author: String): Book[]
+    +searchBooksByCategory(category: String): Book[]
+    +getAvailableBooks(): Book[]
+    +borrowBook(bookId: String): bool
+    +returnBook(bookId: String): void
+    +increaseReservationCount(bookId: String): void
+    +decreaseReservationCount(bookId: String): void
+    +getBookByIsbn(isbn: String): Book
+    +getAllBooks(): Book[]
+  }
+  class BorrowRecordService {
+    +borrowBook(userId: String, bookId: String): BorrowRecord
+    +returnBook(recordId: String): void
+    +renewBook(recordId: String): bool
+    +getBorrowRecordsByUser(userId: String): BorrowRecord[]
+    +getActiveBorrowRecordsByUser(userId: String): BorrowRecord[]
+    +getBorrowRecordsByBook(bookId: String): BorrowRecord[]
+    +getBorrowRecordById(recordId: String): BorrowRecord
+    +getBorrowRecordsByUserAndBook(userId: String, bookId: String): BorrowRecord[]
+    +getAllBorrowRecords(): BorrowRecord[]
+  }
+  class ReservationRecordService {
+    +reserveBook(userId: String, bookId: String): ReservationRecord
+    +cancelReservation(reservationId: String): void
+    +processReservationOnReturn(bookId: String): void
+    +getUserReservations(userId: String): ReservationRecord[]
+    +getActiveReservationsByBook(bookId: String): ReservationRecord[]
+    +getReservationsByUserAndBook(userId: String, bookId: String): ReservationRecord[]
+    +getAllReservations(): ReservationRecord[]
+    +getReservationsByStatus(status: String): ReservationRecord[]
+    +getReservationsByNotifyStatus(notifyStatus: String): ReservationRecord[]
+    +updateReservationNotifyStatus(reservationId: String, notifyStatus: String): void
+  }
+  class ProductService {
+    +addProduct(product: Product): int
+    +removeProduct(productId: String): int
+    +updateProduct(product: Product): int
+    +getProductById(productId: String): Product
+    +getAllProducts(): Product[]
+    +getProductsByType(productType: String): Product[]
+    +reduceStock(productId: String, quantity: int): int
+  }
+  class CartService {
+    +addCartItem(cart: Cart): int
+    +removeCartItem(cartItemId: String): int
+    +updateCartItem(cart: Cart): int
+    +getCartItemById(cartItemId: String): Cart
+    +getCartItemsByUserId(userId: String): Cart[]
+    +getCartItemByUserAndProduct(userId: String, productId: String): Cart
+    +clearUserCart(userId: String): int
+  }
+  class OrderService {
+    +createOrder(order: Order): int
+    +cancelOrder(orderId: String): int
+    +updateOrder(order: Order): int
+    +getOrderById(orderId: String): Order
+    +getOrdersByUserId(userId: String): Order[]
+    +getAllOrders(): Order[]
+    +updateOrderStatus(orderId: String, status: String, paymentStatus: String): int
+  }
+  class OrderItemService {
+    +addOrderItem(orderItem: OrderItem): int
+    +removeOrderItem(itemId: String): int
+    +removeOrderItemsByOrderId(orderId: String): int
+    +updateOrderItem(orderItem: OrderItem): int
+    +getOrderItemById(itemId: String): OrderItem
+    +getOrderItemsByOrderId(orderId: String): OrderItem[]
+    +getAllOrderItems(): OrderItem[]
+  }
+  class CourseService {
+    +courseAdd(course: Course): void
+    +courseDelete(courseId: String): void
+    +courseUpdate(course: Course): void
+    +courseFind(courseId: String): Course
+    +getAllCourses(): Course[]
+    +getCourseStats(courseId: String): CourseStats
+  }
+  class AuditService {
+    +listPending(): AuditRecord[]
+    +review(auditId: Long, reviewerId: Long, approve: bool): bool
+  }
 }
 
 ' ========================
 ' Controller Layer (Backend)
 ' ========================
 package "Controller" {
-  class AuthController
-  class StudentInfoController
-  class BankAccountController
-  class LibraryController
-  class ProductController
-  class CartController
-  class OrderController
-  class CourseController
-  class AuditController
+  class AuthController {
+    +login(body: Map): ResponseEntity
+  }
+  class StudentInfoController {
+    +me(token: String): ResponseEntity
+    +submit(token: String, payload: StudentInfo): ResponseEntity
+  }
+  class BankAccountController {
+    +openAccount(userId: String, accountType: String, initialDeposit: Decimal): ResponseEntity
+    +deposit(accountNumber: String, amount: Decimal): ResponseEntity
+    +withdraw(accountNumber: String, amount: Decimal, password: String): ResponseEntity
+    +transfer(fromAccount: String, toAccount: String, amount: Decimal, password: String): ResponseEntity
+    +getBalance(accountNumber: String): ResponseEntity
+    +getTransactions(accountNumber: String, start: DateTime, end: DateTime): ResponseEntity
+    +updateStatus(accountNumber: String, newStatus: String): ResponseEntity
+    +verifyPassword(accountNumber: String, password: String): ResponseEntity
+    +updatePassword(accountNumber: String, oldPassword: String, newPassword: String): ResponseEntity
+  }
+  class LibraryController {
+    +queryBooks(queryParams: Map): Book[]
+    +borrowBook(userId: String, bookId: String): Map
+    +returnBook(recordId: String): Map
+    +renewBook(recordId: String): Map
+    +queryBorrowRecords(queryParams: Map): BorrowRecord[]
+    +manageBooks(book: Book, action: String): String
+    +reserveBook(userId: String, bookId: String): Map
+    +cancelReservation(reservationId: String): Map
+    +queryReservationRecords(queryParams: Map): ReservationRecord[]
+  }
+  class ProductController {
+    +addProduct(product: Product): ResponseEntity
+    +removeProduct(productId: String): ResponseEntity
+    +updateProduct(product: Product): ResponseEntity
+    +getProductById(productId: String): ResponseEntity
+    +getAllProducts(): ResponseEntity
+    +getProductsByType(productType: String): ResponseEntity
+  }
+  class CartController {
+    +addCartItem(cart: Cart): ResponseEntity
+    +removeCartItem(cartItemId: String): ResponseEntity
+    +updateCartItem(cart: Cart): ResponseEntity
+    +getCartItemById(cartItemId: String): ResponseEntity
+    +getCartItemsByUserId(userId: String): ResponseEntity
+    +clearUserCart(userId: String): ResponseEntity
+  }
+  class OrderController {
+    +createOrder(order: Order): ResponseEntity
+    +cancelOrder(orderId: String): ResponseEntity
+    +updateOrder(order: Order): ResponseEntity
+    +getOrderById(orderId: String): ResponseEntity
+    +getOrdersByUserId(userId: String): ResponseEntity
+    +getAllOrders(): ResponseEntity
+  }
+  class CourseController {
+    +courseAdd(course: Course): void
+    +courseDelete(courseId: String): void
+    +courseUpdate(courseId: String, course: Course): void
+    +courseFind(courseId: String): Course
+    +getAllCourses(): Course[]
+    +getCourseStats(courseId: String): CourseStats
+  }
+  class AuditController {
+    +pending(token: String): ResponseEntity
+    +review(token: String, id: Long, body: Map): ResponseEntity
+  }
 }
 
 ' ========================
