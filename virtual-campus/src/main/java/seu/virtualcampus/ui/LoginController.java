@@ -72,6 +72,7 @@ public class LoginController {
                 JsonNode node = mapper.readTree(responseBody);
                 MainApp.token = node.get("token").asText();
                 MainApp.role = node.get("role").asText();
+                MainApp.username = username;
 
                 Platform.runLater(() -> {
                     try {

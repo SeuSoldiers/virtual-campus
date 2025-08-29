@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import seu.virtualcampus.domain.User;
 import seu.virtualcampus.mapper.UserMapper;
 
-
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -43,5 +42,9 @@ public class AuthService {
         Integer username = tokenStore.get(token);
         if (username == null) return null;
         return userMapper.findByUsername(username);
+    }
+
+    public void logout(String token) {
+        tokenStore.remove(token);
     }
 }

@@ -5,10 +5,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,14 +16,13 @@ import java.util.List;
 
 
 public class RegistrarController {
-    @FXML private ListView<String> auditList;
-    @FXML private Label msgLabel;
-
-
     private final List<JsonNode> pendingRecords = new ArrayList<>();
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-
+    @FXML
+    private ListView<String> auditList;
+    @FXML
+    private Label msgLabel;
 
     @FXML
     public void initialize() {
@@ -38,11 +37,14 @@ public class RegistrarController {
                 .get()
                 .build();
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 System.out.println("加载待审核记录失败: " + e.getMessage());
                 msgLabel.setText("加载失败，请检查网络");
             }
-            @Override public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     System.out.println("获取待审核记录失败，状态码: " + response.code());
                     msgLabel.setText("获取待审核记录失败");
@@ -89,12 +91,40 @@ public class RegistrarController {
                 .post(body)
                 .build();
         client.newCall(request).enqueue(new Callback() {
-            @Override public void onFailure(@NotNull Call call, @NotNull IOException e) { msgLabel.setText("审核失败"); }
-            @Override public void onResponse(@NotNull Call call, @NotNull Response response) { loadPending(); }
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                msgLabel.setText("审核失败");
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
+                loadPending();
+            }
         });
     }
 
 
-    @FXML private void handleApprove() { reviewSelected(true); }
-    @FXML private void handleReject() { reviewSelected(false); }
+    @FXML
+    private void handleApprove() {
+        reviewSelected(true);
+    }
+
+    @FXML
+    private void handleReject() {
+        reviewSelected(false);
+    }
+
+    @FXML
+    private void handleBack() {
+        try {
+            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
+            javafx.scene.Parent root = loader.load();
+            seu.virtualcampus.ui.DashboardController controller = loader.getController();
+            controller.setUserInfo(seu.virtualcampus.ui.MainApp.username, seu.virtualcampus.ui.MainApp.role);
+            javafx.stage.Stage stage = (javafx.stage.Stage) auditList.getScene().getWindow();
+            stage.setScene(new javafx.scene.Scene(root));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

@@ -13,19 +13,8 @@ import java.util.logging.*;
 public class MainApp extends Application {
     public static String token; // 登录后保存 token
     public static String role; // 'student' 或 'registrar'
+    public static String username; // 新增，保存当前用户名
     private static Stage primaryStage;
-
-    public static void switchToStudentScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/student.fxml"));
-        primaryStage.setScene(new Scene(loader.load()));
-        primaryStage.setTitle("学生信息");
-    }
-
-    public static void switchToRegistrarScene() throws Exception {
-        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/registrar.fxml"));
-        primaryStage.setScene(new Scene(loader.load()));
-        primaryStage.setTitle("教师审核");
-    }
 
     public static void main(String[] args) {
         // 设置日志编码为UTF-8，防止中文乱码
@@ -54,3 +43,4 @@ public class MainApp extends Application {
         stage.show();
     }
 }
+

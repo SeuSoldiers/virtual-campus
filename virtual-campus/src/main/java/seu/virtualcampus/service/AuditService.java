@@ -7,7 +7,6 @@ import seu.virtualcampus.domain.StudentInfo;
 import seu.virtualcampus.mapper.AuditRecordMapper;
 import seu.virtualcampus.mapper.StudentInfoMapper;
 
-
 import java.util.List;
 
 
@@ -40,15 +39,28 @@ public class AuditService {
             if (s == null) s = new StudentInfo();
             s.setStudentId(r.getStudentId());
             switch (r.getField()) {
-                case "name": s.setName(r.getNewValue()); break;
-                case "major": s.setMajor(r.getNewValue()); break;
-                case "address": s.setAddress(r.getNewValue()); break;
-                case "phone": s.setPhone(r.getNewValue()); break;
+                case "name":
+                    s.setName(r.getNewValue());
+                    break;
+                case "major":
+                    s.setMajor(r.getNewValue());
+                    break;
+                case "address":
+                    s.setAddress(r.getNewValue());
+                    break;
+                case "phone":
+                    s.setPhone(r.getNewValue());
+                    break;
             }
 // if record existed update else insert
             if (studentInfoMapper.findById(s.getStudentId()) == null) studentInfoMapper.insert(s);
             else studentInfoMapper.update(s);
         }
         return true;
+    }
+
+
+    public List<AuditRecord> listByStudentId(Long studentId) {
+        return auditRecordMapper.findByStudentId(studentId);
     }
 }

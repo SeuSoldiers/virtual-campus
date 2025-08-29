@@ -45,4 +45,14 @@ public class AuditController {
         if (!ok) return ResponseEntity.badRequest().body(Map.of("msg", "cannot review"));
         return ResponseEntity.ok(Map.of("msg", approve ? "approved" : "rejected"));
     }
+
+
+    @GetMapping("/mine")
+    public ResponseEntity<?> myAuditRecords(@RequestHeader("Authorization") String token) {
+        User u = authService.getUserByToken(token);
+        if (u == null) return ResponseEntity.status(401).build();
+        if (!"student".equals(u.getRole())) return ResponseEntity.status(403).build();
+        List<AuditRecord> list = auditService.listByStudentId((long) u.getUsername());
+        return ResponseEntity.ok(list);
+    }
 }

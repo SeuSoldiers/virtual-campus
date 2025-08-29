@@ -5,6 +5,13 @@ INSERT OR IGNORE INTO users (username, password, role)
 VALUES (220232, '123', 'student');
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1001, '123', 'registrar');
+
+-- 插入学生信息
+INSERT OR IGNORE INTO student_info (student_id, name, major, address, phone)
+VALUES (220231, '张三', '计算机科学与技术', '北京市海淀区', '13800000001');
+INSERT OR IGNORE INTO student_info (student_id, name, major, address, phone)
+VALUES (220232, '李四', '软件工程', '上海市浦东新区', '13800000002');
+
 -- 插入测试图书数据
 INSERT OR IGNORE INTO books (bookId, title, author, isbn, category, publishDate, publisher, totalCount, availableCount,
                              location, reservationCount)
