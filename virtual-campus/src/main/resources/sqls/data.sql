@@ -1,13 +1,4 @@
 -- Initial data for users
-DELETE FROM reservation_records;
-DELETE FROM users;
-DELETE FROM audit_record;
-DELETE FROM student_info;
-DELETE FROM bank_account;
-DELETE FROM banktransaction;
-DELETE FROM books;
-DELETE FROM borrow_records;
-DELETE FROM course;
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (220231, '123', 'student');
 INSERT OR IGNORE INTO users (username, password, role)
@@ -15,22 +6,24 @@ VALUES (220232, '123', 'student');
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1001, '123', 'registrar');
 -- 插入测试图书数据
-INSERT INTO books (bookId, title, author, isbn, category, publishDate, publisher, totalCount, availableCount, location, reservationCount)
-VALUES
-    ('B001', 'Java编程思想', 'Bruce Eckel', '9787111213826', '编程', '2007-06-01', '机械工业出版社', 5, 3, 'A区1排', 2),
-    ('B002', 'Spring实战', 'Craig Walls', '9787115447737', '编程', '2016-04-01', '人民邮电出版社', 3, 1, 'A区2排', 1),
-    ('B003', '数据库系统概念', 'Abraham Silberschatz', '9787111557975', '数据库', '2012-03-01', '机械工业出版社', 4, 4, 'B区1排', 0);
+INSERT OR IGNORE INTO books (bookId, title, author, isbn, category, publishDate, publisher, totalCount, availableCount,
+                             location, reservationCount)
+VALUES ('B001', 'Java编程思想', 'Bruce Eckel', '9787111213826', '编程', '2007-06-01', '机械工业出版社', 5, 3, 'A区1排',
+        2),
+       ('B002', 'Spring实战', 'Craig Walls', '9787115447737', '编程', '2016-04-01', '人民邮电出版社', 3, 1, 'A区2排',
+        1),
+       ('B003', '数据库系统概念', 'Abraham Silberschatz', '9787111557975', '数据库', '2012-03-01', '机械工业出版社', 4,
+        4, 'B区1排', 0);
 
 -- 插入测试借阅记录
-INSERT INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status)
-VALUES
-    ('R001', 'U001', 'B001', '2023-05-01', '2023-06-01', NULL, 0, 'BORROWED'),
-    ('R002', 'U002', 'B002', '2023-05-15', '2023-06-15', NULL, 1, 'BORROWED'),
-    ('R003', 'U001', 'B003', '2023-04-01', '2023-05-01', '2023-05-01', 0, 'RETURNED');
+INSERT OR IGNORE INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status)
+VALUES ('R001', 'U001', 'B001', '2023-05-01', '2023-06-01', NULL, 0, 'BORROWED'),
+       ('R002', 'U002', 'B002', '2023-05-15', '2023-06-15', NULL, 1, 'BORROWED'),
+       ('R003', 'U001', 'B003', '2023-04-01', '2023-05-01', '2023-05-01', 0, 'RETURNED');
 
 -- 插入测试预约记录
-INSERT INTO reservation_records (reservationId, userId, bookId, reserveDate, status, queuePosition, notifyStatus)
-VALUES
-    ('RES001', 'U003', 'B001', '2023-05-20', 'ACTIVE', 1, 'NOT_NOTIFIED'),
-    ('RES002', 'U004', 'B001', '2023-05-25', 'ACTIVE', 2, 'NOT_NOTIFIED'),
-    ('RES003', 'U005', 'B002', '2023-05-10', 'ACTIVE', 1, 'NOTIFIED');
+INSERT OR IGNORE INTO reservation_records (reservationId, userId, bookId, reserveDate, status, queuePosition,
+                                           notifyStatus)
+VALUES ('RES001', 'U003', 'B001', '2023-05-20', 'ACTIVE', 1, 'NOT_NOTIFIED'),
+       ('RES002', 'U004', 'B001', '2023-05-25', 'ACTIVE', 2, 'NOT_NOTIFIED'),
+       ('RES003', 'U005', 'B002', '2023-05-10', 'ACTIVE', 1, 'NOTIFIED');
