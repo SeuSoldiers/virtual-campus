@@ -7,6 +7,8 @@ import seu.virtualcampus.domain.StudentInfo;
 import seu.virtualcampus.mapper.AuditRecordMapper;
 import seu.virtualcampus.mapper.StudentInfoMapper;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -27,14 +29,14 @@ public class AuditService {
     }
 
 
-    public boolean review(Long auditId, Long reviewerId, boolean approve) {
+    public boolean review(Long auditId, Long reviewerId, boolean approve, String remark) {
         AuditRecord r = auditRecordMapper.findById(auditId);
         if (r == null || !"pending".equals(r.getStatus())) return false;
         String newStatus = approve ? "approved" : "rejected";
-        int updated = auditRecordMapper.updateStatus(auditId, newStatus, reviewerId);
+        String reviewTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        int updated = auditRecordMapper.updateStatus(auditId, newStatus, reviewerId, remark, reviewTime);
         if (updated <= 0) return false;
         if (approve) {
-// apply to student_info
             StudentInfo s = studentInfoMapper.findById(r.getStudentId());
             if (s == null) s = new StudentInfo();
             s.setStudentId(r.getStudentId());
@@ -52,9 +54,7 @@ public class AuditService {
                     s.setPhone(r.getNewValue());
                     break;
             }
-// if record existed update else insert
-            if (studentInfoMapper.findById(s.getStudentId()) == null) studentInfoMapper.insert(s);
-            else studentInfoMapper.update(s);
+            studentInfoMapper.update(s);
         }
         return true;
     }

@@ -7,7 +7,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
-import seu.virtualcampus.ui.models.StudentInfo;
+import seu.virtualcampus.domain.StudentInfo;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -27,17 +27,17 @@ public class StudentController {
     @FXML
     private TableView<AuditRecordView> auditTable;
     @FXML
-    private TableColumn<AuditRecordView, String> contentCol, timeCol, statusCol, remarkCol;
+    private TableColumn<AuditRecordView, String> contentCol, createTimeCol, reviewTimeCol, statusCol, remarkCol;
     private StudentInfo originalInfo;
-    private boolean editing = false;
 
     @FXML
     public void initialize() {
         // 初始化TableView
-        contentCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getContent()));
-        timeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getTime()));
-        statusCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getStatus()));
-        remarkCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().getRemark()));
+        contentCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().content()));
+        createTimeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().createTime()));
+        reviewTimeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().reviewTime()));
+        statusCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().status()));
+        remarkCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().remark()));
         loadStudentInfo();
         loadAuditRecords();
     }
@@ -101,17 +101,22 @@ public class StudentController {
                     return;
                 }
                 java.util.List<AuditRecordView> list = new java.util.ArrayList<>();
-                com.fasterxml.jackson.databind.JsonNode arr = mapper.readTree(response.body().string());
-                for (com.fasterxml.jackson.databind.JsonNode node : arr) {
-                    String content = node.get("field").asText() + ": " + node.get("oldValue").asText() + " → " + node.get("newValue").asText();
-                    String time = node.has("createTime") ? node.get("createTime").asText() : "";
-                    String status = node.has("status") ? node.get("status").asText() : "";
-                    String remark = node.has("remark") ? node.get("remark").asText() : "";
-                    list.add(new AuditRecordView(content, time, status, remark));
+                com.fasterxml.jackson.databind.JsonNode arr = null;
+                if (response.body() != null) {
+                    arr = mapper.readTree(response.body().string());
                 }
-                Platform.runLater(() -> {
-                    auditTable.getItems().setAll(list);
-                });
+                if (arr != null) {
+                    for (com.fasterxml.jackson.databind.JsonNode node : arr) {
+                        String content = node.get("field").asText() + ": " + node.get("oldValue").asText() + " → " + node.get("newValue").asText();
+                        String createTime = node.has("createTime") ? node.get("createTime").asText() : "";
+                        String reviewTime = node.has("reviewTime") ? node.get("reviewTime").asText() : "";
+                        String status = node.has("status") ? node.get("status").asText() : "";
+                        String remark = node.has("remark") ? node.get("remark").asText() : "";
+
+                        list.add(new AuditRecordView(content, createTime, reviewTime, status, remark));
+                    }
+                }
+                Platform.runLater(() -> auditTable.getItems().setAll(list));
             }
         });
     }
@@ -124,7 +129,6 @@ public class StudentController {
         editBtn.setVisible(!editable);
         saveBtn.setVisible(editable);
         cancelBtn.setVisible(editable);
-        editing = editable;
     }
 
     @FXML
@@ -194,33 +198,6 @@ public class StudentController {
     }
 
     // 审核记录视图模型
-    public static class AuditRecordView {
-        private final String content;
-        private final String time;
-        private final String status;
-        private final String remark;
-
-        public AuditRecordView(String content, String time, String status, String remark) {
-            this.content = content;
-            this.time = time;
-            this.status = status;
-            this.remark = remark;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public String getTime() {
-            return time;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public String getRemark() {
-            return remark;
-        }
+    public record AuditRecordView(String content, String createTime, String reviewTime, String status, String remark) {
     }
 }

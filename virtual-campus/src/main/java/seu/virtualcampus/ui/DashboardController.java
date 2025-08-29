@@ -19,10 +19,8 @@ public class DashboardController {
     private HBox entryBox;
 
     private String userRole;
-    private String username;
 
     public void setUserInfo(String username, String role) {
-        this.username = username;
         this.userRole = role;
         welcomeLabel.setText("欢迎，" + username + "！");
         setupEntries();
@@ -78,8 +76,8 @@ public class DashboardController {
                         .post(okhttp3.RequestBody.create(new byte[0], null))
                         .build();
                 client.newCall(request).execute();
-            } catch (Exception ignored) {
-                Logger.getLogger(DashboardController.class.getName()).log(Level.WARNING, "注销请求失败", ignored);
+            } catch (Exception e) {
+                Logger.getLogger(DashboardController.class.getName()).log(Level.WARNING, "注销请求失败", e);
             }
             // 清空本地登录信息
             seu.virtualcampus.ui.MainApp.token = null;

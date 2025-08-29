@@ -1,6 +1,5 @@
 package seu.virtualcampus.ui;
 
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
@@ -18,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 
 public class LoginController {
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
@@ -88,5 +86,10 @@ public class LoginController {
                 });
             }
         });
+    }
+
+    @FXML
+    private void handleExit() {
+        Platform.exit();
     }
 }

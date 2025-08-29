@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS audit_record
     reviewer_id INTEGER,
     remark      TEXT, -- 新增：审核意见
     create_time TEXT, -- 新增：创建时间
+    review_time TEXT,
     FOREIGN KEY (student_id) REFERENCES student_info (student_id)
 );
 
