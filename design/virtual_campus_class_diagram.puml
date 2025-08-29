@@ -1,0 +1,129 @@
+@startuml
+!theme vibrant
+top to bottom direction
+
+title Virtual Campus System - Complete Class Diagram
+
+' ========================
+' Mapper Layer
+' ========================
+package "Mapper" {
+  interface UserMapper
+  interface StudentInfoMapper
+  interface BankAccountMapper
+  interface TransactionMapper
+  interface BookMapper
+  interface BorrowRecordMapper
+  interface ReservationRecordMapper
+  interface ProductMapper
+  interface CartMapper
+  interface OrderMapper
+  interface OrderItemMapper
+  interface CourseMapper
+  interface AuditRecordMapper
+}
+
+' ========================
+' Service Layer
+' ========================
+package "Service" {
+  class AuthService
+  class StudentInfoService
+  class BankAccountService
+  class BookService
+  class BorrowRecordService
+  class ReservationRecordService
+  class ProductService
+  class CartService
+  class OrderService
+  class OrderItemService
+  class CourseService
+  class AuditService
+}
+
+' ========================
+' Controller Layer (Backend)
+' ========================
+package "Controller" {
+  class AuthController
+  class StudentInfoController
+  class BankAccountController
+  class LibraryController
+  class ProductController
+  class CartController
+  class OrderController
+  class CourseController
+  class AuditController
+}
+
+' ========================
+' UI Layer
+' ========================
+package "UI" {
+  class MainApp
+  class LoginUIController
+  class DashboardUIController
+  class StudentUIController
+  class LibraryUIController
+  class CourseUIController
+  class ShopUIController
+  class BankUIController
+  class AuditUIController
+}
+
+' ========================
+' Relationships
+' ========================
+
+' Service -> Mapper
+AuthService --> UserMapper
+StudentInfoService --> StudentInfoMapper
+BankAccountService --> BankAccountMapper
+BankAccountService --> TransactionMapper
+BookService --> BookMapper
+BorrowRecordService --> BorrowRecordMapper
+ReservationRecordService --> ReservationRecordMapper
+ProductService --> ProductMapper
+CartService --> CartMapper
+OrderService --> OrderMapper
+OrderService --> OrderItemMapper
+OrderService --> CartMapper
+OrderService --> ProductMapper
+CourseService --> CourseMapper
+AuditService --> AuditRecordMapper
+
+' Controller -> Service
+AuthController --> AuthService
+StudentInfoController --> StudentInfoService
+BankAccountController --> BankAccountService
+LibraryController --> BookService
+LibraryController --> BorrowRecordService
+LibraryController --> ReservationRecordService
+ProductController --> ProductService
+CartController --> CartService
+OrderController --> OrderService
+CourseController --> CourseService
+AuditController --> AuditService
+
+' UI Main Flow
+MainApp --> LoginUIController : shows
+LoginUIController --> DashboardUIController : on success
+DashboardUIController --> StudentUIController
+DashboardUIController --> LibraryUIController
+DashboardUIController --> CourseUIController
+DashboardUIController --> ShopUIController
+DashboardUIController --> BankUIController
+DashboardUIController --> AuditUIController
+
+' UIController -> Backend Controller
+LoginUIController --> AuthController
+StudentUIController --> StudentInfoController
+LibraryUIController --> LibraryController
+CourseUIController --> CourseController
+ShopUIController --> ProductController
+ShopUIController --> CartController
+ShopUIController --> OrderController
+BankUIController --> BankAccountController
+AuditUIController --> AuditController
+
+@enduml
