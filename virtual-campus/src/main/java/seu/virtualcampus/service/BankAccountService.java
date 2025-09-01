@@ -25,13 +25,13 @@ public class BankAccountService {
 
     // 创建新账户
     @Transactional
-    public BankAccount createAccount(String userId, String accountType, BigDecimal initialDeposit) {
+    public BankAccount createAccount(String userId, String accountType, String password,BigDecimal initialDeposit) {
         String accountNumber = generateAccountNumber();
 
         BankAccount account = new BankAccount(
                 accountNumber,
                 userId,
-                "defaultPassword", // 需要设置默认密码或从参数获取
+                password, // 需要设置默认密码或从参数获取
                 accountType,
                 initialDeposit,
                 "ACTIVE",
@@ -50,7 +50,7 @@ public class BankAccountService {
                     "DEPOSIT",
                     LocalDateTime.now(),
                     "Initial deposit",
-                    "COMPLETED"
+                    "ACTIVE"
             );
             transactionMapper.insertTransaction(transaction);
         }
@@ -69,6 +69,12 @@ public class BankAccountService {
         if (!"ACTIVE".equals(account.getStatus())) {
             throw new RuntimeException("Account is not active");
         }
+
+        // +++ 新增：验证存款金额必须为正数 +++
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Deposit amount must be > zero");
+        }
+        // +++ 结束新增 +++
 
         // 更新余额
         BigDecimal newBalance = account.getBalance().add(amount);
@@ -244,4 +250,12 @@ public class BankAccountService {
         int result = bankAccountMapper.updateAccount(account); // 使用正确的方法名
         return result > 0;
     }
+
+    // 定期转活期
+
+
+    // 活期转定期
+
+
+
 }

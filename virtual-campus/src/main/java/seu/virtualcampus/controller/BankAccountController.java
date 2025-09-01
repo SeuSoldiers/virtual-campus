@@ -25,8 +25,9 @@ public class BankAccountController {
     public ResponseEntity<BankAccount> openAccount(
             @RequestParam String userId,
             @RequestParam String accountType,
+            @RequestParam String password,
             @RequestParam BigDecimal initialDeposit) {
-        BankAccount account = bankAccountService.createAccount(userId, accountType, initialDeposit);
+        BankAccount account = bankAccountService.createAccount(userId, accountType, password,initialDeposit);
         return ResponseEntity.ok(account);
     }
 
