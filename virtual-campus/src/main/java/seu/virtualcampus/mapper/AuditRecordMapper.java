@@ -9,7 +9,7 @@ import java.util.List;
 
 
 @Mapper
-public interf ace AuditRecordMapper {
+public interface AuditRecordMapper {
     @Insert("INSERT INTO audit_record(student_id, field, old_value, new_value, status) VALUES(#{studentId}, #{field}, #{oldValue}, #{newValue}, #{status})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insert(AuditRecord r);
