@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.User;
 import seu.virtualcampus.service.AuthService;
 
-
 import java.util.Map;
 
 
@@ -33,5 +32,11 @@ public class AuthController {
         response.put("role", u.getRole());
         response.put("username", u.getUsername());
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String token) {
+        authService.logout(token);
+        return ResponseEntity.ok(Map.of("msg", "logout success"));
     }
 }

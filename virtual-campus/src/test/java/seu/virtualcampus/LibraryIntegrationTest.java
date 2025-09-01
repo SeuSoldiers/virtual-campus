@@ -1,20 +1,20 @@
-package seu.virtualcampus.service;
+package seu.virtualcampus;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import seu.virtualcampus.controller.LibraryController;
 import seu.virtualcampus.domain.Book;
 import seu.virtualcampus.domain.BorrowRecord;
 import seu.virtualcampus.domain.ReservationRecord;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.test.annotation.Rollback;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
+
 //@Sql(scripts = {"classpath:schema.sql", "classpath:data.sql"})
 @SpringBootTest
 @Transactional
