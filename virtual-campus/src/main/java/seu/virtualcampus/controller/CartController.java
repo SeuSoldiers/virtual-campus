@@ -14,7 +14,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<String> addCartItem(@RequestBody Cart cart) {
         int result = cartService.addCartItem(cart);
         if (result > 0) {
@@ -24,8 +24,8 @@ public class CartController {
         }
     }
 
-    @DeleteMapping("/{cartItemId}")
-    public ResponseEntity<String> removeCartItem(@PathVariable String cartItemId) {
+    @DeleteMapping("/remove")
+    public ResponseEntity<String> removeCartItem(@RequestParam String cartItemId) {
         int result = cartService.removeCartItem(cartItemId);
         if (result > 0) {
             return ResponseEntity.ok("Cart item removed successfully");
@@ -34,7 +34,7 @@ public class CartController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<String> updateCartItem(@RequestBody Cart cart) {
         int result = cartService.updateCartItem(cart);
         if (result > 0) {
@@ -44,8 +44,8 @@ public class CartController {
         }
     }
 
-    @GetMapping("/{cartItemId}")
-    public ResponseEntity<Cart> getCartItemById(@PathVariable String cartItemId) {
+    @GetMapping("/get")
+    public ResponseEntity<Cart> getCartItemById(@RequestParam String cartItemId) {
         Cart cartItem = cartService.getCartItemById(cartItemId);
         if (cartItem != null) {
             return ResponseEntity.ok(cartItem);
@@ -54,14 +54,14 @@ public class CartController {
         }
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Cart>> getCartItemsByUserId(@PathVariable String userId) {
+    @GetMapping("/user-items")
+    public ResponseEntity<List<Cart>> getCartItemsByUserId(@RequestParam String userId) {
         List<Cart> cartItems = cartService.getCartItemsByUserId(userId);
         return ResponseEntity.ok(cartItems);
     }
 
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<String> clearUserCart(@PathVariable String userId) {
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearUserCart(@RequestParam String userId) {
         int result = cartService.clearUserCart(userId);
         if (result > 0) {
             return ResponseEntity.ok("User cart cleared successfully");

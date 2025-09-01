@@ -14,7 +14,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<String> createOrder(@RequestBody Order order) {
         int result = orderService.createOrder(order);
         if (result > 0) {
@@ -24,7 +24,7 @@ public class OrderController {
         }
     }
 
-    @DeleteMapping("/{orderId}")
+    @DeleteMapping("/cancel/{orderId}")
     public ResponseEntity<String> cancelOrder(@PathVariable String orderId) {
         int result = orderService.cancelOrder(orderId);
         if (result > 0) {
@@ -34,7 +34,7 @@ public class OrderController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<String> updateOrder(@RequestBody Order order) {
         int result = orderService.updateOrder(order);
         if (result > 0) {
@@ -44,7 +44,7 @@ public class OrderController {
         }
     }
 
-    @GetMapping("/{orderId}")
+    @GetMapping("/get/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
         Order order = orderService.getOrderById(orderId);
         if (order != null) {
@@ -60,7 +60,7 @@ public class OrderController {
         return ResponseEntity.ok(orders);
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);

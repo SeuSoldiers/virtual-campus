@@ -14,7 +14,7 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<String> addProduct(@RequestBody Product product) {
         int result = productService.addProduct(product);
         if (result > 0) {
@@ -24,8 +24,8 @@ public class ProductController {
         }
     }
 
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<String> removeProduct(@PathVariable String productId) {
+    @DeleteMapping("/remove")
+    public ResponseEntity<String> removeProduct(@RequestParam String productId) {
         int result = productService.removeProduct(productId);
         if (result > 0) {
             return ResponseEntity.ok("Product removed successfully");
@@ -34,7 +34,7 @@ public class ProductController {
         }
     }
 
-    @PutMapping
+    @PutMapping("/update")
     public ResponseEntity<String> updateProduct(@RequestBody Product product) {
         int result = productService.updateProduct(product);
         if (result > 0) {
@@ -44,8 +44,8 @@ public class ProductController {
         }
     }
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable String productId) {
+    @GetMapping("/get")
+    public ResponseEntity<Product> getProductById(@RequestParam String productId) {
         Product product = productService.getProductById(productId);
         if (product != null) {
             return ResponseEntity.ok(product);
@@ -54,14 +54,14 @@ public class ProductController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/all")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/type/{productType}")
-    public ResponseEntity<List<Product>> getProductsByType(@PathVariable String productType) {
+    @GetMapping("/by-type")
+    public ResponseEntity<List<Product>> getProductsByType(@RequestParam String productType) {
         List<Product> products = productService.getProductsByType(productType);
         return ResponseEntity.ok(products);
     }
