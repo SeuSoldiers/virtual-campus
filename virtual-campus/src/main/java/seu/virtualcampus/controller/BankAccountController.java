@@ -62,8 +62,8 @@ public class BankAccountController {
     }
 
     // 余额查询（***更改为个人信息查询）
-    @GetMapping("/{accountNumber}/balance")
-    public ResponseEntity<BankAccount> getBalance(@PathVariable String accountNumber) {
+    @GetMapping("/{accountNumber}/accountInfo")
+    public ResponseEntity<BankAccount> getAccountInfo(@PathVariable String accountNumber) {
         BankAccount account = bankAccountService.getAccountInfo(accountNumber);
         return ResponseEntity.ok(account);
     }

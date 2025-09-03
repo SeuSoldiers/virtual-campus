@@ -252,7 +252,139 @@ public class BankAccountService {
     }
 
     // 定期转活期
+    /*@Transactional
+    public boolean fixedToCurrent(String accountNumber, String password) {
+        // 验证账户存在且有效
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+        if (!"ACTIVE".equals(account.getStatus())) {
+            throw new RuntimeException("Account is not active");
+        }
 
+        // 验证账户类型为定期
+        if (!"FIXED".equals(account.getAccountType())) {
+            throw new RuntimeException("Account is not a fixed deposit account");
+        }
+
+        // 验证密码
+        if (!account.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        // 计算利息 - 这里简化处理，实际应根据存期和利率计算
+        BigDecimal interest = calculateInterest(account);
+
+        // 计算总额（本金+利息）
+        BigDecimal totalAmount = account.getBalance().add(interest);
+
+        // 更新账户类型为活期
+        account.setAccountType("CURRENT");
+        // 重置定期相关属性
+        account.setTerm(null);
+        account.setInterestRate(null);
+        // 更新余额（包含利息）
+        account.setBalance(totalAmount);
+
+        bankAccountMapper.updateAccount(account);
+
+        // 创建交易记录
+        Transaction transacton = new Transaction(
+                generateTransactionId(),
+                accountNumber,
+                null,
+                totalAmount,
+                "FIXED_TO_CURRENT",
+                LocalDateTime.now(),
+                "Convert fixed deposit to current account with interest: " + interest,
+                "COMPLETED"
+        );
+        transactionMapper.insertTransaction(transaction);
+
+        return transaction;
+    }
+
+    // 活期转定期
+    @Transactional
+    public Transaction currentToFixed(String accountNumber, String password, int termMonths, BigDecimal interestRate) {
+        // 验证账户存在且有效
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+        if (!"ACTIVE".equals(account.getStatus())) {
+            throw new RuntimeException("Account is not active");
+        }
+
+        // 验证账户类型为活期
+        if (!"CURRENT".equals(account.getAccountType())) {
+            throw new RuntimeException("Account is not a current account");
+        }
+
+        // 验证密码
+        if (!account.getPassword().equals(password)) {
+            throw new RuntimeException("Invalid password");
+        }
+
+        // 验证余额是否充足
+        if (account.getBalance().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Insufficient balance for fixed deposit");
+        }
+
+        // 验证存期和利率是否有效
+        if (termMonths <= 0) {
+            throw new IllegalArgumentException("Term must be greater than zero");
+        }
+        if (interestRate.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Interest rate must be greater than zero");
+        }
+
+        // 更新账户类型为定期
+        account.setAccountType("FIXED");
+        // 设置定期相关属性
+        account.setTerm(termMonths);  // 存期（月）
+        account.setInterestRate(interestRate);  // 利率
+        account.setFixedStartDate(LocalDateTime.now());  // 定期开始日期
+
+        bankAccountMapper.updateAccount(account);
+
+        // 创建交易记录
+        Transaction transaction = new Transaction(
+                generateTransactionId(),
+                accountNumber,
+                null,
+                account.getBalance(),
+                "CURRENT_TO_FIXED",
+                LocalDateTime.now(),
+                "Convert current account to fixed deposit, term: " + termMonths + " months, rate: " + interestRate,
+                "COMPLETED"
+        );
+        transactionMapper.insertTransaction(transaction);
+
+        return transaction;
+    }
+
+    // 计算定期利息（简化版）
+    private BigDecimal calculateInterest(BankAccount account) {
+        if (account.getTerm() == null || account.getInterestRate() == null ||
+                account.getFixedStartDate() == null) {
+            return BigDecimal.ZERO;
+        }
+
+        // 计算存期（月）
+        long months = java.time.temporal.ChronoUnit.MONTHS.between(
+                account.getFixedStartDate(), LocalDateTime.now());
+
+        // 实际存期不能超过约定存期
+        months = Math.min(months, account.getTerm());
+
+        // 利息 = 本金 × 利率 × 存期/12
+        return account.getBalance()
+                .multiply(account.getInterestRate())
+                .multiply(BigDecimal.valueOf(months))
+                .divide(BigDecimal.valueOf(12), 2, BigDecimal.ROUND_HALF_UP);
+    }*/
 
     // 活期转定期
 
