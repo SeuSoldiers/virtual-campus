@@ -61,11 +61,11 @@ public class BankAccountController {
         return ResponseEntity.ok(transaction);
     }
 
-    // 余额查询
+    // 余额查询（***更改为个人信息查询）
     @GetMapping("/{accountNumber}/balance")
-    public ResponseEntity<BigDecimal> getBalance(@PathVariable String accountNumber) {
-        BigDecimal balance = bankAccountService.getAccountBalance(accountNumber);
-        return ResponseEntity.ok(balance);
+    public ResponseEntity<BankAccount> getBalance(@PathVariable String accountNumber) {
+        BankAccount account = bankAccountService.getAccountInfo(accountNumber);
+        return ResponseEntity.ok(account);
     }
 
     // 交易记录查询
@@ -105,4 +105,10 @@ public class BankAccountController {
         boolean result = bankAccountService.updateAccountPassword(accountNumber, oldPassword, newPassword);
         return ResponseEntity.ok(result);
     }
+
+    // *定期转活期
+
+    // *活期转定期
+
+
 }

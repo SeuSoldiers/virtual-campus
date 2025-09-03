@@ -193,13 +193,13 @@ public class BankAccountService {
         return transaction;
     }
 
-    // 获取余额
-    public BigDecimal getAccountBalance(String accountNumber) {
+    // 获取余额（***改为个人信息查询）
+    public BankAccount getAccountInfo(String accountNumber) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        return account.getBalance();
+        return account;
     }
 
     // 获取交易历史
@@ -232,7 +232,7 @@ public class BankAccountService {
         return account.getPassword().equals(password);
     }
 
-    // 更新账户密码
+    // 更新账户密码：思考（能不能把验证账户密码结合到这个方法里面来，提高代码复用性）
     @Transactional
     public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
@@ -255,6 +255,7 @@ public class BankAccountService {
 
 
     // 活期转定期
+
 
 
 
