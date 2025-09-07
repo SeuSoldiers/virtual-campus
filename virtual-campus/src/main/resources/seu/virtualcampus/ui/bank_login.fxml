@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_loginController">
+   <children>
+      <Button fx:id="Login_btn" layoutX="116.0" layoutY="244.0" mnemonicParsing="false" onAction="#login" prefHeight="49.0" prefWidth="85.0" text="登录">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <Button fx:id="Open_btn" layoutX="315.0" layoutY="244.0" mnemonicParsing="false" onAction="#open" prefHeight="49.0" prefWidth="85.0" text="开户">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+      <Label layoutX="69.0" layoutY="129.0" text="账户号码：">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="69.0" layoutY="176.0" text="账户密码：">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Label>
+      <TextField fx:id="AccountNumber_text" layoutX="154.0" layoutY="123.0" prefHeight="35.0" prefWidth="292.0" />
+      <TextField fx:id="Password_text" layoutX="154.0" layoutY="170.0" prefHeight="35.0" prefWidth="292.0" />
+      <Label alignment="CENTER" layoutX="85.0" layoutY="56.0" prefHeight="24.0" prefWidth="362.0" text="欢迎来到银行登录界面">
+         <font>
+            <Font size="24.0" />
+         </font>
+      </Label>
+   </children>
+</AnchorPane>
