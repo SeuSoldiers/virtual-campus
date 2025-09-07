@@ -1,5 +1,5 @@
 // BankAccountServiceTest.java
-package seu.virtualcampus.service;
+package seu.virtualcampus;
 
 import seu.virtualcampus.domain.BankAccount;
 import seu.virtualcampus.domain.Transaction;
@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import seu.virtualcampus.service.BankAccountService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -41,6 +42,7 @@ public class BankAccountServiceTest {
         testAccount = new BankAccount();
         testAccount.setAccountNumber("AC123456789");
         testAccount.setUserId("USER001");
+        testAccount.setPassword("123456");
         testAccount.setAccountType("SAVINGS");
         testAccount.setBalance(new BigDecimal("1000.00"));
         testAccount.setStatus("ACTIVE");
@@ -70,6 +72,7 @@ public class BankAccountServiceTest {
         assertNotNull(result);
         assertNotNull(result.getAccountNumber());
         assertEquals("USER001", result.getUserId());
+        assertEquals("123456",result.getPassword());
         assertEquals("SAVINGS", result.getAccountType());
         assertEquals(new BigDecimal("500.00"), result.getBalance());
         assertEquals("ACTIVE", result.getStatus());
@@ -127,7 +130,7 @@ public class BankAccountServiceTest {
         when(transactionMapper.insertTransaction(any(Transaction.class))).thenReturn(1);
 
         // 执行
-        Transaction result = bankAccountService.processWithdrawal("AC123456789", new BigDecimal("200.00"), "password123");
+        Transaction result = bankAccountService.processWithdrawal("AC123456789", new BigDecimal("200.00"), "123456");
 
         // 验证
         assertNotNull(result);
@@ -164,6 +167,7 @@ public class BankAccountServiceTest {
         BankAccount fromAccount = new BankAccount();
         fromAccount.setAccountNumber("AC111111111");
         fromAccount.setUserId("USER001");
+        fromAccount.setPassword("123456");
         fromAccount.setAccountType("SAVINGS");
         fromAccount.setBalance(new BigDecimal("1000.00"));
         fromAccount.setStatus("ACTIVE");
@@ -183,7 +187,7 @@ public class BankAccountServiceTest {
         when(transactionMapper.insertTransaction(any(Transaction.class))).thenReturn(1);
 
         // 执行
-        Transaction result = bankAccountService.processTransfer("AC111111111", "AC222222222", new BigDecimal("300.00"), "password123");
+        Transaction result = bankAccountService.processTransfer("AC111111111", "AC222222222", new BigDecimal("300.00"), "123456");
 
         // 验证
         assertNotNull(result);
@@ -201,15 +205,22 @@ public class BankAccountServiceTest {
     }
 
     @Test
-    void testGetAccountBalance() {
+    void testGetAccountInfo() {
         // 准备
         when(bankAccountMapper.selectByAccountNumber("AC123456789")).thenReturn(testAccount);
 
         // 执行
-        BigDecimal result = bankAccountService.getAccountBalance("AC123456789");
+        BankAccount result = bankAccountService.getAccountInfo("AC123456789");
 
-        // 验证
-        assertEquals(new BigDecimal("1000.00"), result);
+        // 验证 - 需要逐个字段比较，而不是整个对象
+        assertNotNull(result, "返回的账户信息不应为null");
+        assertEquals("AC123456789", result.getAccountNumber(), "账户号不匹配");
+        assertEquals("USER001", result.getUserId(), "用户ID不匹配");
+        assertEquals("SAVINGS", result.getAccountType(), "账户类型不匹配");
+        assertEquals(new BigDecimal("1000.00"), result.getBalance(), "余额不匹配");
+        assertEquals("ACTIVE", result.getStatus(), "状态不匹配");
+        assertNotNull(result.getCreatedDate(), "创建日期不应为null");
+
 
         // 验证方法调用
         verify(bankAccountMapper, times(1)).selectByAccountNumber("AC123456789");

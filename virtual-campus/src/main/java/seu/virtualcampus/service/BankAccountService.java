@@ -223,7 +223,7 @@ public class BankAccountService {
         return "TX" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
-    // 验证账户密码
+    // 验证账户密码(登录)
     public boolean verifyAccountPassword(String accountNumber, String password) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
@@ -235,7 +235,7 @@ public class BankAccountService {
     // 更新账户密码：思考（能不能把验证账户密码结合到这个方法里面来，提高代码复用性）
     @Transactional
     public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
-        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
+        /*BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
@@ -243,9 +243,11 @@ public class BankAccountService {
         // 验证旧密码
         if (!account.getPassword().equals(oldPassword)) {
             throw new RuntimeException("Invalid old password");
-        }
+        }*/
+        verifyAccountPassword(accountNumber, oldPassword);
 
         // 更新密码
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
         account.setPassword(newPassword);
         int result = bankAccountMapper.updateAccount(account); // 使用正确的方法名
         return result > 0;
