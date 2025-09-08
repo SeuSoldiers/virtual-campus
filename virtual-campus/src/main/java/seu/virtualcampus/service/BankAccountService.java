@@ -36,7 +36,7 @@ public class BankAccountService {
                 accountType,
                 initialDeposit,
                 "ACTIVE",
-                getCurrentTime()
+                LocalDateTime.now()
         );
 
         bankAccountMapper.insertAccount(account); // 使用正确的方法名
@@ -49,7 +49,7 @@ public class BankAccountService {
                     accountNumber,
                     initialDeposit,
                     "DEPOSIT",
-                    getCurrentTime(),
+                    LocalDateTime.now(),
                     "Initial deposit",
                     "ACTIVE"
             );
@@ -88,7 +88,7 @@ public class BankAccountService {
                 accountNumber,
                 amount,
                 "DEPOSIT",
-                getCurrentTime(),
+                LocalDateTime.now(),
                 "Deposit transaction",
                 "COMPLETED"
         );
@@ -130,7 +130,7 @@ public class BankAccountService {
                 null,
                 amount,
                 "WITHDRAWAL",
-                getCurrentTime(),
+                LocalDateTime.now(),
                 "Withdrawal transaction",
                 "COMPLETED"
         );
@@ -185,7 +185,7 @@ public class BankAccountService {
                 toAccount,
                 amount,
                 "TRANSFER",
-                getCurrentTime(),
+                LocalDateTime.now(),
                 "Transfer transaction",
                 "COMPLETED"
         );
@@ -357,7 +357,7 @@ public class BankAccountService {
                 accountNumber,
                 totalAmount,
                 "FixedToCurrent" + extractDepositType(transactionType),
-                getCurrentTime(),
+                LocalDateTime.now(),
                 "定期转活期，本金: " + principal + "，利息: " + interest,
                 "COMPLETED"
         );
@@ -428,7 +428,7 @@ public class BankAccountService {
                 accountNumber,
                 amount,
                 "CurrentToFixed"+type,
-                getCurrentTime(),
+                LocalDateTime.now(),
                 "活期转定期"+amount,
                 "COMPLETED"
         );
@@ -443,7 +443,7 @@ public class BankAccountService {
         return LocalDateTime.now().withNano(0); // 去除纳秒部分
     }
 
-// 在所有使用 LocalDateTime.now() 的地方替换为 getCurrentTime()
+
 
 
 
