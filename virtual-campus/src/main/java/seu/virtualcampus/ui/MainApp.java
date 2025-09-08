@@ -27,12 +27,20 @@ public class MainApp extends Application {
         primaryStage.setTitle("教师审核");
     }
 
-    // 🔥 新增的银行登录切换方法 - 加在这里！
-    public static void switchToBankLogin() throws Exception {
-        FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/bank_login.fxml"));
-        primaryStage.setScene(new Scene(loader.load()));
-        primaryStage.setTitle("银行登录界面");
+
+    // 调用银行模块的方法
+    public static void launchBankModule() throws Exception {
+        // 隐藏当前主窗口
+        if (primaryStage != null) {
+            primaryStage.hide();
+        }
+
+        // 直接创建 Bank_MainApp 实例并调用 start 方法
+        Bank_MainApp bankApp = new Bank_MainApp();
+        Stage bankStage = new Stage();
+        bankApp.start(bankStage);  // 手动调用 start 方法
     }
+
 
     public static void main(String[] args) throws Exception {
         // 设置日志编码为UTF-8，防止中文乱码
@@ -55,11 +63,13 @@ public class MainApp extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         primaryStage = stage;
-        switchToBankLogin();
-        /*FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/login.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/login.fxml"));
         Scene scene = new Scene(loader.load());
         stage.setTitle("虚拟校园登录");
-        stage.setScene(scene);*/
+        stage.setScene(scene);
         stage.show();
+        launchBankModule();
     }
+
+
 }

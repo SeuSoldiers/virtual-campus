@@ -24,4 +24,9 @@ public interface TransactionMapper {
     List<Transaction> selectByAccountNumberAndTimeRange(@Param("accountNumber") String accountNumber,
                                                         @Param("start") LocalDateTime start,
                                                         @Param("end") LocalDateTime end);
+
+    // 根据交易ID查询交易记录
+    @Select("SELECT * FROM banktransaction WHERE transactionId = #{transactionId}")
+    Transaction selectByTransactionId(String transactionId);
+
 }

@@ -1,4 +1,7 @@
 package seu.virtualcampus.ui;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -6,8 +9,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
+import okhttp3.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 
 public class bank_ctofController {
 
@@ -34,6 +41,12 @@ public class bank_ctofController {
 
     private ToggleGroup termToggleGroup;
 
+    // 添加HTTP客户端
+    private OkHttpClient client = new OkHttpClient();
+
+    // 添加ObjectMapper用于JSON解析
+    private ObjectMapper mapper = new ObjectMapper();
+
     @FXML
     public void initialize() {
         // 创建ToggleGroup并将RadioButton添加到组中
@@ -41,6 +54,8 @@ public class bank_ctofController {
         term1.setToggleGroup(termToggleGroup);
         term3.setToggleGroup(termToggleGroup);
         term5.setToggleGroup(termToggleGroup);
+        // 默认选中1年期
+        term1.setSelected(true);
     }
 
     @FXML
@@ -68,7 +83,139 @@ public class bank_ctofController {
 
     @FXML
     void ctof_yes(ActionEvent event) {
+        // 验证输入
+        if (!validateInput()) {
+            return;
+        }
 
+        // 获取选中的期限
+        String selectedTerm = getSelectedTerm();
+
+        // 执行活期转定期操作
+        convertCurrentToFixed(selectedTerm);
     }
+
+    private boolean validateInput() {
+        String password = passwordtext.getText();
+        String amountStr = amounttext.getText();
+
+        if (password == null || password.isEmpty()) {
+            System.out.println("请输入密码");
+            return false;
+        }
+
+        if (amountStr == null || amountStr.isEmpty()) {
+            System.out.println("请输入金额");
+            return false;
+        }
+
+        try {
+            BigDecimal amount = new BigDecimal(amountStr);
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                System.out.println("金额必须大于0");
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("请输入有效的金额");
+            return false;
+        }
+
+        return true;
+    }
+
+    private String getSelectedTerm() {
+        RadioButton selectedRadioButton = (RadioButton) termToggleGroup.getSelectedToggle();
+        if (selectedRadioButton == term1) {
+            return "1年";
+        } else if (selectedRadioButton == term3) {
+            return "3年";
+        } else if (selectedRadioButton == term5) {
+            return "5年";
+        }
+        return "1年"; // 默认值
+    }
+
+    private void convertCurrentToFixed(String term) {
+        String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+        String password = passwordtext.getText();
+        BigDecimal amount = new BigDecimal(amounttext.getText());
+
+        // 构造请求URL
+        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/current-to-fixed";
+
+        // 构造请求体
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("amount", amount.toString());
+        requestBody.put("password", password);
+        requestBody.put("term", term);
+
+        try {
+            // 将请求体转换为JSON
+            String json = mapper.writeValueAsString(requestBody);
+
+            // 创建请求
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(json, MediaType.get("application/json")))
+                    .addHeader("Authorization", "Bearer " + MainApp.token)
+                    .build();
+
+            // 发送请求
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    Platform.runLater(() -> {
+                        System.out.println("活期转定期操作失败: " + e.getMessage());
+                    });
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful() && response.body() != null) {
+                        String responseBody = response.body().string();
+                        try {
+                            Map<String, Object> result = mapper.readValue(responseBody, new TypeReference<Map<String, Object>>() {});
+                            boolean success = (Boolean) result.get("success");
+
+                            if (success) {
+                                Platform.runLater(() -> {
+                                    System.out.println("活期转定期操作成功");
+                                    // 清空输入框
+                                    passwordtext.clear();
+                                    amounttext.clear();
+                                });
+                            } else {
+                                String message = (String) result.get("message");
+                                Platform.runLater(() -> {
+                                    System.out.println("活期转定期操作失败: " + message);
+                                });
+                            }
+                        } catch (Exception e) {
+                            Platform.runLater(() -> {
+                                System.out.println("解析响应失败: " + e.getMessage());
+                            });
+                        }
+                    } else {
+                        Platform.runLater(() -> {
+                            System.out.println("活期转定期操作失败，状态码: " + response.code());
+                            try {
+                                if (response.body() != null) {
+                                    System.out.println("错误信息: " + response.body().string());
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                    }
+                }
+            });
+        } catch (Exception e) {
+            System.out.println("发送请求时出错: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+
+
 
 }

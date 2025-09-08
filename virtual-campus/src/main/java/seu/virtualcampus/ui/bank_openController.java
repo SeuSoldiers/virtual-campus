@@ -89,19 +89,18 @@ public class bank_openController {
                 return;
             }
 
-            // 创建URL查询参数
-            String urlParams = String.format(
-                    "userId=%s&accountType=%s&password=%s&initialDeposit=%s",
-                    URLEncoder.encode(userId, StandardCharsets.UTF_8),
-                    URLEncoder.encode("储蓄账户", StandardCharsets.UTF_8),
-                    URLEncoder.encode(password, StandardCharsets.UTF_8),
-                    initialDeposit.toString()
-            );
+            // 创建表单请求体
+            RequestBody formBody = new FormBody.Builder()
+                    .add("userId", userId)
+                    .add("accountType", "储蓄账户")
+                    .add("password", password)
+                    .add("initialDeposit", initialDeposit.toString())
+                    .build();
 
-            // 创建HTTP请求，使用GET方法发送参数
+            // 创建HTTP请求，使用POST方法发送表单数据
             Request request = new Request.Builder()
-                    .url("http://localhost:8080/api/accounts/open?" + urlParams)
-                    .get()
+                    .url("http://localhost:8080/api/accounts/open")
+                    .post(formBody)  // 使用表单数据
                     .build();
 
             // 显示加载中提示
@@ -146,6 +145,7 @@ public class bank_openController {
             showAlert("错误", "发生未知错误: " + e.getMessage());
         }
     }
+
 
     private void handleOpenAccountFailure(Response response, String responseBody) {
         String errorMessage = "开户失败";

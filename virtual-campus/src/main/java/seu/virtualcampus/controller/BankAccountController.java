@@ -1,6 +1,7 @@
 // BankAccountController.java
 package seu.virtualcampus.controller;
 
+import org.springframework.http.HttpStatus;
 import seu.virtualcampus.domain.BankAccount;
 import seu.virtualcampus.domain.Transaction;
 import seu.virtualcampus.service.BankAccountService;
@@ -11,7 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -106,9 +110,62 @@ public class BankAccountController {
         return ResponseEntity.ok(result);
     }
 
-    // *定期转活期
+    // 获取定期存款记录
+    @GetMapping("/{accountNumber}/fixed-deposits")
+    public ResponseEntity<List<Transaction>> getFixedDepositRecords(
+            @PathVariable String accountNumber) {
+        List<Transaction> fixedDepositTransactions = bankAccountService.getFixedDepositTransactions(accountNumber);
+        return ResponseEntity.ok(fixedDepositTransactions);
+    }
 
-    // *活期转定期
+    //定期转活期
+    @PostMapping("/{accountNumber}/fixed-to-current")
+    public ResponseEntity<String> convertFixedToCurrent(
+            @PathVariable String accountNumber,
+            @RequestBody Map<String, String> request) {
+        try {
+            String transactionId = request.get("transactionId");
+            String password = request.get("password");
+
+            boolean result = bankAccountService.convertFixedToCurrent(accountNumber, transactionId, password);
+
+            if (result) {
+                return ResponseEntity.ok("定期转活期操作成功");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("定期转活期操作失败");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+
+
+    // 活期转定期
+    @PostMapping("/{accountNumber}/current-to-fixed")
+    public ResponseEntity<Map<String, Object>> convertCurrentToFixed(
+            @PathVariable String accountNumber,
+            @RequestBody Map<String, String> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String amountStr = request.get("amount");
+            String password = request.get("password");
+            String term = request.get("term");
+
+            BigDecimal amount = new BigDecimal(amountStr);
+
+            Transaction transaction = bankAccountService.convertCurrentToFixed(accountNumber, amount, password, term);
+
+            response.put("success", true);
+            response.put("message", "活期转定期操作成功");
+            response.put("data", transaction);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
 
 
 }

@@ -261,4 +261,72 @@ public class BankAccountServiceTest {
         // 验证方法调用
         verify(bankAccountMapper, times(1)).updateStatus("AC123456789", "FROZEN");
     }
+
+    @Test
+    void testConvertCurrentToFixed() {
+        // 准备
+        when(bankAccountMapper.selectByAccountNumber("AC123456789")).thenReturn(testAccount);
+        when(bankAccountMapper.updateBalance(anyString(), any(BigDecimal.class))).thenReturn(1);
+        when(transactionMapper.insertTransaction(any(Transaction.class))).thenReturn(1);
+
+        // 执行
+        Transaction result = bankAccountService.convertCurrentToFixed(
+                "AC123456789",
+                new BigDecimal("500.00"),
+                "123456",
+                "1年"
+        );
+
+        // 验证
+        assertNotNull(result);
+        assertEquals("AC123456789", result.getFromAccountNumber());
+        assertEquals("AC123456789", result.getToAccountNumber());
+        assertEquals(new BigDecimal("500.00"), result.getAmount());
+        assertEquals("CurrentToFixed1年", result.getTransactionType());
+        assertEquals("COMPLETED", result.getStatus());
+
+        // 验证方法调用
+        verify(bankAccountMapper, times(1)).selectByAccountNumber("AC123456789");
+        verify(bankAccountMapper, times(1)).updateBalance(anyString(), any(BigDecimal.class));
+        verify(transactionMapper, times(1)).insertTransaction(any(Transaction.class));
+    }
+
+    @Test
+    void testConvertFixedToCurrent() {
+        // 准备
+        when(bankAccountMapper.selectByAccountNumber("AC123456789")).thenReturn(testAccount);
+
+        Transaction fixedTransaction = new Transaction();
+        fixedTransaction.setTransactionId("TX987654321");
+        fixedTransaction.setFromAccountNumber("AC123456789");
+        fixedTransaction.setToAccountNumber("AC123456789");
+        fixedTransaction.setAmount(new BigDecimal("500.00"));
+        fixedTransaction.setTransactionType("CurrentToFixed1年");
+        fixedTransaction.setTransactionTime(LocalDateTime.now().minusYears(1)); // 1年前的交易
+        fixedTransaction.setStatus("COMPLETED");
+
+        when(transactionMapper.selectByTransactionId("TX987654321")).thenReturn(fixedTransaction);
+        when(bankAccountMapper.updateBalance(anyString(), any(BigDecimal.class))).thenReturn(1);
+        when(transactionMapper.insertTransaction(any(Transaction.class))).thenReturn(1);
+
+        // 执行
+        boolean result = bankAccountService.convertFixedToCurrent(
+                "AC123456789",
+                "TX987654321",
+                "123456"
+        );
+
+        // 验证
+        assertTrue(result);
+
+        // 验证方法调用
+        verify(bankAccountMapper, times(1)).selectByAccountNumber("AC123456789");
+        verify(transactionMapper, times(1)).selectByTransactionId("TX987654321");
+        verify(bankAccountMapper, times(1)).updateBalance(anyString(), any(BigDecimal.class));
+        verify(transactionMapper, times(1)).insertTransaction(any(Transaction.class));
+    }
+
+
+
+
 }
