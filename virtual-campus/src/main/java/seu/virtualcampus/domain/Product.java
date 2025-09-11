@@ -13,5 +13,4 @@ public class Product {
     private Double productPrice;
     private Integer availableCount;
     private String productType;
-    private String status; // 商品状态：ACTIVE(上架)、INACTIVE(下架)
 }

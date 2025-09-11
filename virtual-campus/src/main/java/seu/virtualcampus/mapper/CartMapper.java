@@ -29,13 +29,4 @@ public interface CartMapper {
 
     @Update("UPDATE cart SET isActive = 0 WHERE userId = #{userId}")
     int deactivateAllByUserId(String userId);
-
-    @Update("UPDATE cart SET quantity = #{quantity} WHERE cartItemId = #{cartItemId}")
-    int updateQuantity(@Param("cartItemId") String cartItemId, @Param("quantity") Integer quantity);
-
-    // 根据ID列表查询购物车项
-    List<Cart> selectByIds(List<String> cartItemIds);
-
-    // 根据ID列表删除购物车项
-    int deleteByIds(List<String> cartItemIds);
 }

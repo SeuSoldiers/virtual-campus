@@ -6,7 +6,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.logging.*;
 
@@ -40,103 +39,6 @@ public class MainApp extends Application {
         stage.setTitle("虚拟校园登录");
         stage.setScene(scene);
         stage.show();
-    }
-
-    /**
-     * 打开产品列表页面
-     */
-    public static void openProductList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/product_list.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("商品列表");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开商品列表页面失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开购物车页面
-     */
-    public static void openCart() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/cart.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("购物车");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开购物车页面失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开结算页面
-     */
-    public static void openCheckout() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/checkout.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("订单结算");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开结算页面失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开订单列表页面
-     */
-    public static void openOrderList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/order_list.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("我的订单");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开订单列表页面失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开管理员商品管理页面
-     */
-    public static void openAdminProducts() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/admin_products.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("商品管理");
-            stage.setScene(scene);
-            stage.setMaximized(true); // 全屏显示
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开商品管理页面失败: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开管理员发货页面
-     */
-    public static void openAdminShip() {
-        try {
-            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/admin_ship.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("订单发货管理");
-            stage.setScene(scene);
-            stage.show();
-        } catch (IOException e) {
-            System.err.println("打开发货管理页面失败: " + e.getMessage());
-        }
     }
 }
 

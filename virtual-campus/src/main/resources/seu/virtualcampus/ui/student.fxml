@@ -29,17 +29,6 @@
         </HBox>
         <Button text="返回" onAction="#handleBack"
                 style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #b0b8c1; -fx-text-fill: #2d3a4a;"/>
-        <Separator style="-fx-padding: 8 0;"/>
-        <Label text="商城功能"
-               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2d3a4a;"/>
-        <VBox spacing="8" alignment="CENTER">
-            <Button text="商品列表" onAction="#openProductList" prefWidth="200"
-                    style="-fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 8 18; -fx-background-color: #ff7a00; -fx-text-fill: white;"/>
-            <Button text="购物车" onAction="#openCart" prefWidth="200"
-                    style="-fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 8 18; -fx-background-color: #00c853; -fx-text-fill: white;"/>
-            <Button text="我的订单" onAction="#openOrderList" prefWidth="200"
-                    style="-fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 8 18; -fx-background-color: #6200ea; -fx-text-fill: white;"/>
-        </VBox>
         <Label fx:id="msgLabel" textFill="green" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
     </VBox>
 

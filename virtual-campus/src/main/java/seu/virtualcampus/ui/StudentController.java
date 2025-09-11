@@ -197,21 +197,6 @@ public class StudentController {
         }
     }
 
-    @FXML
-    private void openProductList() {
-        MainApp.openProductList();
-    }
-
-    @FXML
-    private void openCart() {
-        MainApp.openCart();
-    }
-
-    @FXML
-    private void openOrderList() {
-        MainApp.openOrderList();
-    }
-
     // 审核记录视图模型
     public record AuditRecordView(String content, String createTime, String reviewTime, String status, String remark) {
     }

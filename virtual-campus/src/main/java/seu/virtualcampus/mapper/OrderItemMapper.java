@@ -29,7 +29,4 @@ public interface OrderItemMapper {
 
     @Select("SELECT * FROM order_item")
     List<OrderItem> selectAll();
-
-    // 批量插入订单项
-    int insertBatch(List<OrderItem> orderItems);
 }

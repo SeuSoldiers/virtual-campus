@@ -32,125 +32,14 @@ public class DashboardController {
             Button studentBtn = new Button("学生个人信息维护");
             studentBtn.setOnAction(e -> openStudentUI());
             entryBox.getChildren().add(studentBtn);
-            
-            // 添加商品浏览入口
-            Button productBtn = new Button("商品浏览");
-            productBtn.setOnAction(e -> openProductListUI());
-            productBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #43b244; -fx-text-fill: white;");
-            entryBox.getChildren().add(productBtn);
-            
-            // 添加购物车入口
-            Button cartBtn = new Button("我的购物车");
-            cartBtn.setOnAction(e -> openCartUI());
-            cartBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #ff6b35; -fx-text-fill: white;");
-            entryBox.getChildren().add(cartBtn);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
             Button registrarBtn = new Button("学生信息审核");
             registrarBtn.setOnAction(e -> openRegistrarUI());
             entryBox.getChildren().add(registrarBtn);
-            
-            // 添加商品浏览入口
-            Button productBtn = new Button("商品列表");
-            productBtn.setOnAction(e -> openProductListUI());
-            productBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #43b244; -fx-text-fill: white;");
-            entryBox.getChildren().add(productBtn);
-            
-            // 根据MainApp.role检查管理员权限，添加管理员功能
-            if (isAdmin()) {
-                // 添加管理商品入口
-                Button adminProductsBtn = new Button("管理商品");
-                adminProductsBtn.setOnAction(e -> openAdminProductsUI());
-                adminProductsBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #8e44ad; -fx-text-fill: white;");
-                entryBox.getChildren().add(adminProductsBtn);
-                
-                // 添加发货管理入口
-                Button adminShipBtn = new Button("发货管理");
-                adminShipBtn.setOnAction(e -> openAdminShipUI());
-                adminShipBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #e74c3c; -fx-text-fill: white;");
-                entryBox.getChildren().add(adminShipBtn);
-            }
         } else {
             Button defaultBtn = new Button("默认功能");
             entryBox.getChildren().add(defaultBtn);
         }
-    }
-
-    /**
-     * 检查是否为管理员
-     */
-    private boolean isAdmin() {
-        return "admin".equalsIgnoreCase(seu.virtualcampus.ui.MainApp.role) || 
-               "registrar".equalsIgnoreCase(seu.virtualcampus.ui.MainApp.role);
-    }
-
-    /**
-     * 打开管理商品界面
-     */
-    private void openAdminProductsUI() {
-        try {
-            System.out.println("DEBUG: 开始打开管理商品界面");
-            System.out.println("DEBUG: 当前用户角色: " + seu.virtualcampus.ui.MainApp.role);
-            
-            // 检查FXML文件是否存在
-            java.net.URL fxmlUrl = getClass().getResource("/seu/virtualcampus/ui/admin_products.fxml");
-            if (fxmlUrl == null) {
-                System.out.println("ERROR: FXML文件不存在: /seu/virtualcampus/ui/admin_products.fxml");
-                showErrorAlert("文件错误", "找不到管理商品界面文件。");
-                return;
-            }
-            System.out.println("DEBUG: FXML文件找到: " + fxmlUrl.toString());
-            
-            System.out.println("DEBUG: 开始加载FXML文件");
-            FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            
-            System.out.println("DEBUG: 开始解析FXML");
-            Parent root = loader.load();
-            System.out.println("DEBUG: FXML解析完成");
-            
-            System.out.println("DEBUG: 获取当前舞台");
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            if (stage == null) {
-                System.out.println("ERROR: 无法获取当前舞台");
-                showErrorAlert("界面错误", "无法获取当前窗口。");
-                return;
-            }
-            
-            System.out.println("DEBUG: 设置新场景");
-            stage.setScene(new Scene(root));
-            System.out.println("DEBUG: 管理商品界面打开成功");
-            
-        } catch (Exception e) {
-            System.out.println("ERROR: 打开管理商品界面异常: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-            e.printStackTrace();
-            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到管理商品UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开管理商品界面，请检查系统状态。详细错误：" + e.getMessage());
-        }
-    }
-
-    /**
-     * 打开发货管理界面
-     */
-    private void openAdminShipUI() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/admin_ship.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到发货管理UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开发货管理界面，请检查系统状态。");
-        }
-    }
-
-    /**
-     * 显示错误提示
-     */
-    private void showErrorAlert(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
     }
 
     private void openStudentUI() {
@@ -161,7 +50,6 @@ public class DashboardController {
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到学生UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开学生界面，请检查系统状态。");
         }
     }
 
@@ -173,41 +61,6 @@ public class DashboardController {
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到教务UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开教务界面，请检查系统状态。");
-        }
-    }
-
-    private void openProductListUI() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到商品列表UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开商品列表界面，请检查系统状态。");
-        }
-    }
-
-    private void openCartUI() {
-        try {
-            System.out.println("开始加载购物车界面...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            System.out.println("FXML路径: " + getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            Parent root = loader.load();
-            System.out.println("FXML加载成功");
-            
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            
-            System.out.println("购物车界面切换成功");
-        } catch (Exception e) {
-            System.err.println("购物车界面加载详细错误信息:");
-            e.printStackTrace();
-            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到购物车UI时发生异常", e);
-            showErrorAlert("切换失败", "无法打开购物车界面: " + e.getMessage());
         }
     }
 

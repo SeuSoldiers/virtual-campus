@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.Order;
 import seu.virtualcampus.service.OrderService;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -65,45 +64,5 @@ public class OrderController {
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
-    }
-
-    // ========== 新增业务接口 ==========
-
-    @PostMapping("/preview")
-    public ResponseEntity<Map<String, Object>> previewOrder(@RequestParam String userId, 
-                                                           @RequestParam(required = false) List<String> cartItemIds) {
-        Map<String, Object> result = orderService.previewOrder(userId, cartItemIds);
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/{orderId}/pay")
-    public ResponseEntity<Map<String, Object>> payOrder(@PathVariable String orderId,
-                                                       @RequestParam String userId,
-                                                       @RequestParam String accountNumber,
-                                                       @RequestParam String password,
-                                                       @RequestParam String paymentMethod) {
-        Map<String, Object> result = orderService.payOrder(userId, orderId, accountNumber, password, paymentMethod);
-        return ResponseEntity.ok(result);
-    }
-
-    @PutMapping("/{orderId}/deliver")
-    public ResponseEntity<Map<String, Object>> deliverOrder(@PathVariable String orderId,
-                                                           @RequestParam String adminId) {
-        Map<String, Object> result = orderService.deliverOrder(adminId, orderId);
-        return ResponseEntity.ok(result);
-    }
-
-    @PutMapping("/{orderId}/confirm")
-    public ResponseEntity<Map<String, Object>> confirmOrder(@PathVariable String orderId,
-                                                           @RequestParam String userId) {
-        Map<String, Object> result = orderService.confirmOrder(userId, orderId);
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{orderId}/detail")
-    public ResponseEntity<Map<String, Object>> getOrderDetail(@PathVariable String orderId,
-                                                             @RequestParam String userId) {
-        Map<String, Object> result = orderService.getOrderDetail(userId, orderId);
-        return ResponseEntity.ok(result);
     }
 }
