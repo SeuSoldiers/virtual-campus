@@ -143,6 +143,16 @@ public class RegistrarController {
         }
     }
 
+    @FXML
+    private void openAdminProducts() {
+        MainApp.openAdminProducts();
+    }
+
+    @FXML
+    private void openAdminShip() {
+        MainApp.openAdminShip();
+    }
+
     // 表格数据模型
     public record AuditRecordView(String id, String studentId, String field, String oldValue, String newValue,
                                   String createTime, String reviewTime, String remark) {

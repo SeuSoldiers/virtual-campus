@@ -122,7 +122,8 @@ CREATE TABLE IF NOT EXISTS product
     productName    TEXT NOT NULL,
     productPrice   REAL CHECK (productPrice >= 0),
     availableCount INTEGER CHECK (availableCount >= 0),
-    productType    TEXT
+    productType    TEXT,
+    status         TEXT DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE'))
 );
 
 -- 创建订单表

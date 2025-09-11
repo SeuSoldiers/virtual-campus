@@ -16,6 +16,10 @@ public class OrderItemService {
         return orderItemMapper.insert(orderItem);
     }
 
+    public int addOrderItemsBatch(List<OrderItem> orderItems) {
+        return orderItemMapper.insertBatch(orderItems);
+    }
+
     public int removeOrderItem(String itemId) {
         return orderItemMapper.deleteById(itemId);
     }

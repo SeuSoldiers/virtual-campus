@@ -33,7 +33,7 @@ public class AuthService {
 // NOTE: in production use hashing & salted password
         if (!u.getPassword().equals(password)) return null;
         String token = UUID.randomUUID().toString();
-        tokenStore.put(token, u.getUsername());
+        tokenStore.put(token, Integer.parseInt(username));
         return token;
     }
 
