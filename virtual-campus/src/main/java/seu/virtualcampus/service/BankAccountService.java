@@ -640,6 +640,61 @@ public class BankAccountService {
         return updatedCount;
     }
 
+    @Transactional
+    public Transaction processPayLater(String fromAccount, String password, String toAccount, BigDecimal amount) {
+        // 验证转出账户
+        BankAccount from = bankAccountMapper.selectByAccountNumber(fromAccount);
+        if (from == null) {
+            throw new RuntimeException("消费者账户不存在");
+        }
+        if (!"ACTIVE".equals(from.getStatus()) && !"LIMIT".equals(from.getStatus())) {
+            throw new RuntimeException("消费者账户状态异常");
+        }
+
+        // 验证密码
+        if (!from.getPassword().equals(password)) {
+            throw new RuntimeException("密码错误！");
+        }
+
+        // 验证转入账户（商家账户）
+        BankAccount to = bankAccountMapper.selectByAccountNumber(toAccount);
+        if (to == null) {
+            throw new RuntimeException("商家账户不存在");
+        }
+        if (!"ACTIVE".equals(to.getStatus()) && !"LIMIT".equals(to.getStatus())) {
+            throw new RuntimeException("商家账户状态异常");
+        }
+
+        // 检查余额是否充足
+        if (from.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("余额不足！");
+        }
+
+        // 更新转出账户余额
+        BigDecimal fromNewBalance = from.getBalance().subtract(amount);
+        bankAccountMapper.updateBalance(fromAccount, fromNewBalance);
+
+        // 更新转入账户余额
+        BigDecimal toNewBalance = to.getBalance().add(amount);
+        bankAccountMapper.updateBalance(toAccount, toNewBalance);
+
+        // 创建商店消费交易记录
+        Transaction transaction = new Transaction(
+                generateTransactionId(),
+                fromAccount,
+                toAccount,
+                amount,
+                "PAYLATER", // 商店消费特色交易类型
+                LocalDateTime.now(),
+                "商店消费"+amount+"元",
+                "COMPLETED"
+        );
+        transactionMapper.insertTransaction(transaction);
+
+        return transaction;
+    }
+
+
 
 
 }

@@ -253,6 +253,15 @@ public class BankAccountController {
     }
     // 在 BankAccountController.java 中添加以下方法
 
+    @PostMapping("/paylater")
+    public ResponseEntity<Transaction> payLater(
+            @RequestParam String fromAccount,
+            @RequestParam String password,
+            @RequestParam String toAccount,
+            @RequestParam BigDecimal amount) {
+        Transaction transaction = bankAccountService.processPayLater(fromAccount, password, toAccount, amount);
+        return ResponseEntity.ok(transaction);
+    }
     /**
      * 检查并更新违约交易状态
      * @return 更新的交易数量
