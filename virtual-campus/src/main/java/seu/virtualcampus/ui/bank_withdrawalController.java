@@ -96,21 +96,39 @@ public class bank_withdrawalController {
                 // 清除输入框中的内容
                 amounttext.clear();
                 passwordtext.clear();
+            } else if (response.statusCode() == 400) {
+                // 处理具体的业务错误
+                String responseBody = response.body();
+                String userMessage = parseErrorMessage(responseBody);
+                showAlert(AlertType.ERROR, "取款失败", userMessage);
             } else {
-                // 处理错误情况
-                String errorMsg = "取款操作失败";
-                if (response.statusCode() == 400) {
-                    errorMsg += ": " + response.body();
-                } else {
-                    errorMsg += "，请稍后重试";
-                }
-                showAlert(AlertType.ERROR, "取款失败：", "请检查当前用户状态/网络状况！");
-                System.out.println("取款失败: " + "请检查当前用户状态/网络状况！");
+                showAlert(AlertType.ERROR, "取款失败", "系统错误，请稍后重试！错误码: " + response.statusCode());
             }
         } catch (Exception e) {
             // 处理异常情况，如网络问题
-            showAlert(AlertType.ERROR, "操作异常", "发生异常: " + "请检查当前用户状态/网络状况！");
+            showAlert(AlertType.ERROR, "操作异常", "网络连接失败，请检查网络状况！");
             e.printStackTrace();
+        }
+    }
+
+    // 解析错误信息的方法
+    private String parseErrorMessage(String responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            return "未知错误";
+        }
+
+        // 根据自定义的错误码解析具体错误信息
+        if (responseBody.contains("Account not found")) {
+            return "账户不存在";
+        } else if (responseBody.contains("Account is not active/limit")) {
+            return "账户状态异常，无法进行取款操作";
+        } else if (responseBody.contains("Invalid password")) {
+            return "密码错误";
+        } else if (responseBody.contains("Insufficient balance")) {
+            return "余额不足";
+        } else {
+            // 返回原始错误信息
+            return responseBody.length() > 100 ? "操作失败，请重试" : responseBody;
         }
     }
 

@@ -102,12 +102,6 @@ public class bank_administrationController {
     private TableColumn<BankAccount, String> createdate_column3;
 
     @FXML
-    private Button delete_btn2;
-
-    @FXML
-    private Button delete_btn4;
-
-    @FXML
     private TextField endtime_text2;
 
     @FXML
@@ -218,14 +212,59 @@ public class bank_administrationController {
 
     // API基础URL
     private static final String BASE_URL = "http://localhost:8080/api/accounts";
+
+
+
+
     @FXML
     public void initialize() {
         // 初始化所有表格的列
         setupTableColumns();
 
-        // 加载初始数据
-        loadInitialData();
+        // 首先检查违约交易，然后再加载初始数据
+        checkOverdueTransactions();
+
+        // 添加 TableView4 的选择监听器
+        setupTableView4SelectionListener();
     }
+    // 设置 TableView4 的选择监听器
+    private void setupTableView4SelectionListener() {
+        TableView4.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                // 将选中记录的 fromAccountNumber 填入 blacklist_text4
+                blacklist_text4.setText(newValue.getFromAccountNumber());
+            }
+        });
+    }
+
+
+    /**
+     * 检查违约交易
+     */
+    private void checkOverdueTransactions() {
+        String url = BASE_URL + "/check-overdue-transactions";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .get()
+                .addHeader("Authorization", "Bearer " + MainApp.token)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // 即使检查失败也继续加载数据
+                loadInitialData();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                // 无论是否成功都继续加载数据
+                loadInitialData();
+            }
+        });
+    }
+
 
     // 设置表格列的值工厂
     private void setupTableColumns() {
@@ -403,10 +442,23 @@ public class bank_administrationController {
                                 new TypeReference<List<Transaction>>() {});
 
                         javafx.application.Platform.runLater(() -> {
-                            ObservableList<Transaction> transactionList = FXCollections.observableArrayList(transactions);
-                            TableView2.setItems(transactionList);
-                            TableView4.setItems(transactionList);
+                            // 过滤出 transactionType 为 "PAY_LATER" 的交易记录
+                            ObservableList<Transaction> allTransactionList = FXCollections.observableArrayList(transactions);
+                            ObservableList<Transaction> breakTransactions = FXCollections.observableArrayList();
+
+                            for (Transaction transaction : transactions) {
+                                if ("BREAK_CONTRACT".equals(transaction.getStatus())) {
+                                    breakTransactions.add(transaction);
+                                }
+                            }
+
+                            // 设置 TableView2 显示所有交易记录
+                            TableView2.setItems(allTransactionList);
+
+                            // 设置 TableView4 只显示 PAY_LATER 类型的交易记录
+                            TableView4.setItems(breakTransactions);
                         });
+
                     } catch (Exception e) {
                         javafx.application.Platform.runLater(() -> {
                             showAlert("错误", "解析响应失败: 请检查当前用户状态/网络状况！");
@@ -447,9 +499,9 @@ public class bank_administrationController {
 
         // 从交易记录中获取账户号（这里假设使用fromAccountNumber，也可以根据需要使用toAccountNumber）
         String accountNumber = selectedTransaction.getFromAccountNumber();
-        // 先获取账户的当前状态
         getAccountInfoAndCheckStatus(accountNumber, "LIMIT");
     }
+
     // 获取账户信息并检查状态后再执行操作
     private void getAccountInfoAndCheckStatus(String accountNumber, String targetStatus) {
         String url = BASE_URL + "/" + accountNumber + "/accountInfo";
@@ -610,17 +662,6 @@ public class bank_administrationController {
     }
 
     @FXML
-    void delete2(ActionEvent event) {
-
-    }
-
-    @FXML
-    void delete4(ActionEvent event) {
-
-    }
-
-
-    @FXML
     void exit(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("退出程序");
@@ -752,7 +793,7 @@ public class bank_administrationController {
             @Override
             public void onFailure(Call call, IOException e) {
                 javafx.application.Platform.runLater(() -> {
-                    showAlert("错误", "网络连接失败: 请检查当前用户状态/网络状况！");
+                    showAlert("错误", "该交易记录不存在！");
                 });
             }
 

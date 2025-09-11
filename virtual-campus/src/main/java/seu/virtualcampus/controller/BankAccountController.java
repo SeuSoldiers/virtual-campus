@@ -232,4 +232,36 @@ public class BankAccountController {
     }
 
 
+    // 商店消费*********************************************
+
+    /**
+     * 商店消费接口
+     * @param fromAccount 消费者账户
+     * @param password 消费者账户密码
+     * @param toAccount 商家账户
+     * @param amount 消费金额
+     * @return 交易记录
+     */
+    @PostMapping("/shopping")
+    public ResponseEntity<Transaction> shopping(
+            @RequestParam String fromAccount,
+            @RequestParam String password,
+            @RequestParam String toAccount,
+            @RequestParam BigDecimal amount) {
+        Transaction transaction = bankAccountService.processShopping(fromAccount, password, toAccount, amount);
+        return ResponseEntity.ok(transaction);
+    }
+    // 在 BankAccountController.java 中添加以下方法
+
+    /**
+     * 检查并更新违约交易状态
+     * @return 更新的交易数量
+     */
+    @GetMapping("/check-overdue-transactions")
+    public ResponseEntity<Integer> checkOverdueTransactions() {
+        int updatedCount = bankAccountService.checkAndMarkOverdueTransactions();
+        return ResponseEntity.ok(updatedCount);
+    }
+
+
 }

@@ -36,15 +36,20 @@ public class bank_depositController {
             // 获取输入的存款金额
             String amountStr = amounttext.getText();
             if (amountStr == null || amountStr.trim().isEmpty()) {
-                Alert alert = new Alert(AlertType.WARNING);
-                alert.setTitle("输入错误");
-                alert.setHeaderText(null);
-                alert.setContentText("请输入存款金额！");
-                alert.showAndWait();
+                showAlert(AlertType.WARNING, "输入错误", "请输入存款金额！");
                 return;
             }
 
             BigDecimal amount = new BigDecimal(amountStr);
+            try {
+                if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                    showAlert(AlertType.WARNING, "输入错误", "存款金额必须大于0！");
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                showAlert(AlertType.ERROR, "输入错误", "请输入有效的金额格式！");
+                return;
+            }
 
             // 获取当前选中的账户
             String accountNumber = Bank_MainApp.getCurrentAccountNumber();
@@ -71,34 +76,48 @@ public class bank_depositController {
             // 处理响应
             if (response.statusCode() == 200) {
                 // 存款成功后的处理
-                // 添加成功提示，如弹窗显示存款成功
-                Alert successAlert = new Alert(AlertType.INFORMATION);
-                successAlert.setTitle("存款成功");
-                successAlert.setHeaderText(null);
-                successAlert.setContentText("存款操作已完成！");
-                successAlert.showAndWait();
-                // 清除输入框中的内容
+                showAlert(AlertType.INFORMATION, "存款成功", "存款操作已完成！");
                 amounttext.clear();
 
+            } else if (response.statusCode() == 400) {
+                // 处理具体的业务错误
+                String responseBody = response.body();
+                String userMessage = parseDepositErrorMessage(responseBody);
+                showAlert(AlertType.ERROR, "存款失败", userMessage);
             } else {
-                // 处理错误情况
-                Alert errorAlert = new Alert(AlertType.ERROR);
-                errorAlert.setTitle("存款失败");
-                errorAlert.setHeaderText(null);
-                errorAlert.setContentText("存款操作失败: 请检查当前用户状态/网络状况！" );
-                errorAlert.showAndWait();
-                // 可以添加错误提示信息
-                System.out.println("存款失败: " + response.body());
+                showAlert(AlertType.ERROR, "存款失败", "系统错误，请稍后重试！错误码: " + response.statusCode());
             }
         } catch (Exception e) {
-            // 处理异常情况，如输入格式错误或网络问题
-            Alert exceptionAlert = new Alert(AlertType.ERROR);
-            exceptionAlert.setTitle("操作异常");
-            exceptionAlert.setHeaderText(null);
-            exceptionAlert.setContentText("发生异常: " + "请检查当前用户状态/网络状况！");
-            exceptionAlert.showAndWait();
+            // 处理异常情况，如网络问题
+            showAlert(AlertType.ERROR, "操作异常", "网络连接失败，请检查网络状况！");
             e.printStackTrace();
         }
+    }
+
+    // 解析存款错误信息的方法
+    private String parseDepositErrorMessage(String responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            return "未知错误";
+        }
+
+        // 根据自定义的错误码解析具体错误信息
+        if (responseBody.contains("Account not found")) {
+            return "账户不存在";
+        } else if (responseBody.contains("Account is not active")) {
+            // 兼容旧版本错误信息
+            return "账户状态异常";
+        } else {
+            // 返回原始错误信息
+            return responseBody.length() > 100 ? "操作失败，请重试" : responseBody;
+        }
+    }
+
+    private void showAlert(AlertType alertType, String title, String content) {
+        Alert alert = new Alert(alertType);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
 }

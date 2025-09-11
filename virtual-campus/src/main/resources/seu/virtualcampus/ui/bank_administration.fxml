@@ -131,12 +131,7 @@
                            </font>
                         </Button>
                         <Separator layoutX="727.0" layoutY="320.0" prefHeight="5.0" prefWidth="185.0" />
-                        <Button fx:id="refresh_btn2" layoutX="760.0" layoutY="372.0" mnemonicParsing="false" onAction="#refresh2" prefHeight="35.0" prefWidth="119.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="刷新记录" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="delete_btn2" layoutX="760.0" layoutY="426.0" mnemonicParsing="false" onAction="#delete2" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="删除记录" textFill="WHITE">
+                        <Button fx:id="refresh_btn2" layoutX="758.0" layoutY="392.0" mnemonicParsing="false" onAction="#refresh2" prefHeight="35.0" prefWidth="119.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="刷新记录" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>
@@ -222,12 +217,7 @@
                            </font>
                         </Button>
                         <Separator layoutX="727.0" layoutY="343.0" prefHeight="5.0" prefWidth="185.0" />
-                        <Button fx:id="refresh_btn4" layoutX="760.0" layoutY="372.0" mnemonicParsing="false" onAction="#refresh4" prefHeight="35.0" prefWidth="119.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="刷新记录" textFill="WHITE">
-                           <font>
-                              <Font name="System Bold" size="14.0" />
-                           </font>
-                        </Button>
-                        <Button fx:id="delete_btn4" layoutX="760.0" layoutY="426.0" mnemonicParsing="false" onAction="#delete4" prefHeight="35.0" prefWidth="120.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="删除记录" textFill="WHITE">
+                        <Button fx:id="refresh_btn4" layoutX="760.0" layoutY="405.0" mnemonicParsing="false" onAction="#refresh4" prefHeight="35.0" prefWidth="119.0" style="-fx-background-color: #4b6cb7; -fx-background-radius: 8px;" text="刷新记录" textFill="WHITE">
                            <font>
                               <Font name="System Bold" size="14.0" />
                            </font>

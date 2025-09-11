@@ -115,22 +115,45 @@ public class bank_transferController {
                 amounttext.clear();
                 inaccountnumtext.clear();
                 passwordtext.clear();
-
+            } else if (response.statusCode() == 400) {
+                // 处理具体的业务错误
+                String responseBody = response.body();
+                String userMessage = parseTransferErrorMessage(responseBody);
+                showAlert(AlertType.ERROR, "转账失败", userMessage);
             } else {
-                // 处理错误情况
-                String errorMsg = "转账操作失败";
-                if (response.statusCode() == 400) {
-                    errorMsg += ": " + response.body();
-                } else {
-                    errorMsg += "，请稍后重试";
-                }
-                showAlert(AlertType.ERROR, "转账失败", "请检查当前用户状态/网络状况！");
-                System.out.println("转账失败: " + response.body());
+                showAlert(AlertType.ERROR, "转账失败", "系统错误，请稍后重试！错误码: " + response.statusCode());
             }
         } catch (Exception e) {
             // 处理异常情况，如网络问题
-            showAlert(AlertType.ERROR, "操作异常", "发生异常: " + "请检查当前用户状态/网络状况！");
+            showAlert(AlertType.ERROR, "操作异常", "网络连接失败，请检查网络状况！");
             e.printStackTrace();
+        }
+    }
+
+    // 解析转账错误信息的方法
+    private String parseTransferErrorMessage(String responseBody) {
+        if (responseBody == null || responseBody.isEmpty()) {
+            return "未知错误";
+        }
+
+        // 根据自定义的错误码解析具体错误信息
+        if (responseBody.contains("from account not found")) {
+            return "转出账户不存在";
+        } else if (responseBody.contains("to account not found")) {
+            return "转入账户不存在";
+        } else if (responseBody.contains("from account is not active/limit")) {
+            return "转出账户状态异常，无法进行转账操作";
+        } else if (responseBody.contains("to account is not active/limit")) {
+            return "转入账户状态异常，无法接收转账";
+        } else if (responseBody.contains("invalid password")) {
+            return "转出账户密码错误";
+        } else if (responseBody.contains("insufficient balance")) {
+            return "转出账户余额不足";
+        } else if (responseBody.contains("cannot transfer to the same account")) {
+            return "不能向自己转账";
+        } else {
+            // 返回原始错误信息
+            return responseBody.length() > 100 ? "操作失败，请重试" : responseBody;
         }
     }
 

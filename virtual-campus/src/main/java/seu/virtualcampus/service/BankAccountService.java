@@ -50,7 +50,7 @@ public class BankAccountService {
                     initialDeposit,
                     "DEPOSIT",
                     LocalDateTime.now(),
-                    "Initial deposit",
+                    "开户（初始存款）："+initialDeposit+"元",
                     "ACTIVE"
             );
             transactionMapper.insertTransaction(transaction);
@@ -89,7 +89,7 @@ public class BankAccountService {
                 amount,
                 "DEPOSIT",
                 LocalDateTime.now(),
-                "Deposit transaction",
+                "存款:"+amount+"元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -131,7 +131,7 @@ public class BankAccountService {
                 amount,
                 "WITHDRAWAL",
                 LocalDateTime.now(),
-                "Withdrawal transaction",
+                "取款："+amount+"元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -145,29 +145,34 @@ public class BankAccountService {
         // 验证转出账户
         BankAccount from = bankAccountMapper.selectByAccountNumber(fromAccount); // 使用正确的方法名
         if (from == null) {
-            throw new RuntimeException("From account not found");
+            throw new RuntimeException("from account not found");
         }
         if (!"ACTIVE".equals(from.getStatus())&&!"LIMIT".equals(from.getStatus())) {
-            throw new RuntimeException("From account is not active/limit");
+            throw new RuntimeException("from account is not active/limit");
         }
 
         // 验证密码
         if (!from.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("invalid password");
         }
 
         // 验证转入账户
         BankAccount to = bankAccountMapper.selectByAccountNumber(toAccount); // 使用正确的方法名
         if (to == null) {
-            throw new RuntimeException("To account not found");
+            throw new RuntimeException("to account not found");
         }
         if (!"ACTIVE".equals(to.getStatus())&&!"LIMIT".equals(to.getStatus())) {
-            throw new RuntimeException("To account is not active/limit");
+            throw new RuntimeException("to account is not active/limit");
+        }
+
+        // 检查不能转账给自己
+        if (fromAccount.equals(toAccount)) {
+            throw new RuntimeException("cannot transfer to the same account");
         }
 
         // 检查余额是否充足
         if (from.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("Insufficient balance");
+            throw new RuntimeException("insufficient balance");
         }
 
         // 更新转出账户余额
@@ -186,7 +191,7 @@ public class BankAccountService {
                 amount,
                 "TRANSFER",
                 LocalDateTime.now(),
-                "Transfer transaction",
+                "转账:"+amount+"元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -198,7 +203,7 @@ public class BankAccountService {
     public BankAccount getAccountInfo(String accountNumber) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
-            throw new RuntimeException("Account not found");
+            throw new RuntimeException("account not found");
         }
         return account;
     }
@@ -354,21 +359,21 @@ public class BankAccountService {
         // 验证账户存在且有效
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
         if (account == null) {
-            throw new RuntimeException("账户不存在");
+            throw new RuntimeException("account not found");
         }
         if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
-            throw new RuntimeException("账户状态异常");
+            throw new RuntimeException("account status abnormal");
         }
 
         // 验证密码
         if (!account.getPassword().equals(password)) {
-            throw new RuntimeException("密码错误");
+            throw new RuntimeException("invalid password");
         }
 
         // 查找对应的定期存款交易记录
         Transaction fixedTransaction = transactionMapper.selectByTransactionId(transactionId);
         if (fixedTransaction == null) {
-            throw new RuntimeException("未找到对应的定期存款记录");
+            throw new RuntimeException("fixed deposit record not found");
         }
 
         // 验证交易记录是否属于该账户
@@ -455,20 +460,20 @@ public class BankAccountService {
         // 验证账户存在且有效
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
         if (account == null) {
-            throw new RuntimeException("Account not found");
+            throw new RuntimeException("account not found");
         }
         if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
-            throw new RuntimeException("Account is not active/limit");
+            throw new RuntimeException("account is not active/limit");
         }
 
         // 验证密码
         if (!account.getPassword().equals(password)) {
-            throw new RuntimeException("Invalid password");
+            throw new RuntimeException("invalid password");
         }
 
         // 检查余额是否充足
         if (account.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("余额不足！");
+            throw new RuntimeException("insufficient balance");
         }
 
         // 更新余额
@@ -483,7 +488,7 @@ public class BankAccountService {
                 amount,
                 "CurrentToFixed"+type,
                 LocalDateTime.now(),
-                "活期转定期"+type+" "+amount+"￥",
+                "活期转定期"+type+" "+amount+"元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -530,6 +535,109 @@ public class BankAccountService {
         account.setAccountType(newAccountType);
         int result = bankAccountMapper.updateAccount(account);
         return result > 0;
+    }
+
+// 商店逻辑**************************************************
+
+    // 商店消费
+    /**
+     * 处理商店消费
+     * @param fromAccount 消费者账户
+     * @param password 消费者账户密码
+     * @param toAccount 商家账户
+     * @param amount 消费金额
+     * @return 交易记录
+     */
+    @Transactional
+    public Transaction processShopping(String fromAccount, String password, String toAccount, BigDecimal amount) {
+        // 验证转出账户
+        BankAccount from = bankAccountMapper.selectByAccountNumber(fromAccount);
+        if (from == null) {
+            throw new RuntimeException("消费者账户不存在");
+        }
+        if (!"ACTIVE".equals(from.getStatus()) && !"LIMIT".equals(from.getStatus())) {
+            throw new RuntimeException("消费者账户状态异常");
+        }
+
+        // 验证密码
+        if (!from.getPassword().equals(password)) {
+            throw new RuntimeException("密码错误！");
+        }
+
+        // 验证转入账户（商家账户）
+        BankAccount to = bankAccountMapper.selectByAccountNumber(toAccount);
+        if (to == null) {
+            throw new RuntimeException("商家账户不存在");
+        }
+        if (!"ACTIVE".equals(to.getStatus()) && !"LIMIT".equals(to.getStatus())) {
+            throw new RuntimeException("商家账户状态异常");
+        }
+
+        // 检查余额是否充足
+        if (from.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("余额不足！");
+        }
+
+        // 更新转出账户余额
+        BigDecimal fromNewBalance = from.getBalance().subtract(amount);
+        bankAccountMapper.updateBalance(fromAccount, fromNewBalance);
+
+        // 更新转入账户余额
+        BigDecimal toNewBalance = to.getBalance().add(amount);
+        bankAccountMapper.updateBalance(toAccount, toNewBalance);
+
+        // 创建商店消费交易记录
+        Transaction transaction = new Transaction(
+                generateTransactionId(),
+                fromAccount,
+                toAccount,
+                amount,
+                "SHOPPING", // 商店消费特色交易类型
+                LocalDateTime.now(),
+                "商店消费"+amount+"元",
+                "COMPLETED"
+        );
+        transactionMapper.insertTransaction(transaction);
+
+        return transaction;
+    }
+
+
+    /**
+     * 检查并更新违约交易状态
+     * @return 更新的交易数量
+     */
+
+    public int checkAndMarkOverdueTransactions() {
+        // 获取所有交易记录
+        List<Transaction> allTransactions = transactionMapper.selectAllTransactions();
+
+        int updatedCount = 0;
+
+        // 获取7天前的时间
+        LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
+
+        for (Transaction transaction : allTransactions) {
+            // 检查是否符合违约条件：
+            // 1. 交易类型为PAY_LATER
+            // 2. 状态为ARREARAGE
+            // 3. 交易时间在7天前
+            if ("PAY_LATER".equals(transaction.getTransactionType()) &&
+                    "ARREARAGE".equals(transaction.getStatus()) &&
+                    transaction.getTransactionTime().isBefore(sevenDaysAgo)) {
+
+                // 更新交易状态为BREAK_CONTRACT
+                Transaction updatedTransaction = new Transaction();
+                updatedTransaction.setTransactionId(transaction.getTransactionId());
+                updatedTransaction.setStatus("BREAK_CONTRACT");
+                updatedTransaction.setRemark(transaction.getRemark() + " (先用后付违约)");
+
+                transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
+                updatedCount++;
+            }
+        }
+
+        return updatedCount;
     }
 
 
