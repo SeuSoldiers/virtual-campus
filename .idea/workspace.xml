@@ -5,29 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/virtual-campus/mvnw" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/mvnw" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/CartController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/CartController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/ProductController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/ProductController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/domain/Product.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/domain/Product.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/CartMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/CartMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/OrderItemMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/OrderItemMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/ProductMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/ProductMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/CartService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/CartService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/OrderItemService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/OrderItemService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/OrderService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/OrderService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/ProductService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/ProductService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/DashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/DashboardController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/RegistrarController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/RegistrarController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/StudentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/registrar.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/registrar.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/student.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/student.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/sqls/data.sql" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/sqls/data.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/sqls/schema.sql" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/sqls/schema.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/virtualcampus.sqlite" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,11 +14,16 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev_zyc_storesystem" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8
+}</component>
   <component name="ProjectId" id="32RgqIrN5UheQ6MRuJDwyQacAxB" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -49,8 +33,9 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "data__base",
+    "git-widget-placeholder": "merge-shopandbank",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "/Users/yichi-zhang/virtual-campus",
     "node.js.detected.package.eslint": "true",
@@ -82,5 +67,16 @@
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
