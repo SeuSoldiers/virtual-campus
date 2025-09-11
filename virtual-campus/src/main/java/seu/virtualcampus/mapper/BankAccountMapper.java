@@ -46,4 +46,10 @@ public interface BankAccountMapper {
     // 取款操作
     @Update("UPDATE bank_account SET balance = balance - #{amount} WHERE accountNumber = #{accountNumber}")
     int withdraw(@Param("accountNumber") String accountNumber, @Param("amount") BigDecimal amount);
+
+    // 返回所有账户列表
+    @Select("SELECT * FROM bank_account")
+    List<BankAccount> selectAllAccounts();
+
+
 }
