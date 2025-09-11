@@ -5,8 +5,14 @@
 <VBox xmlns:fx="http://javafx.com/fxml" spacing="24" alignment="CENTER"
       fx:controller="seu.virtualcampus.ui.RegistrarController"
       style="-fx-font-family: 'Microsoft YaHei'; -fx-background-color: linear-gradient(to bottom, #f8fafc, #e0e7ef); -fx-padding: 48 64; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, #b0b8c1, 16, 0.2, 0, 4);">
-    <Button text="返回" onAction="#handleBack"
-            style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #b0b8c1; -fx-text-fill: #2d3a4a;"/>
+    <HBox spacing="16" alignment="CENTER">
+        <Button text="返回" onAction="#handleBack"
+                style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #b0b8c1; -fx-text-fill: #2d3a4a;"/>
+        <Button text="商品管理" onAction="#openAdminProducts"
+                style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #ff7a00; -fx-text-fill: white;"/>
+        <Button text="发货管理" onAction="#openAdminShip"
+                style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #e67e22; -fx-text-fill: white;"/>
+    </HBox>
     <Label text="待审核记录"
            style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2d3a4a; -fx-padding: 0 0 16 0;"/>
     <TableView fx:id="auditTable" prefHeight="320" prefWidth="820" style="-fx-font-size: 15px;">
