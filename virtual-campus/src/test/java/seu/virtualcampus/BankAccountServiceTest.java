@@ -250,16 +250,16 @@ public class BankAccountServiceTest {
     @Test
     void testUpdateAccountStatus() {
         // 准备
-        when(bankAccountMapper.updateStatus("AC123456789", "FROZEN")).thenReturn(1);
+        when(bankAccountMapper.updateStatus("AC123456789", "LOST")).thenReturn(1);
 
         // 执行
-        boolean result = bankAccountService.updateAccountStatus("AC123456789", "FROZEN");
+        boolean result = bankAccountService.updateAccountStatus("AC123456789", "LOST");
 
         // 验证
         assertTrue(result);
 
         // 验证方法调用
-        verify(bankAccountMapper, times(1)).updateStatus("AC123456789", "FROZEN");
+        verify(bankAccountMapper, times(1)).updateStatus("AC123456789", "LOST");
     }
 
     @Test
