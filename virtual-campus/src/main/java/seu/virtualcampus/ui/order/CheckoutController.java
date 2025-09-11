@@ -19,7 +19,6 @@ import javafx.stage.Stage;
 import okhttp3.*;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -179,60 +178,28 @@ public class CheckoutController implements Initializable {
     @FXML
     private void handlePayOrder() {
         if (currentOrderId == null || currentOrderId.isEmpty()) { showMsg("请先创建订单", true); return; }
-        // 获取账户信息和支付金额
-        String fromAccount = accountNumberField.getText().trim();
-        String password = accountPasswordField.getText().trim();
-        String toAccount = "111";  // 默认商家账户
-        String amountStr = finalAmountLabel.getText().replace("¥", "").trim();
-
-        // 验证输入
-        if (fromAccount.isEmpty() || password.isEmpty()) {
-            showMsg("请输入账号和密码", true);
-            return;
-        }
-        try {
-            // 转换金额
-            BigDecimal amount = new BigDecimal(amountStr);
-
-            // 构建请求参数
-            RequestBody formBody = new FormBody.Builder()
-                    .add("fromAccount", fromAccount)
-                    .add("password", password)
-                    .add("toAccount", toAccount)
-                    .add("amount", amount.toString())
-                    .build();
-
-            // 发送请求到后端shopping接口
-            Request request = new Request.Builder()
-                    .url(baseUrl + "/api/accounts/shopping")
-                    .post(formBody)
-                    .build();
-
-            httpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true));
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    String body = response.body() != null ? response.body().string() : "";
-                    Platform.runLater(() -> {
-                        if (response.isSuccessful()) {
-                            // 支付成功后继续处理订单支付
-                            processOrderPayment(fromAccount, password);
-                        } else {
-                            showMsg("支付失败: " + body, true);
-                        }
-                    });
-                }
-            });
-        } catch (NumberFormatException e) {
-            showMsg("支付金额格式错误", true);
-        } catch (Exception e) {
-            showMsg("支付过程中发生错误: " + e.getMessage(), true);
-        }
-
+        String account = accountNumberField.getText().trim();
+        String pwd = accountPasswordField.getText().trim();
+        if (account.isEmpty() || pwd.isEmpty()) { showMsg("请输入账号和密码", true); return; }
+        Request req = new Request.Builder()
+                .url(baseUrl + "/api/orders/" + currentOrderId + "/pay?userId=" + currentUserId
+                        + "&accountNumber=" + account + "&password=" + pwd
+                        + "&paymentMethod=" + (paymentMethodBox != null ? paymentMethodBox.getValue() : "ONLINE"))
+                .post(RequestBody.create("", MediaType.get("application/json")))
+                .build();
+        httpClient.newCall(req).enqueue(new Callback() {
+            @Override public void onFailure(Call call, IOException e) { Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true)); }
+            @Override public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body() != null ? response.body().string() : "";
+                Platform.runLater(() -> {
+                    if (response.isSuccessful()) {
+                        showMsg("支付成功！", false);
+                        accountNumberField.clear(); accountPasswordField.clear();
+                        handlePreview();
+                    } else { showMsg("支付失败: " + body, true); }
+                });
+            }
+        });
     }
 
     @FXML
