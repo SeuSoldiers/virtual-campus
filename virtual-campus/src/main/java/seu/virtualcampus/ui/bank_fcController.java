@@ -4,6 +4,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
 
@@ -44,6 +45,11 @@ public class bank_fcController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("无法加载活期转定期界面: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("错误");
+            alert.setHeaderText(null);
+            alert.setContentText("无法加载活期转定期界面");
+            alert.showAndWait();
         }
 
     }
@@ -66,6 +72,11 @@ public class bank_fcController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("无法加载定期转活期界面: " + e.getMessage());
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("错误");
+            alert.setHeaderText(null);
+            alert.setContentText("无法加载活期转定期界面");
+            alert.showAndWait();
         }
     }
 

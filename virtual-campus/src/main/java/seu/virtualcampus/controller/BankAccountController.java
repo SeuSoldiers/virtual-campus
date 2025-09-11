@@ -78,7 +78,16 @@ public class BankAccountController {
             @PathVariable String accountNumber,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        List<Transaction> transactions = bankAccountService.getTransactionHistory(accountNumber, start, end);
+
+        List<Transaction> transactions;
+
+        // 如果accountNumber是"all"，则查询所有交易记录
+        if ("all".equals(accountNumber)) {
+            transactions = bankAccountService.getAllTransactionsByTimeRange(start, end);
+        } else {
+            transactions = bankAccountService.getTransactionHistory(accountNumber, start, end);
+        }
+
         return ResponseEntity.ok(transactions);
     }
 
@@ -99,6 +108,24 @@ public class BankAccountController {
         boolean isValid = bankAccountService.verifyAccountPassword(accountNumber, password);
         return ResponseEntity.ok(isValid);
     }
+
+    // 在 BankAccountController.java 中添加以下方法
+// 新增：验证管理员账户密码
+    @PostMapping("/{accountNumber}/verify-admin-password")
+    public ResponseEntity<Boolean> verifyAdminPassword(
+            @PathVariable String accountNumber,
+            @RequestParam String password) {
+        try {
+            boolean isValid = bankAccountService.verifyAdminPassword(accountNumber, password);
+            return ResponseEntity.ok(isValid);
+        } catch (RuntimeException e) {
+            // 账户不存在或其他运行时异常，返回false
+            return ResponseEntity.badRequest().body(false);
+        }
+    }
+
+
+
 
     // 新增：更新账户密码
     @PutMapping("/{accountNumber}/password")
@@ -164,6 +191,43 @@ public class BankAccountController {
             response.put("success", false);
             response.put("message", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+    }
+
+    //管理员部分***********************************************************
+    // 在 BankAccountController.java 中添加以下方法
+
+    // 管理员获取所有账户信息
+    @GetMapping("/all-accounts")
+    public ResponseEntity<List<BankAccount>> getAllAccounts() {
+        List<BankAccount> accounts = bankAccountService.getAllAccounts();
+        return ResponseEntity.ok(accounts);
+    }
+
+    // 管理员获取所有交易记录
+    @GetMapping("/all-transactions")
+    public ResponseEntity<List<Transaction>> getAllTransactions() {
+        List<Transaction> transactions = bankAccountService.getAllTransactions();
+        return ResponseEntity.ok(transactions);
+    }
+
+    // 根据交易ID获取交易记录
+    @GetMapping("/transaction/{transactionId}")
+    public ResponseEntity<Transaction> getTransactionById(@PathVariable String transactionId) {
+        Transaction transaction = bankAccountService.getTransactionById(transactionId);
+        return ResponseEntity.ok(transaction);
+    }
+
+    // 更新账户类型(设置管理员权限)
+    @PutMapping("/{accountNumber}/account-type")
+    public ResponseEntity<Boolean> updateAccountType(
+            @PathVariable String accountNumber,
+            @RequestParam String newAccountType) {
+        try {
+            boolean result = bankAccountService.updateAccountType(accountNumber, newAccountType);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(false);
         }
     }
 

@@ -9,14 +9,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,6 +64,7 @@ public class bank_openController {
         } catch (IOException e) {
             e.printStackTrace();
             System.out.println("无法加载登录界面: " + e.getMessage());
+            showAlert("错误","无法加载登录界面");
         }
     }
 
@@ -92,7 +92,7 @@ public class bank_openController {
             // 创建表单请求体
             RequestBody formBody = new FormBody.Builder()
                     .add("userId", userId)
-                    .add("accountType", "储蓄账户")
+                    .add("accountType", "USER")
                     .add("password", password)
                     .add("initialDeposit", initialDeposit.toString())
                     .build();
@@ -110,7 +110,7 @@ public class bank_openController {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                    logger.log(Level.WARNING, "网络错误: " + e.getMessage());
+                    logger.log(Level.WARNING, "网络错误: " + "请检查当前用户状态/网络状况！");
                     Platform.runLater(() -> {
                         msgLabel.setText("");
                         showAlert("网络错误", "无法连接到服务器，请检查网络连接");
@@ -142,7 +142,7 @@ public class bank_openController {
         } catch (NumberFormatException e) {
             showAlert("错误", "请输入正确的金额格式！");
         } catch (Exception e) {
-            showAlert("错误", "发生未知错误: " + e.getMessage());
+            showAlert("错误", "发生未知错误: " + "请检查当前用户状态/网络状况！");
         }
     }
 
@@ -173,14 +173,31 @@ public class bank_openController {
             String balance = node.has("balance") ? node.get("balance").asText() : "未知";
 
             Platform.runLater(() -> {
-                Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
-                successAlert.setTitle("开户成功");
-                successAlert.setHeaderText(null);
-                successAlert.setContentText(String.format(
-                        "开户成功！\n账户号: %s\n初始余额: %s 元",
-                        accountNumber, balance
-                ));
-                successAlert.showAndWait();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("开户成功");
+                alert.setHeaderText("账户已成功创建！");
+                // 创建包含可选择文本和复制按钮的界面
+                VBox vbox = new VBox(10);
+                Label infoLabel = new Label(
+                        "您的账户信息:\n\n" +
+                                "账户号: " + accountNumber + "\n" +
+                                "初始余额: " + balance + " 元"
+                );
+                TextField accountField = new TextField(accountNumber);
+                accountField.setEditable(false);
+                accountField.setPrefWidth(300);
+
+                Button copyButton = new Button("复制账户号");
+                copyButton.setOnAction(e -> {
+                    accountField.selectAll();
+                    accountField.copy();
+
+                });
+
+                vbox.getChildren().addAll(infoLabel, accountField, copyButton);
+
+                alert.getDialogPane().setContent(vbox);
+                alert.showAndWait();
 
                 // 开户成功后清空输入框
                 clearInputFields();

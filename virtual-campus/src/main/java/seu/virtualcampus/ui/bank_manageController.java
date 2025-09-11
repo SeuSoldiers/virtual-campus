@@ -1,6 +1,7 @@
 package seu.virtualcampus.ui;
 
-import ch.qos.logback.core.status.Status;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.event.ActionEvent;
 
@@ -9,13 +10,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.time.format.DateTimeFormatter;
+
 
 public class bank_manageController {
 
@@ -46,35 +52,147 @@ public class bank_manageController {
     @FXML
     private Button statusbtn;
 
-
+    // HTTP客户端和ObjectMapper
+    private OkHttpClient client = new OkHttpClient();
+    private ObjectMapper mapper = new ObjectMapper();
 
     // 2. 初始化方法（会自动调用）
     public void initialize() {
-        // 这里应该是从数据库或服务层获取真实数据
-        // 暂时先用模拟数据演示
+        loadAccountInfo();
+    }
 
-        // 3. 设置 Label 的文本内容
-        accountNUM.setText("6222 1234 5678 9001");
-        useID.setText("10086");
-        accountTYPE.setText("储蓄卡");
-        accountBALANCE.setText("¥ 15,000.00");
-        accountSTATUS.setText("ACTIVE");
-        String status=new String("ACTIVE");
-        LocalDateTime localDateTime=LocalDateTime.now();
-        accountDATE.setText(localDateTime.toString());
-        // 4. 可以额外设置样式（比如根据状态设置不同颜色）
+    private void loadAccountInfo() {
+        String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+        if (accountNumber == null || accountNumber.isEmpty()) {
+            showAlert("错误", "未选择账户");
+            return;
+        }
+
+        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/accountInfo";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Authorization", "Bearer " + MainApp.token)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                javafx.application.Platform.runLater(() -> {
+                    showAlert("错误", "网络连接失败: " + "请检查当前用户状态/网络状况！");
+                });
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful() && response.body() != null) {
+                    String responseBody = response.body().string();
+                    try {
+                        JsonNode accountNode = mapper.readTree(responseBody);
+
+                        String accountNumber = accountNode.get("accountNumber").asText();
+                        String userId = accountNode.get("userId").asText();
+                        String accountType = accountNode.get("accountType").asText();
+                        String balance = accountNode.get("balance").asText();
+                        String status = accountNode.get("status").asText();
+                        String createdDate = accountNode.get("createdDate").asText();
+
+                        javafx.application.Platform.runLater(() -> {
+                            updateUI(accountNumber, userId, accountType, balance, status, createdDate);
+                        });
+                    } catch (Exception e) {
+                        javafx.application.Platform.runLater(() -> {
+                            showAlert("错误", "解析账户信息失败: " + "请检查当前用户状态/网络状况！");
+                        });
+                    }
+                } else {
+                    javafx.application.Platform.runLater(() -> {
+                        showAlert("错误", "获取账户信息失败，状态码: " + "请检查当前用户状态/网络状况！");
+                    });
+                }
+            }
+        });
+    }
+
+    private void updateUI(String accountNumber, String userId, String accountType,
+                          String balance, String status, String createdDate) {
+        accountNUM.setText(formatAccountNumber(accountNumber));
+        useID.setText(userId);
+        accountTYPE.setText(accountType);
+        accountBALANCE.setText("¥ " + formatBalance(balance));
+        accountSTATUS.setText(status);
+        accountDATE.setText(formatDate(createdDate));
+
+        // 根据状态设置样式
         switch (status) {
             case "ACTIVE":
                 accountSTATUS.setStyle("-fx-text-fill: green; -fx-font-weight: bold;");
                 break;
             case "BLOCKED":
-                accountSTATUS.setStyle("-fx-text-fill: yellow; -fx-font-weight: bold;");
+                accountSTATUS.setStyle("-fx-text-fill: orange; -fx-font-weight: bold;");
                 break;
             case "CLOSED":
                 accountSTATUS.setStyle("-fx-text-fill: red; -fx-font-weight: bold;");
                 break;
+            default:
+                accountSTATUS.setStyle("-fx-text-fill: black; -fx-font-weight: normal;");
+                break;
         }
     }
+
+    private String formatAccountNumber(String accountNumber) {
+        if (accountNumber.length() == 17) {
+            // 处理17位账户号：ACxxx xxxx xxxx xxxx x
+            return accountNumber.substring(0, 5) + " " +
+                    accountNumber.substring(5, 9) + " " +
+                    accountNumber.substring(9, 13) + " " +
+                    accountNumber.substring(13, 17);
+        } else if (accountNumber.length() >= 16) {
+            // 处理16位及以上的账户号：xxxx xxxx xxxx xxxx
+            return accountNumber.substring(0, 4) + " " +
+                    accountNumber.substring(4, 8) + " " +
+                    accountNumber.substring(8, 12) + " " +
+                    accountNumber.substring(12, 16) +
+                    (accountNumber.length() > 16 ? " " + accountNumber.substring(16) : "");
+        }
+        return accountNumber;
+    }
+
+    private String formatBalance(String balance) {
+        try {
+            BigDecimal bd = new BigDecimal(balance);
+            return String.format("%.2f", bd);
+        } catch (Exception e) {
+            return balance;
+        }
+    }
+
+    private String formatDate(String dateStr) {
+        try {
+            // 尝试解析不同的日期格式
+            if (dateStr.contains("T")) {
+                // ISO格式: 2023-12-01T10:30:00
+                LocalDateTime dateTime = LocalDateTime.parse(dateStr);
+                return dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+            } else {
+                // 已经是 yyyy-MM-dd HH:mm:ss 格式
+                return dateStr;
+            }
+        } catch (Exception e) {
+            return dateStr;
+        }
+    }
+
+
+    private void showAlert(String title, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(content);
+        alert.showAndWait();
+    }
+
+
     @FXML
     void manage_back(ActionEvent event) {
         Stage currentStage = (Stage) backbtn.getScene().getWindow();
@@ -84,7 +202,7 @@ public class bank_manageController {
     @FXML
     void manage_refresh(ActionEvent event) {
         // 刷新数据的逻辑
-        initialize(); // 可以重新调用初始化来刷新
+        loadAccountInfo(); // 刷新数据
     }
 
     @FXML
@@ -104,7 +222,7 @@ public class bank_manageController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("无法加载银行修改用户状态界面: " + e.getMessage());
+            System.out.println("无法加载银行修改用户状态界面: " + "请检查当前用户状态/网络状况！");
         }
     }
 

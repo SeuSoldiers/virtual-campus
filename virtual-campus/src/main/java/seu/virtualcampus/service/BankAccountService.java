@@ -67,8 +67,8 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new RuntimeException("Account is not active");
+        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+            throw new RuntimeException("Account is not active/limit");
         }
 
         // +++ 新增：验证存款金额必须为正数 +++
@@ -105,8 +105,8 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new RuntimeException("Account is not active");
+        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+            throw new RuntimeException("Account is not active/limit");
         }
 
         // 验证密码
@@ -147,8 +147,8 @@ public class BankAccountService {
         if (from == null) {
             throw new RuntimeException("From account not found");
         }
-        if (!"ACTIVE".equals(from.getStatus())) {
-            throw new RuntimeException("From account is not active");
+        if (!"ACTIVE".equals(from.getStatus())&&!"LIMIT".equals(from.getStatus())) {
+            throw new RuntimeException("From account is not active/limit");
         }
 
         // 验证密码
@@ -161,8 +161,8 @@ public class BankAccountService {
         if (to == null) {
             throw new RuntimeException("To account not found");
         }
-        if (!"ACTIVE".equals(to.getStatus())) {
-            throw new RuntimeException("To account is not active");
+        if (!"ACTIVE".equals(to.getStatus())&&!"LIMIT".equals(to.getStatus())) {
+            throw new RuntimeException("To account is not active/limit");
         }
 
         // 检查余额是否充足
@@ -210,7 +210,33 @@ public class BankAccountService {
 
     // 更新账户状态
     public boolean updateAccountStatus(String accountNumber, String newStatus) {
-        int result = bankAccountMapper.updateStatus(accountNumber, newStatus); // 使用正确的方法名
+
+        // 首先获取账户的当前状态
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+
+        String oldStatus = account.getStatus();
+
+        // 更新账户状态
+        int result = bankAccountMapper.updateStatus(accountNumber, newStatus);
+
+        if (result > 0) {
+            // 记录状态变更交易
+            Transaction transaction = new Transaction(
+                    generateTransactionId(),
+                    accountNumber,
+                    accountNumber,
+                    BigDecimal.ZERO,  // 状态变更不涉及金额变动
+                    "STATUS_CHANGE",
+                    LocalDateTime.now(),
+                    "账户状态从 " + oldStatus + " 变更为 " + newStatus,
+                    "COMPLETED"
+            );
+            transactionMapper.insertTransaction(transaction);
+        }
+
         return result > 0;
     }
 
@@ -230,21 +256,41 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
+        // 检查账户状态，只有ACTIVE或BLOCKED状态的账户才能验证密码
+        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+            // 对于已销户(CLOSED)或其他非活跃状态的账户，直接返回false，不允许验证密码
+            return false;
+        }
         return account.getPassword().equals(password);
     }
+
+    // 验证管理员账户密码(登录)
+    public boolean verifyAdminPassword(String accountNumber, String password) {
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+        // 检查账户状态，只有ACTIVE或BLOCKED状态的账户才能验证密码
+        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+            // 对于已销户(CLOSED)或其他非活跃状态的账户，直接返回false，不允许验证密码
+            return false;
+        }
+
+        // 验证账户类型是否为管理员
+        if (!"ADMINISTRATOR".equals(account.getAccountType())) {
+            return false;
+        }
+
+        return account.getPassword().equals(password);
+    }
+
+
+
+
 
     // 更新账户密码：思考（能不能把验证账户密码结合到这个方法里面来，提高代码复用性）
     @Transactional
     public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
-        /*BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
-        if (account == null) {
-            throw new RuntimeException("Account not found");
-        }
-
-        // 验证旧密码
-        if (!account.getPassword().equals(oldPassword)) {
-            throw new RuntimeException("Invalid old password");
-        }*/
         verifyAccountPassword(accountNumber, oldPassword);
 
         // 更新密码
@@ -310,7 +356,7 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("账户不存在");
         }
-        if (!"ACTIVE".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
             throw new RuntimeException("账户状态异常");
         }
 
@@ -349,6 +395,14 @@ public class BankAccountService {
         // 更新账户余额（将本息和加入活期余额）
         BigDecimal newBalance = account.getBalance().add(totalAmount);
         bankAccountMapper.updateBalance(accountNumber, newBalance);
+
+        // 更新原有定期存款记录的状态，标记为已取走
+        Transaction updatedFixedTransaction = new Transaction();
+        updatedFixedTransaction.setTransactionId(transactionId);
+        updatedFixedTransaction.setTransactionType(transactionType + "已取走");
+        updatedFixedTransaction.setRemark(fixedTransaction.getRemark() + " (已转为活期)");
+        transactionMapper.updateTransactionTypeAndRemark(updatedFixedTransaction);
+
 
         // 创建新的交易记录（定期转活期）
         Transaction transaction = new Transaction(
@@ -403,8 +457,8 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())) {
-            throw new RuntimeException("Account is not active");
+        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+            throw new RuntimeException("Account is not active/limit");
         }
 
         // 验证密码
@@ -429,7 +483,7 @@ public class BankAccountService {
                 amount,
                 "CurrentToFixed"+type,
                 LocalDateTime.now(),
-                "活期转定期"+amount,
+                "活期转定期"+type+" "+amount+"￥",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -438,13 +492,45 @@ public class BankAccountService {
     }
 
 
-    // 处理时间解读的方法方法
-    private LocalDateTime getCurrentTime() {
-        return LocalDateTime.now().withNano(0); // 去除纳秒部分
+
+    //管理员部分********************************************************
+
+    // 获取所有账户信息（供管理员使用）
+    public List<BankAccount> getAllAccounts() {
+        return bankAccountMapper.selectAllAccounts();
+    }
+
+    // 获取所有交易记录（供管理员使用）
+    public List<Transaction> getAllTransactions() {
+        return transactionMapper.selectAllTransactions();
+    }
+
+    // 根据交易ID获取交易记录
+    public Transaction getTransactionById(String transactionId) {
+        Transaction transaction = transactionMapper.selectByTransactionId(transactionId);
+        if (transaction == null) {
+            throw new RuntimeException("Transaction not found");
+        }
+        return transaction;
     }
 
 
+    // 获取所有交易记录（按时间范围）
+    public List<Transaction> getAllTransactionsByTimeRange(LocalDateTime start, LocalDateTime end) {
+        return transactionMapper.selectAllTransactionsByTimeRange(start, end);
+    }
 
+    // 更新账户类型（设置管理员权限）
+    public boolean updateAccountType(String accountNumber, String newAccountType) {
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("Account not found");
+        }
+
+        account.setAccountType(newAccountType);
+        int result = bankAccountMapper.updateAccount(account);
+        return result > 0;
+    }
 
 
 

@@ -11,16 +11,18 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
-import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import okhttp3.*;
 
 import java.io.IOException;
 import java.util.Optional;
 
-import static javafx.scene.control.ButtonType.OK;
 
 public class bank_loginController {
+
+
+    @FXML
+    public Button administrator_btn;
 
     @FXML
     private TextField AccountNumber_text;
@@ -81,7 +83,7 @@ public class bank_loginController {
             @Override
             public void onFailure(Call call, IOException e) {
                 Platform.runLater(() -> {
-                    showAlert("错误", "网络连接失败: " + e.getMessage());
+                    showAlert("错误", "网络连接失败: " + "请检查当前用户状态/网络状况！");
                 });
             }
 
@@ -104,17 +106,17 @@ public class bank_loginController {
                             });
                         } else {
                             Platform.runLater(() -> {
-                                showAlert("登录失败", "账户号码或密码错误");
+                                showAlert("登录失败", "请检查你当前的账户号码、密码及用户状态！");
                             });
                         }
                     } catch (Exception e) {
                         Platform.runLater(() -> {
-                            showAlert("错误", "解析响应失败: " + e.getMessage());
+                            showAlert("错误", "解析响应失败: " + "请检查当前用户状态/网络状况！");
                         });
                     }
                 } else {
                     Platform.runLater(() -> {
-                        showAlert("错误", "登录验证失败，状态码: " + response.code());
+                        showAlert("错误", "登录验证失败，状态码: " + "请检查当前用户状态/网络状况！");
                     });
                 }
             }
@@ -155,8 +157,8 @@ public class bank_loginController {
         } catch (IOException e) {
             e.printStackTrace();
             // 处理加载失败的情况
-            System.out.println("无法加载服务界面: " + e.getMessage());
-            showAlert("错误", "无法加载服务界面: " + e.getMessage());
+            System.out.println("无法加载服务界面: " + "请检查当前用户状态/网络状况！");
+            showAlert("错误", "无法加载服务界面: " + "请检查当前用户状态/网络状况！");
         }
     }
 
@@ -195,6 +197,7 @@ public class bank_loginController {
             } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("无法重新打开登录窗口");
+                showAlert("提示", "无法重新打开登录窗口");
             }
         }
         // 如果用户取消，什么都不做，窗口保持打开
@@ -222,7 +225,29 @@ public class bank_loginController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.out.println("无法加载开户界面: " + e.getMessage());
+            System.out.println("无法加载开户界面: " +"请检查当前用户状态/网络状况！");
+            showAlert("提示", "无法加载开户界面");
+        }
+    }
+
+    public void administrator(ActionEvent actionEvent) {
+        try {
+            // 加载管理员登录界面的FXML文件
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_administrator.fxml"));
+            Parent Root = loader.load();
+
+            // 获取当前舞台（Stage）
+            Stage currentStage = (Stage) administrator_btn.getScene().getWindow();
+
+            // 创建新场景并设置到舞台
+            Scene adScene = new Scene(Root);
+            currentStage.setScene(adScene);
+            currentStage.setTitle("银行管理员登录界面");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println("无法加载管理员登录界面: " + "请检查当前用户状态/网络状况！");
+            showAlert("提示", "无法加载管理员登录界面");
         }
     }
 }

@@ -7,36 +7,36 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_openController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="520.0" style="-fx-background-color: linear-gradient(to bottom, #c2e9fb, #a1c4fd);" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_openController">
    <children>
-      <Button fx:id="open_btn" layoutX="121.0" layoutY="240.0" mnemonicParsing="false" onAction="#handleOpenAccount" prefHeight="35.0" prefWidth="90.0" text="开户">
+      <Button fx:id="open_btn" layoutX="121.0" layoutY="245.0" mnemonicParsing="false" onAction="#handleOpenAccount" prefHeight="35.0" prefWidth="90.0" style="-fx-background-color: rgba(255, 255, 255, 0.4); -fx-background-radius: 10px; -fx-border-color: white; -fx-border-radius: 10px; -fx-border-width: 2px;" text="开户">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <Button fx:id="back_btn" layoutX="324.0" layoutY="240.0" mnemonicParsing="false" onAction="#back" prefHeight="35.0" prefWidth="90.0" text="返回">
+      <Button fx:id="back_btn" layoutX="324.0" layoutY="245.0" mnemonicParsing="false" onAction="#back" prefHeight="35.0" prefWidth="90.0" style="-fx-background-color: rgba(255, 255, 255, 0.4); -fx-background-radius: 10px; -fx-border-color: white; -fx-border-radius: 10px; -fx-border-width: 2px;" text="返回">
          <font>
             <Font size="18.0" />
          </font>
       </Button>
-      <TextField fx:id="userid_text" layoutX="149.0" layoutY="59.0" prefHeight="35.0" prefWidth="237.0" />
-      <Label layoutX="67.0" layoutY="65.0" text="用户ID：">
+      <TextField fx:id="userid_text" layoutX="186.0" layoutY="65.0" prefHeight="35.0" prefWidth="237.0" />
+      <Label layoutX="104.0" layoutY="71.0" text="用户ID：">
          <font>
-            <Font size="18.0" />
+            <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="59.0" layoutY="115.0" text="设置密码：">
+      <Label layoutX="96.0" layoutY="121.0" text="设置密码：">
          <font>
-            <Font size="18.0" />
+            <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="59.0" layoutY="163.0" text="存入金额：">
+      <Label layoutX="96.0" layoutY="169.0" text="存入金额：">
          <font>
-            <Font size="18.0" />
+            <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="amount_text" layoutX="149.0" layoutY="157.0" prefHeight="35.0" prefWidth="237.0" />
-      <PasswordField fx:id="password_text" layoutX="149.0" layoutY="109.0" prefHeight="35.0" prefWidth="237.0" />
+      <TextField fx:id="amount_text" layoutX="186.0" layoutY="163.0" prefHeight="35.0" prefWidth="237.0" />
+      <PasswordField fx:id="password_text" layoutX="186.0" layoutY="115.0" prefHeight="35.0" prefWidth="237.0" />
        <Label fx:id="msgLabel" layoutX="149.0" layoutY="200.0" prefHeight="25.0" prefWidth="237.0" text="" />
    </children>
 </AnchorPane>

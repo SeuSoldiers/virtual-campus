@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.event.ActionEvent;
 import javafx.stage.Stage;
 import okhttp3.*;
+import javafx.scene.control.Alert.AlertType;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -44,8 +45,10 @@ public class bank_ctofController {
     // 添加HTTP客户端
     private OkHttpClient client = new OkHttpClient();
 
-    // 添加ObjectMapper用于JSON解析
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     @FXML
     public void initialize() {
@@ -101,11 +104,21 @@ public class bank_ctofController {
 
         if (password == null || password.isEmpty()) {
             System.out.println("请输入密码");
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("温馨提示");
+            warningAlert.setHeaderText(null);
+            warningAlert.setContentText("请输入密码！");
+            warningAlert.showAndWait();
             return false;
         }
 
         if (amountStr == null || amountStr.isEmpty()) {
             System.out.println("请输入金额");
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("温馨提示");
+            warningAlert.setHeaderText(null);
+            warningAlert.setContentText("请输入金额！");
+            warningAlert.showAndWait();
             return false;
         }
 
@@ -113,10 +126,20 @@ public class bank_ctofController {
             BigDecimal amount = new BigDecimal(amountStr);
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
                 System.out.println("金额必须大于0");
+                Alert warningAlert = new Alert(AlertType.WARNING);
+                warningAlert.setTitle("温馨提示");
+                warningAlert.setHeaderText(null);
+                warningAlert.setContentText("金额必需大于零！");
+                warningAlert.showAndWait();
                 return false;
             }
         } catch (NumberFormatException e) {
             System.out.println("请输入有效的金额");
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("温馨提示");
+            warningAlert.setHeaderText(null);
+            warningAlert.setContentText("请输入有效金额！");
+            warningAlert.showAndWait();
             return false;
         }
 
@@ -166,6 +189,11 @@ public class bank_ctofController {
                 public void onFailure(Call call, IOException e) {
                     Platform.runLater(() -> {
                         System.out.println("活期转定期操作失败: " + e.getMessage());
+                        // 错误提示
+                        Alert errorAlert = new Alert(AlertType.ERROR);
+                        errorAlert.setTitle("错误");
+                        errorAlert.setContentText("活期转定期操作失败，请重试！");
+                        errorAlert.showAndWait();
                     });
                 }
 
@@ -180,6 +208,10 @@ public class bank_ctofController {
                             if (success) {
                                 Platform.runLater(() -> {
                                     System.out.println("活期转定期操作成功");
+                                    Alert infoAlert = new Alert(AlertType.INFORMATION);
+                                    infoAlert.setTitle("信息");
+                                    infoAlert.setContentText("活期转定期操作成功！");
+                                    infoAlert.showAndWait();
                                     // 清空输入框
                                     passwordtext.clear();
                                     amounttext.clear();
@@ -188,16 +220,34 @@ public class bank_ctofController {
                                 String message = (String) result.get("message");
                                 Platform.runLater(() -> {
                                     System.out.println("活期转定期操作失败: " + message);
+                                    // 错误提示
+                                    Alert errorAlert = new Alert(AlertType.ERROR);
+                                    errorAlert.setTitle("错误");
+                                    errorAlert.setContentText("操作失败，请重试！");
+                                    errorAlert.showAndWait();
+
                                 });
                             }
                         } catch (Exception e) {
                             Platform.runLater(() -> {
                                 System.out.println("解析响应失败: " + e.getMessage());
+                                // 错误提示
+                                Alert errorAlert = new Alert(AlertType.ERROR);
+                                errorAlert.setTitle("错误");
+                                errorAlert.setContentText("操作失败，请重试！");
+                                errorAlert.showAndWait();
+
                             });
                         }
                     } else {
                         Platform.runLater(() -> {
                             System.out.println("活期转定期操作失败，状态码: " + response.code());
+                            // 错误提示
+                            Alert errorAlert = new Alert(AlertType.ERROR);
+                            errorAlert.setTitle("错误");
+                            errorAlert.setContentText("操作失败，请重试！");
+                            errorAlert.showAndWait();
+
                             try {
                                 if (response.body() != null) {
                                     System.out.println("错误信息: " + response.body().string());
@@ -211,6 +261,11 @@ public class bank_ctofController {
             });
         } catch (Exception e) {
             System.out.println("发送请求时出错: " + e.getMessage());
+            // 错误提示
+            Alert errorAlert = new Alert(AlertType.ERROR);
+            errorAlert.setTitle("错误");
+            errorAlert.setContentText("操作失败，请重试！");
+            errorAlert.showAndWait();
             e.printStackTrace();
         }
     }

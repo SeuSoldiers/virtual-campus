@@ -6,34 +6,39 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="520.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_loginController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="350.0" prefWidth="520.0" style="-fx-background-color: linear-gradient(to bottom, #c2e9fb, #a1c4fd);" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_loginController">
    <children>
-      <Button fx:id="Login_btn" layoutX="116.0" layoutY="244.0" mnemonicParsing="false" onAction="#login" prefHeight="49.0" prefWidth="85.0" text="登录">
+      <Button fx:id="Login_btn" layoutX="119.0" layoutY="265.0" mnemonicParsing="false" onAction="#login" prefHeight="49.0" prefWidth="85.0" style="-fx-background-color: rgba(255, 255, 255, 0.4); -fx-background-radius: 10px; -fx-border-color: white; -fx-border-radius: 10px; -fx-border-width: 2px;" text="登录" textFill="#0e2853">
          <font>
-            <Font size="18.0" />
+            <Font name="System Bold Italic" size="18.0" />
          </font>
       </Button>
-      <Button fx:id="Open_btn" layoutX="315.0" layoutY="244.0" mnemonicParsing="false" onAction="#open" prefHeight="49.0" prefWidth="85.0" text="开户">
+      <Button fx:id="Open_btn" layoutX="318.0" layoutY="265.0" mnemonicParsing="false" onAction="#open" prefHeight="49.0" prefWidth="85.0" style="-fx-background-color: rgba(255, 255, 255, 0.4); -fx-background-radius: 10px; -fx-border-color: white; -fx-border-radius: 10px; -fx-border-width: 2px;" text="开户" textFill="#0e2853">
          <font>
-            <Font size="18.0" />
+            <Font name="System Bold Italic" size="18.0" />
          </font>
       </Button>
-      <Label layoutX="69.0" layoutY="129.0" text="账户号码：">
+      <Label layoutX="72.0" layoutY="150.0" text="账户号码：" textFill="#0e2853">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <Label layoutX="69.0" layoutY="176.0" text="账户密码：">
+      <Label layoutX="72.0" layoutY="197.0" text="账户密码：" textFill="#0e2853">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Label>
-      <TextField fx:id="AccountNumber_text" layoutX="154.0" layoutY="123.0" prefHeight="35.0" prefWidth="292.0" />
-      <TextField fx:id="Password_text" layoutX="154.0" layoutY="170.0" prefHeight="35.0" prefWidth="292.0" />
-      <Label alignment="CENTER" layoutX="85.0" layoutY="56.0" prefHeight="24.0" prefWidth="362.0" text="欢迎来到银行登录界面">
+      <TextField fx:id="AccountNumber_text" layoutX="157.0" layoutY="144.0" prefHeight="35.0" prefWidth="292.0" />
+      <TextField fx:id="Password_text" layoutX="157.0" layoutY="191.0" prefHeight="35.0" prefWidth="292.0" />
+      <Label alignment="CENTER" layoutX="65.0" layoutY="65.0" prefHeight="47.0" prefWidth="389.0" style="-fx-background-color: #ffffff; -fx-background-radius: 10px; -fx-border-color: #6ea6ff; -fx-border-radius: 10px; -fx-border-width: 4px;" text="欢迎来到银行登录界面" textFill="#438bff">
          <font>
-            <Font size="24.0" />
+            <Font name="System Bold" size="36.0" />
          </font>
       </Label>
+      <Button fx:id="administrator_btn" layoutX="403.0" layoutY="14.0" mnemonicParsing="false" onAction="#administrator" style="-fx-background-color: linear-gradient(to bottom, #ffffff,#dbf8ff);" text="银行管理员系统" textFill="#0f3e5e">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

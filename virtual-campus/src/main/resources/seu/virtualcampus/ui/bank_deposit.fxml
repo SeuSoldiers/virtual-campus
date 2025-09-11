@@ -6,10 +6,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_depositController">
+<AnchorPane prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: linear-gradient(to bottom, #a1c4fd, #c2e9fb);" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_depositController">
    <children>
-      <Label layoutX="81.0" layoutY="100.0" prefHeight="36.0" prefWidth="146.0" text="请输入存入金额：">
+      <Label layoutX="81.0" layoutY="100.0" prefHeight="36.0" prefWidth="146.0" text="请输入存入金额：" textFill="#071a98">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>

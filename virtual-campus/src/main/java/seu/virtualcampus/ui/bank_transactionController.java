@@ -32,7 +32,7 @@ public class bank_transactionController {
     @FXML
     private TableColumn<Transaction, String> typeColumn;
     @FXML
-    private TableColumn<Transaction, LocalDateTime> timeColumn;
+    private TableColumn<Transaction, String> timeColumn;
     @FXML
     private TableColumn<Transaction, String> remarkColumn;
     @FXML
@@ -55,7 +55,11 @@ public class bank_transactionController {
 
     // HTTP客户端
     private OkHttpClient client = new OkHttpClient();
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+
 
     // 当前账户号码
     private String currentAccountNumber = Bank_MainApp.getCurrentAccountNumber();
@@ -137,8 +141,19 @@ public class bank_transactionController {
                     new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getAmount()));
             typeColumn.setCellValueFactory(cellData ->
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getTransactionType()));
-            timeColumn.setCellValueFactory(cellData ->
-                    new javafx.beans.property.SimpleObjectProperty<>(cellData.getValue().getTransactionTime()));
+
+            timeColumn.setCellValueFactory(cellData -> {
+                LocalDateTime dateTime = cellData.getValue().getTransactionTime();
+                if (dateTime != null) {
+                    // 定义期望的日期时间格式
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    // 格式化日期时间
+                    String formattedDateTime = dateTime.format(formatter);
+                    return new javafx.beans.property.SimpleStringProperty(formattedDateTime);
+                }
+                return new javafx.beans.property.SimpleStringProperty("");
+            });
+
             remarkColumn.setCellValueFactory(cellData ->
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getRemark())); // 修正为getDescription()
             statusColumn.setCellValueFactory(cellData ->
@@ -152,8 +167,8 @@ public class bank_transactionController {
         String url = String.format("%s/%s/transactions?start=%s&end=%s",
                 BASE_URL,
                 currentAccountNumber,
-                start.toString().replace(" ", "T"),  // 转换为空ISO格式
-                end.toString().replace(" ", "T"));
+                start.toString().replace(" ", " "),  // 转换为空ISO格式
+                end.toString().replace(" ", " "));
 
         // 创建请求
         Request request = new Request.Builder()
@@ -167,7 +182,7 @@ public class bank_transactionController {
             @Override
             public void onFailure(Call call, IOException e) {
                 javafx.application.Platform.runLater(() -> {
-                    showAlert("错误", "网络连接失败: " + e.getMessage());
+                    showAlert("错误", "网络连接失败: " + "请检查当前用户状态/网络状况！");
                 });
             }
 
@@ -187,12 +202,12 @@ public class bank_transactionController {
                         });
                     } catch (Exception e) {
                         javafx.application.Platform.runLater(() -> {
-                            showAlert("错误", "解析响应失败: " + e.getMessage());
+                            showAlert("错误", "解析响应失败: " +"请检查当前用户状态/网络状况！");
                         });
                     }
                 } else {
                     javafx.application.Platform.runLater(() -> {
-                        showAlert("错误", "获取交易记录失败，状态码: " + response.code());
+                        showAlert("错误", "获取交易记录失败，状态码: " +"请检查当前用户状态/网络状况！");
                     });
                 }
             }
@@ -203,7 +218,8 @@ public class bank_transactionController {
     private void updateTransactionTable(List<Transaction> transactions) {
         // 清空现有数据
         transactionTableView.getItems().clear();
-
+        starttext.clear();
+        endtext.clear();
         // 添加新数据
         ObservableList<Transaction> transactionList = FXCollections.observableArrayList(transactions);
         transactionTableView.setItems(transactionList);

@@ -8,17 +8,17 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="400.0" prefWidth="637.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_ftocController">
+<AnchorPane prefHeight="503.0" prefWidth="799.0" style="-fx-background-color: linear-gradient(to bottom, #a1c4fd, #ffffff);" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.bank_ftocController">
    <children>
-      <TableView fx:id="ftocTableView" layoutX="21.0" layoutY="100.0" prefHeight="200.0" prefWidth="595.0">
+      <TableView fx:id="ftocTableView" layoutX="25.0" layoutY="100.0" prefHeight="295.0" prefWidth="750.0" style="-fx-border-width: 6px; -fx-border-color: #5a93f4;">
         <columns>
-          <TableColumn fx:id="idColumn" editable="false" prefWidth="117.33334922790527" text="交易记录ID" />
-            <TableColumn fx:id="amountColumn" editable="false" prefWidth="65.33331298828125" text="金额" />
-            <TableColumn fx:id="yearColumn" editable="false" prefWidth="68.00001525878906" text="定期年限" />
-            <TableColumn fx:id="timeColumn" editable="false" prefWidth="100.6666259765625" text="交易时间" />
-            <TableColumn fx:id="rateColumn" editable="false" prefWidth="75.33331298828125" text="利率" />
-            <TableColumn fx:id="interestColumn" editable="false" prefWidth="94.00003051757812" text="利息" />
-            <TableColumn fx:id="statusColumn" editable="false" prefWidth="74.66668701171875" text="状态" />
+          <TableColumn fx:id="idColumn" editable="false" prefWidth="127.33334350585938" text="交易记录ID" />
+            <TableColumn fx:id="amountColumn" editable="false" prefWidth="78.6666259765625" text="金额" />
+            <TableColumn fx:id="yearColumn" editable="false" prefWidth="144.666748046875" text="定期年限" />
+            <TableColumn fx:id="timeColumn" editable="false" prefWidth="142.6666259765625" text="交易时间" />
+            <TableColumn fx:id="rateColumn" editable="false" prefWidth="76.0" text="利率" />
+            <TableColumn fx:id="interestColumn" editable="false" prefWidth="79.33331298828125" text="利息" />
+            <TableColumn fx:id="statusColumn" editable="false" prefWidth="93.3333740234375" text="状态" />
         </columns>
       </TableView>
       <Button fx:id="backbtn" layoutX="19.0" layoutY="21.0" mnemonicParsing="false" onAction="#ftoc_back" prefHeight="29.0" prefWidth="57.0" text="返回">
@@ -31,21 +31,21 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <Label layoutX="47.0" layoutY="343.0" prefHeight="19.0" prefWidth="152.0" text="请输入你的密码：">
+      <Label layoutX="151.0" layoutY="431.0" prefHeight="19.0" prefWidth="152.0" text="请输入你的密码：">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <Label layoutX="211.0" layoutY="58.0" text="请选择你的定期存款记录：">
+      <Label layoutX="256.0" layoutY="50.0" style="-fx-background-color: #afb6fc; -fx-background-radius: 10px;" text="请选择你的定期存款记录：" textFill="#1616a3">
          <font>
-            <Font name="System Bold" size="18.0" />
+            <Font name="System Bold" size="24.0" />
          </font>
       </Label>
-      <Button fx:id="yesbtn" layoutX="474.0" layoutY="327.0" mnemonicParsing="false" onAction="#ftoc_yes" prefHeight="51.0" prefWidth="137.0" text="确认定期转活期" textFill="#431877">
+      <Button fx:id="yesbtn" layoutX="508.0" layoutY="419.0" mnemonicParsing="false" onAction="#ftoc_yes" prefHeight="43.0" prefWidth="137.0" style="-fx-background-color: linear-gradient(to bottom, #a1c4fd, #c2e9fb);" text="确认定期转活期" textFill="#2745db">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <PasswordField fx:id="passwordtext" layoutX="157.0" layoutY="338.0" prefHeight="29.0" prefWidth="161.0" />
+      <PasswordField fx:id="passwordtext" layoutX="261.0" layoutY="426.0" prefHeight="29.0" prefWidth="198.0" />
    </children>
 </AnchorPane>

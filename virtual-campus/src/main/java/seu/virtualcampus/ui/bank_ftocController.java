@@ -8,15 +8,15 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Button;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.Transaction;
+import javafx.scene.control.Alert.AlertType;
+import java.time.format.DateTimeFormatter;
+
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -57,7 +57,7 @@ public class bank_ftocController implements Initializable{
     private TableColumn<Transaction, String> statusColumn;
 
     @FXML
-    private TableColumn<Transaction, LocalDateTime> timeColumn;
+    private TableColumn<Transaction, String> timeColumn;
 
     @FXML
     private TableColumn<Transaction, String> yearColumn;
@@ -72,8 +72,10 @@ public class bank_ftocController implements Initializable{
     private OkHttpClient client = new OkHttpClient();
 
     // 添加ObjectMapper用于JSON解析
-    private ObjectMapper mapper = new ObjectMapper();
-
+    private ObjectMapper mapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     @FXML
     void ftoc_back(ActionEvent event) {
@@ -112,6 +114,11 @@ public class bank_ftocController implements Initializable{
 
         if (selectedTransaction == null) {
             System.out.println("请先选择一条定期存款记录");
+            // 警告提示
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("提示");
+            warningAlert.setContentText("请先选择一条定期存款记录！");
+            warningAlert.showAndWait();
             return;
         }
 
@@ -119,6 +126,12 @@ public class bank_ftocController implements Initializable{
         boolean isMatured = isDepositMatured(selectedTransaction.getTransactionTime(), selectedTransaction.getTransactionType());
         if (!isMatured) {
             System.out.println("该定期存款尚未到期，无法转为活期");
+            // 警告提示
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("提示");
+            warningAlert.setContentText("该定期存款尚未到期，无法转为活期！");
+            warningAlert.showAndWait();
+
             return;
         }
 
@@ -126,6 +139,12 @@ public class bank_ftocController implements Initializable{
         String password = passwordtext.getText();
         if (password == null || password.isEmpty()) {
             System.out.println("请输入密码");
+            // 警告提示
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("提示");
+            warningAlert.setContentText("请输入密码！");
+            warningAlert.showAndWait();
+
             return;
         }
 
@@ -159,6 +178,11 @@ public class bank_ftocController implements Initializable{
                 public void onFailure(Call call, IOException e) {
                     Platform.runLater(() -> {
                         System.out.println("定期转活期操作失败: " + e.getMessage());
+                        // 错误提示
+                        Alert errorAlert = new Alert(AlertType.ERROR);
+                        errorAlert.setTitle("错误");
+                        errorAlert.setContentText("定期转活期操作失败，请重试！");
+                        errorAlert.showAndWait();
                     });
                 }
 
@@ -167,6 +191,11 @@ public class bank_ftocController implements Initializable{
                     if (response.isSuccessful()) {
                         Platform.runLater(() -> {
                             System.out.println("定期转活期操作成功");
+                            // 信息提示
+                            Alert infoAlert = new Alert(AlertType.INFORMATION);
+                            infoAlert.setTitle("信息");
+                            infoAlert.setContentText("定期转活期操作成功！");
+                            infoAlert.showAndWait();
                             // 刷新表格数据
                             loadFixedDepositRecords();
                             // 清空密码输入框
@@ -175,6 +204,10 @@ public class bank_ftocController implements Initializable{
                     } else {
                         Platform.runLater(() -> {
                             System.out.println("定期转活期操作失败，状态码: " + response.code());
+                            Alert errorAlert = new Alert(AlertType.ERROR);
+                            errorAlert.setTitle("错误");
+                            errorAlert.setContentText("定期转活期操作失败，请重试！");
+                            errorAlert.showAndWait();
                             try {
                                 if (response.body() != null) {
                                     System.out.println("错误信息: " + response.body().string());
@@ -188,6 +221,10 @@ public class bank_ftocController implements Initializable{
             });
         } catch (Exception e) {
             System.out.println("发送请求时出错: " + e.getMessage());
+            Alert errorAlert = new Alert(AlertType.ERROR);
+            errorAlert.setTitle("错误");
+            errorAlert.setContentText("操作失败，请重试！");
+            errorAlert.showAndWait();
             e.printStackTrace();
         }
     }
@@ -214,8 +251,18 @@ public class bank_ftocController implements Initializable{
         // 设置金额列
         amountColumn.setCellValueFactory(new PropertyValueFactory<>("amount"));
 
-        // 设置交易时间列
-        timeColumn.setCellValueFactory(new PropertyValueFactory<>("transactionTime"));
+        // 设置交易时间列 (自定义格式)
+        timeColumn.setCellValueFactory(data -> {
+            LocalDateTime dateTime = data.getValue().getTransactionTime();
+            if (dateTime != null) {
+                // 定义期望的日期时间格式
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                // 格式化日期时间
+                String formattedDateTime = dateTime.format(formatter);
+                return new javafx.beans.property.SimpleStringProperty(formattedDateTime);
+            }
+            return new javafx.beans.property.SimpleStringProperty("");
+        });
 
         // 设置年限列（从transactionType中提取）
         yearColumn.setCellValueFactory(data -> {
@@ -255,6 +302,10 @@ public class bank_ftocController implements Initializable{
     private void loadFixedDepositRecords() {
         if (accountNumber == null || accountNumber.isEmpty()) {
             System.out.println("账户号码为空");
+            Alert warningAlert = new Alert(AlertType.WARNING);
+            warningAlert.setTitle("警告");
+            warningAlert.setContentText("账户号码为空！");
+            warningAlert.showAndWait();
             return;
         }
 
@@ -270,6 +321,10 @@ public class bank_ftocController implements Initializable{
             public void onFailure(Call call, IOException e) {
                 Platform.runLater(() -> {
                     System.out.println("获取定期存款记录失败: " + e.getMessage());
+                    Alert errorAlert = new Alert(AlertType.ERROR);
+                    errorAlert.setTitle("错误");
+                    errorAlert.setContentText("获取定期存款记录失败，请重试！");
+                    errorAlert.showAndWait();
                 });
             }
 
@@ -290,11 +345,19 @@ public class bank_ftocController implements Initializable{
                     } catch (Exception e) {
                         Platform.runLater(() -> {
                             System.out.println("解析定期存款记录失败: " + e.getMessage());
+                            Alert errorAlert = new Alert(AlertType.ERROR);
+                            errorAlert.setTitle("错误");
+                            errorAlert.setContentText("操作失败，请重试！");
+                            errorAlert.showAndWait();
                         });
                     }
                 } else {
                     Platform.runLater(() -> {
                         System.out.println("获取定期存款记录失败，状态码: " + response.code());
+                        Alert errorAlert = new Alert(AlertType.ERROR);
+                        errorAlert.setTitle("错误");
+                        errorAlert.setContentText("操作失败，请重试！");
+                        errorAlert.showAndWait();
                     });
                 }
             }
