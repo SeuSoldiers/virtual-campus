@@ -115,7 +115,7 @@ public class bank_transferController {
                 amounttext.clear();
                 inaccountnumtext.clear();
                 passwordtext.clear();
-            } else if (response.statusCode() == 400) {
+            } else if (response.statusCode() != 200) {
                 // 处理具体的业务错误
                 String responseBody = response.body();
                 String userMessage = parseTransferErrorMessage(responseBody);

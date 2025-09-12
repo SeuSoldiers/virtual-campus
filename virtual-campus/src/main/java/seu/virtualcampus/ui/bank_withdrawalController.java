@@ -96,7 +96,7 @@ public class bank_withdrawalController {
                 // 清除输入框中的内容
                 amounttext.clear();
                 passwordtext.clear();
-            } else if (response.statusCode() == 400) {
+            } else if (response.statusCode() != 200) {
                 // 处理具体的业务错误
                 String responseBody = response.body();
                 String userMessage = parseErrorMessage(responseBody);

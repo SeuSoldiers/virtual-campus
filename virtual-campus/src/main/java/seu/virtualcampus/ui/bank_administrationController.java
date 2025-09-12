@@ -312,6 +312,9 @@ public class bank_administrationController {
             });
             status_column2.setCellValueFactory(cellData ->
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatus()));
+            remark_column2.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(cellData.getValue().getRemark()));
+
         }
 
         // TableView3 - 管理员权限受理
@@ -358,6 +361,9 @@ public class bank_administrationController {
             });
             status_column4.setCellValueFactory(cellData ->
                     new javafx.beans.property.SimpleStringProperty(cellData.getValue().getStatus()));
+            remark_column4.setCellValueFactory(cellData ->
+                    new javafx.beans.property.SimpleStringProperty(cellData.getValue().getRemark()));
+
         }
     }
 

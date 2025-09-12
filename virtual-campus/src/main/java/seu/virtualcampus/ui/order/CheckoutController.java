@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -177,48 +178,113 @@ public class CheckoutController implements Initializable {
 
     @FXML
     private void handlePayOrder() {
-        if (currentOrderId == null || currentOrderId.isEmpty()) { showMsg("请先创建订单", true); return; }
-        String account = accountNumberField.getText().trim();
-        String pwd = accountPasswordField.getText().trim();
-        String paymentMethod = paymentMethodBox != null ? paymentMethodBox.getValue() : "ONLINE";
-        
-        System.out.println("=== 前端开始支付请求 ===");
-        System.out.println("订单ID: " + currentOrderId);
-        System.out.println("用户ID: " + currentUserId);
-        System.out.println("账户: " + account);
-        System.out.println("支付方式: " + paymentMethod);
-        
-        if (account.isEmpty() || pwd.isEmpty()) { showMsg("请输入账号和密码", true); return; }
-        
-        String url = baseUrl + "/api/orders/" + currentOrderId + "/pay?userId=" + currentUserId
-                + "&accountNumber=" + account + "&password=" + pwd
-                + "&paymentMethod=" + paymentMethod;
-        System.out.println("请求URL: " + url);
-        
-        Request req = new Request.Builder()
-                .url(url)
-                .post(RequestBody.create("", MediaType.get("application/json")))
-                .build();
-        httpClient.newCall(req).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) { 
-                System.out.println("支付请求失败: " + e.getMessage());
-                Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true)); 
+            if (currentOrderId == null || currentOrderId.isEmpty()) { showMsg("请先创建订单", true); return; }
+            String paymentMethod = paymentMethodBox.getValue(); // 使用 getValue() 而不是 getSelectedItem()
+            String fromAccount = accountNumberField.getText().trim();
+            String password = accountPasswordField.getText().trim(); // 直接获取文本而不是 getPassword()
+            String toAccount = "AC1757654040349D143E9"; // 默认商家账户（要根据数据库里规定的那个商家的银行账户账号来更改）
+
+            // 验证输入
+            if (fromAccount.isEmpty() || password.isEmpty()) {
+                showMsg("请输入账户号码和密码", true);
+                return;
             }
-            @Override public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body() != null ? response.body().string() : "";
-                System.out.println("支付响应: " + response.code() + " - " + body);
-                Platform.runLater(() -> {
-                    if (response.isSuccessful()) {
-                        showMsg("支付成功！", false);
-                        accountNumberField.clear(); accountPasswordField.clear();
-                        handlePreview();
-                    } else { 
-                        showMsg("支付失败: " + body, true); 
+
+            // 从标签中提取金额数字部分
+            BigDecimal amount = extractAmountFromLabel(finalAmountLabel.getText());
+
+            // 验证金额
+            if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+                showMsg("金额无效", true);
+                return;
+            }
+
+            try {
+                // 构建请求URL
+                String url;
+                if ("立即付款".equals(paymentMethod)) {
+                    // 调用立即支付接口
+                    url = baseUrl + "/api/accounts/shopping?fromAccount=" + fromAccount
+                            + "&password=" + password
+                            + "&toAccount=" + toAccount
+                            + "&amount=" + amount;
+                } else if ("先用后付".equals(paymentMethod)) {
+                    // 调用先用后付接口
+                    url = baseUrl + "/api/accounts/paylater?fromAccount=" + fromAccount
+                            + "&password=" + password
+                            + "&toAccount=" + toAccount
+                            + "&amount=" + amount;
+                } else {
+                    showMsg("无效的支付方式", true);
+                    return;
+                }
+
+                // 创建请求
+                Request request = new Request.Builder()
+                        .url(url)
+                        .post(RequestBody.create("", MediaType.get("application/json")))
+                        .build();
+
+                // 发送请求
+                httpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Platform.runLater(() -> showMsg("支付过程中发生网络错误: " + e.getMessage(), true));
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        String body = response.body() != null ? response.body().string() : "";
+                        Platform.runLater(() -> {
+                            try {
+                                if (response.isSuccessful()) {
+                                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                    alert.setTitle("消息提示：");
+                                    alert.setContentText("支付成功！");
+                                    alert.showAndWait();
+                                    // 清空输入字段
+                                    accountNumberField.clear();
+                                    accountPasswordField.clear();
+
+                                    // 重新加载预览以更新购物车状态
+                                    handlePreview();
+                                } else {
+                                    // 尝试解析错误信息
+                                    String errorMessage = "支付失败";
+                                    try {
+                                        JsonNode root = objectMapper.readTree(body);
+                                        errorMessage = root.path("message").asText(errorMessage);
+                                    } catch (Exception ex) {
+                                        // 如果解析失败，使用响应体作为错误信息
+                                        if (!body.isEmpty()) {
+                                            errorMessage = body;
+                                        }
+                                    }
+                                    showMsg(errorMessage, true);
+                                }
+                            } catch (Exception ex) {
+                                showMsg("处理支付响应时发生错误: " + ex.getMessage(), true);
+                            }
+                        });
                     }
                 });
+            } catch (Exception ex) {
+                showMsg("支付过程中发生错误: " + ex.getMessage(), true);
             }
-        });
-    }
+        }
+        // 从标签文本中提取金额数字部分的辅助方法
+        private BigDecimal extractAmountFromLabel(String label) {
+            try {
+                // 假设标签格式为 "¥100.00" 或类似格式
+                String amountStr = label.replaceAll("[^0-9.]", ""); // 只保留数字和小数点
+                if (amountStr.isEmpty()) {
+                    return BigDecimal.ZERO;
+                }
+                return new BigDecimal(amountStr);
+            } catch (Exception e) {
+                return BigDecimal.ZERO;
+            }
+        }
 
     @FXML
     private void handleViewOrder() {

@@ -4,9 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: add changePassword">
+    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: add “立即支付” “先用后付”">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/TransactionMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/TransactionMapper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_transferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_transferController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_withdrawalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_withdrawalController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/virtualcampus.sqlite" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtualcampus.sqlite" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -80,6 +86,12 @@
       <workItem from="1757388988362" duration="805000" />
       <workItem from="1757590341173" duration="2423000" />
       <workItem from="1757649299616" duration="5402000" />
+      <workItem from="1757667664785" duration="550000" />
+      <workItem from="1757676488435" duration="267000" />
+      <workItem from="1757680132315" duration="84000" />
+      <workItem from="1757681363157" duration="1581000" />
+      <workItem from="1757684737659" duration="7320000" />
+      <workItem from="1757692817657" duration="4447000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />
@@ -113,7 +125,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757595677973</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="feat: add “立即支付” “先用后付”">
+      <option name="closed" value="true" />
+      <created>1757667788516</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1757667788516</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -124,7 +144,19 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="merge-shopandbank" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
           </value>
         </entry>
       </map>
@@ -132,6 +164,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="..." />
-    <option name="LAST_COMMIT_MESSAGE" value="..." />
+    <MESSAGE value="feat: add “立即支付” “先用后付”" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: add “立即支付” “先用后付”" />
   </component>
 </project>

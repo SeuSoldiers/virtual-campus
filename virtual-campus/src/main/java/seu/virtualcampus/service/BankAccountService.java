@@ -426,9 +426,9 @@ public class BankAccountService {
         // 更新原有定期存款记录的状态，标记为已取走
         Transaction updatedFixedTransaction = new Transaction();
         updatedFixedTransaction.setTransactionId(transactionId);
-        updatedFixedTransaction.setTransactionType(transactionType + "已取走");
+        updatedFixedTransaction.setTransactionType(transactionType + "(已取走)");
         updatedFixedTransaction.setRemark(fixedTransaction.getRemark() + " (已转为活期)");
-        transactionMapper.updateTransactionTypeAndRemark(updatedFixedTransaction);
+        transactionMapper.updateTransactionTypeAndRemark_fc(updatedFixedTransaction);
 
 
         // 创建新的交易记录（定期转活期）
@@ -648,7 +648,7 @@ public class BankAccountService {
                     "ARREARAGE".equals(transaction.getStatus()) &&
                     transaction.getTransactionTime().isBefore(sevenDaysAgo)) {
 
-                // 获取转出账户信息
+                // 获取账户信息
                 BankAccount fromAccount = bankAccountMapper.selectByAccountNumber(transaction.getFromAccountNumber());
                 // 检查余额是否充足，比较当前交易记录里面的余额amount，和账户余额fromAccount的 balance
                 if (fromAccount != null) {
@@ -656,13 +656,6 @@ public class BankAccountService {
                         // 如果余额充足，自动扣款
                         BigDecimal newBalance = fromAccount.getBalance().subtract(transaction.getAmount());
                         bankAccountMapper.updateBalance(fromAccount.getAccountNumber(), newBalance);
-
-                        // 更新转入账户余额
-                        BankAccount toAccount = bankAccountMapper.selectByAccountNumber(transaction.getToAccountNumber());
-                        if (toAccount != null) {
-                            BigDecimal toNewBalance = toAccount.getBalance().add(transaction.getAmount());
-                            bankAccountMapper.updateBalance(toAccount.getAccountNumber(), toNewBalance);
-                        }
 
                         // 创建扣款交易记录
                         Transaction deductionTransaction = new Transaction(
@@ -678,11 +671,7 @@ public class BankAccountService {
                         transactionMapper.insertTransaction(deductionTransaction);
 
                         // 更新原交易状态为COMPLETED
-                        Transaction updatedTransaction = new Transaction();
-                        updatedTransaction.setTransactionId(transaction.getTransactionId());
-                        updatedTransaction.setStatus("COMPLETED");
-                        updatedTransaction.setRemark(transaction.getRemark() + " (逾期自动扣款完成)");
-                        transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
+                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(),"COMPLETED",transaction.getRemark() + " (逾期自动扣款完成)");
                     } else {
                         // 如果余额不足，将账户拉入黑名单
                         bankAccountMapper.updateStatus(fromAccount.getAccountNumber(), "LIMIT");
@@ -696,16 +685,12 @@ public class BankAccountService {
                                 "LIMIT",
                                 LocalDateTime.now(),
                                 "因逾期未还款且余额不足账户被拉黑",
-                                "COMPLETED"
+                                "BREAK_CONTRACT"
                         );
                         transactionMapper.insertTransaction(blacklistTransaction);
 
                         // 更新交易状态为BREAK_CONTRACT
-                        Transaction updatedTransaction = new Transaction();
-                        updatedTransaction.setTransactionId(transaction.getTransactionId());
-                        updatedTransaction.setStatus("BREAK_CONTRACT");
-                        updatedTransaction.setRemark(transaction.getRemark() + " (先用后付违约，余额不足被拉黑)");
-                        transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
+                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(),"BREAK_CONTRACT",transaction.getRemark() + "(先用后付违约，余额不足被拉黑)");
                     }
 
                     updatedCount++;
