@@ -19,7 +19,9 @@ public class StudentController {
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
     @FXML
-    private TextField nameField, majorField, addressField, phoneField;
+    private TextField nameField, majorField, addressField, phoneField, ethnicityField, politicalStatusField;
+    @FXML
+    private ComboBox<String> genderField, placeOfOriginField;
     @FXML
     private Label msgLabel;
     @FXML
@@ -38,6 +40,21 @@ public class StudentController {
         reviewTimeCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().reviewTime()));
         statusCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().status()));
         remarkCol.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(data.getValue().remark()));
+
+        // 设置性别下拉菜单选项
+        genderField.getItems().addAll("男", "女");
+
+        // 设置生源地下拉菜单选项
+        placeOfOriginField.getItems().addAll("北京", "天津", "上海", "重庆",
+                "河北", "山西", "辽宁", "吉林", "黑龙江",
+                "江苏", "浙江", "安徽", "福建", "江西", "山东",
+                "河南", "湖北", "湖南", "广东", "海南",
+                "四川", "贵州", "云南", "陕西", "甘肃", "青海",
+                "台湾",
+                "内蒙古", "广西", "西藏", "宁夏", "新疆",
+                "香港", "澳门"
+        );
+
         loadStudentInfo();
         loadAuditRecords();
     }
@@ -75,6 +92,10 @@ public class StudentController {
                         majorField.setText(info.getMajor());
                         addressField.setText(info.getAddress());
                         phoneField.setText(info.getPhone());
+                        ethnicityField.setText(info.getEthnicity()); // 新增字段
+                        politicalStatusField.setText(info.getPoliticalStatus()); // 新增字段
+                        genderField.setValue(info.getGender()); // 更新字段
+                        placeOfOriginField.setValue(info.getPlaceOfOrigin()); // 更新字段
                         setEditable(false);
                     });
                 }
@@ -126,6 +147,10 @@ public class StudentController {
         majorField.setEditable(editable);
         addressField.setEditable(editable);
         phoneField.setEditable(editable);
+        ethnicityField.setEditable(editable);
+        politicalStatusField.setEditable(editable);
+        genderField.setDisable(!editable);
+        placeOfOriginField.setDisable(!editable);
         editBtn.setVisible(!editable);
         saveBtn.setVisible(editable);
         cancelBtn.setVisible(editable);
@@ -144,6 +169,10 @@ public class StudentController {
             info.setMajor(majorField.getText());
             info.setAddress(addressField.getText());
             info.setPhone(phoneField.getText());
+            info.setEthnicity(ethnicityField.getText());
+            info.setPoliticalStatus(politicalStatusField.getText());
+            info.setGender(genderField.getValue()); // 更新字段
+            info.setPlaceOfOrigin(placeOfOriginField.getValue()); // 更新字段
             String json = mapper.writeValueAsString(info);
             RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
             Request request = new Request.Builder()
@@ -179,6 +208,10 @@ public class StudentController {
             majorField.setText(originalInfo.getMajor());
             addressField.setText(originalInfo.getAddress());
             phoneField.setText(originalInfo.getPhone());
+            ethnicityField.setText(originalInfo.getEthnicity());
+            politicalStatusField.setText(originalInfo.getPoliticalStatus());
+            genderField.setValue(originalInfo.getGender()); // 更新字段
+            placeOfOriginField.setValue(originalInfo.getPlaceOfOrigin()); // 更新字段
         }
         setEditable(false);
     }

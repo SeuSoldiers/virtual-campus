@@ -12,11 +12,15 @@ CREATE TABLE IF NOT EXISTS users
 CREATE TABLE IF NOT EXISTS student_info
 (
 
-    student_id INTEGER PRIMARY KEY,
-    name       TEXT,
-    major      TEXT,
-    address    TEXT,
-    phone      TEXT
+    student_id       INTEGER PRIMARY KEY,
+    name             TEXT,
+    major            TEXT,
+    address          TEXT,
+    phone            TEXT,
+    ethnicity        TEXT, -- 新增字段：民族
+    political_status TEXT, -- 新增字段：政治面貌
+    gender           TEXT, -- 新增字段：性别
+    place_of_origin  TEXT  -- 新增字段：生源地
 );
 
 

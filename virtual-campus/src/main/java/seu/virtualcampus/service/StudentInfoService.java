@@ -41,6 +41,14 @@ public class StudentInfoService {
                 createAuditForField(studentId, "address", null, updated.getAddress());
             if (notEmpty(updated.getPhone()))
                 createAuditForField(studentId, "phone", null, updated.getPhone());
+            if (notEmpty(updated.getEthnicity()))
+                createAuditForField(studentId, "ethnicity", null, updated.getEthnicity());
+            if (notEmpty(updated.getPoliticalStatus()))
+                createAuditForField(studentId, "politicalStatus", null, updated.getPoliticalStatus());
+            if (notEmpty(updated.getGender()))
+                createAuditForField(studentId, "gender", null, updated.getGender());
+            if (notEmpty(updated.getPlaceOfOrigin()))
+                createAuditForField(studentId, "placeOfOrigin", null, updated.getPlaceOfOrigin());
             return;
         }
 
@@ -52,6 +60,14 @@ public class StudentInfoService {
             createAuditForField(studentId, "address", original.getAddress(), updated.getAddress());
         if (notEquals(original.getPhone(), updated.getPhone()))
             createAuditForField(studentId, "phone", original.getPhone(), updated.getPhone());
+        if (notEquals(original.getEthnicity(), updated.getEthnicity()))
+            createAuditForField(studentId, "ethnicity", original.getEthnicity(), updated.getEthnicity());
+        if (notEquals(original.getPoliticalStatus(), updated.getPoliticalStatus()))
+            createAuditForField(studentId, "politicalStatus", original.getPoliticalStatus(), updated.getPoliticalStatus());
+        if (notEquals(original.getGender(), updated.getGender()))
+            createAuditForField(studentId, "gender", original.getGender(), updated.getGender());
+        if (notEquals(original.getPlaceOfOrigin(), updated.getPlaceOfOrigin()))
+            createAuditForField(studentId, "placeOfOrigin", original.getPlaceOfOrigin(), updated.getPlaceOfOrigin());
     }
 
 
