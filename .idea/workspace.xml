@@ -5,13 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="...">
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/virtual-campus.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/virtual-campus.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/BankAccountController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/controller/BankAccountController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_changestatus.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_changestatus.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_manage.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_manage.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtualcampus.sqlite" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,24 +35,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "Spring Boot.VirtualCampusApplication.executor": "Run",
-    "git-widget-placeholder": "merge-shopandbank",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/Users/yichi-zhang/virtual-campus",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
+    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
+    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
+    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;Spring Boot.VirtualCampusApplication.executor&quot;: &quot;Run&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;merge-shopandbank&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/yichi-zhang/virtual-campus&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
     <configuration name="VirtualCampusApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
@@ -79,6 +84,7 @@
       <updated>1757388987181</updated>
       <workItem from="1757388988362" duration="805000" />
       <workItem from="1757590341173" duration="2423000" />
+      <workItem from="1757649299616" duration="5402000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />
@@ -96,7 +102,23 @@
       <option name="project" value="LOCAL" />
       <updated>1757585163676</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="...">
+      <option name="closed" value="true" />
+      <created>1757595500092</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1757595500092</updated>
+    </task>
+    <task id="LOCAL-00004" summary="...">
+      <option name="closed" value="true" />
+      <created>1757595677973</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1757595677973</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

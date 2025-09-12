@@ -15,8 +15,9 @@ public class MainApp extends Application {
     public static String token; // 登录后保存 token
     public static String role; // 'student' 或 'registrar'
     public static String username;
-    /*private static Stage primaryStage;
-
+    //**************************************
+    private static Stage primaryStage;
+    //*****************************************
     public static void switchToStudentScene() throws Exception {
         FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/student.fxml"));
         primaryStage.setScene(new Scene(loader.load()));
@@ -27,7 +28,7 @@ public class MainApp extends Application {
         FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/registrar.fxml"));
         primaryStage.setScene(new Scene(loader.load()));
         primaryStage.setTitle("教师审核");
-    }*/
+    }
 
     public static void main(String[] args) {
         // 设置日志编码为UTF-8，防止中文乱码
@@ -54,11 +55,11 @@ public class MainApp extends Application {
         stage.setTitle("虚拟校园登录");
         stage.setScene(scene);
         stage.show();
-       // launchBankModule();
+       launchBankModule();
     }
 
 
-   /** // 调用银行模块的方法
+   // 调用银行模块的方法
     public static void launchBankModule() throws Exception {
         // 隐藏当前主窗口
         if (primaryStage != null) {
@@ -69,7 +70,7 @@ public class MainApp extends Application {
         Bank_MainApp bankApp = new Bank_MainApp();
         Stage bankStage = new Stage();
         bankApp.start(bankStage);  // 手动调用 start 方法
-    }*/
+    }
 
 
 

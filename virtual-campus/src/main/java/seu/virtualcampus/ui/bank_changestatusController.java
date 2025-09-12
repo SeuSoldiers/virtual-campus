@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert.AlertType;
 
@@ -20,6 +21,12 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
 public class bank_changestatusController {
+
+    @FXML
+    private TextField oldpassword_text;
+
+    @FXML
+    private TextField newpassword_text;
 
     @FXML
     private Button backbtn;
@@ -36,6 +43,8 @@ public class bank_changestatusController {
     @FXML
     private Label statustext;
 
+    @FXML
+    private Button changepassword_btn;
     @FXML
     void changestatus_back(ActionEvent event) {
         try {
@@ -273,5 +282,88 @@ public class bank_changestatusController {
         alert.setContentText(content);
         alert.showAndWait();
     }
+    @FXML
+    public void changepassword(ActionEvent actionEvent) {
+        try {
+            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            if (accountNumber == null || accountNumber.isEmpty()) {
+                showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
+                return;
+            }
 
+            // 获取旧密码和新密码输入框的内容
+            String oldPassword = oldpassword_text.getText();
+            String newPassword = newpassword_text.getText();
+
+            // 验证输入
+            if (oldPassword == null || oldPassword.isEmpty()) {
+                showAlert(AlertType.WARNING, "输入错误", "请输入旧密码！");
+                return;
+            }
+
+            if (newPassword == null || newPassword.isEmpty()) {
+                showAlert(AlertType.WARNING, "输入错误", "请输入新密码！");
+                return;
+            }
+
+            if (newPassword.length() < 6) {
+                showAlert(AlertType.WARNING, "输入错误", "新密码长度不能少于6位！");
+                return;
+            }
+
+            if (oldPassword.equals(newPassword)) {
+                showAlert(AlertType.WARNING, "输入错误", "新密码不能与旧密码相同！");
+                return;
+            }
+
+            // 调用后端服务更新密码
+            boolean success = callUpdatePasswordAPI(accountNumber, oldPassword, newPassword);
+
+            if (success) {
+                showAlert(AlertType.INFORMATION, "操作成功", "密码已更新！");
+                // 清空输入框
+                oldpassword_text.clear();
+                newpassword_text.clear();
+            } else {
+                showAlert(AlertType.ERROR, "操作失败", "密码更新失败，请检查旧密码是否正确！");
+            }
+        } catch (Exception e) {
+            showAlert(AlertType.ERROR, "操作异常", "发生异常: " );
+            e.printStackTrace();
+        }
+    }
+    // 调用后端更新密码API
+    private boolean callUpdatePasswordAPI(String accountNumber, String oldPassword, String newPassword) {
+        try {
+            String baseUrl = "http://localhost:8080/api/accounts";
+            String url = String.format("%s/%s/password", baseUrl, accountNumber);
+
+            HttpClient client = HttpClient.newHttpClient();
+
+            // 构造表单数据
+            String formData = String.format("oldPassword=%s&newPassword=%s",
+                    URLEncoder.encode(oldPassword, StandardCharsets.UTF_8.toString()),
+                    URLEncoder.encode(newPassword, StandardCharsets.UTF_8.toString()));
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .PUT(HttpRequest.BodyPublishers.ofString(formData))
+                    .build();
+
+            HttpResponse<String> response = client.send(request,
+                    HttpResponse.BodyHandlers.ofString());
+
+            // 检查HTTP状态码和响应内容
+            if (response.statusCode() == 200) {
+                // 如果后端返回"true"字符串，表示密码更新成功
+                return "true".equals(response.body().trim());
+            }
+
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

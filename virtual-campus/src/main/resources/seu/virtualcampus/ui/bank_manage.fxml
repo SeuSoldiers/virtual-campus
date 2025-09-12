@@ -42,7 +42,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Button>
-      <Button fx:id="statusbtn" layoutX="345.0" layoutY="323.0" mnemonicParsing="false" onAction="#manage_status" prefHeight="38.0" prefWidth="120.0" text="修改用户状态" textFill="RED">
+      <Button fx:id="statusbtn" layoutX="345.0" layoutY="323.0" mnemonicParsing="false" onAction="#manage_status" prefHeight="38.0" prefWidth="155.0" text="修改用户状态/密码" textFill="RED">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>

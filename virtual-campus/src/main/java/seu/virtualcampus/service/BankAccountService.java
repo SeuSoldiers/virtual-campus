@@ -296,12 +296,34 @@ public class BankAccountService {
     // 更新账户密码：思考（能不能把验证账户密码结合到这个方法里面来，提高代码复用性）
     @Transactional
     public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
-        verifyAccountPassword(accountNumber, oldPassword);
+        // 验证旧密码，如果验证失败会抛出异常或返回false
+        boolean isPasswordValid = verifyAccountPassword(accountNumber, oldPassword);
+        // 如果旧密码验证失败，直接返回false
+        if (!isPasswordValid) {
+            return false;
+        }
 
-        // 更新密码
+        // 获取账户信息
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        // 更新密码
         account.setPassword(newPassword);
-        int result = bankAccountMapper.updateAccount(account); // 使用正确的方法名
+        int result = bankAccountMapper.updateAccount(account);
+
+        // 创建密码修改交易记录
+        if (result > 0) {
+            Transaction transaction = new Transaction(
+                    generateTransactionId(),
+                    accountNumber,
+                    accountNumber,
+                    BigDecimal.ZERO,  // 密码修改不涉及金额变动
+                    "PASSWORD_CHANGE",
+                    LocalDateTime.now(),
+                    "密码已修改",  // 不记录具体密码信息，出于安全考虑
+                    "COMPLETED"
+            );
+            transactionMapper.insertTransaction(transaction);
+        }
+
         return result > 0;
     }
 
@@ -626,14 +648,68 @@ public class BankAccountService {
                     "ARREARAGE".equals(transaction.getStatus()) &&
                     transaction.getTransactionTime().isBefore(sevenDaysAgo)) {
 
-                // 更新交易状态为BREAK_CONTRACT
-                Transaction updatedTransaction = new Transaction();
-                updatedTransaction.setTransactionId(transaction.getTransactionId());
-                updatedTransaction.setStatus("BREAK_CONTRACT");
-                updatedTransaction.setRemark(transaction.getRemark() + " (先用后付违约)");
+                // 获取转出账户信息
+                BankAccount fromAccount = bankAccountMapper.selectByAccountNumber(transaction.getFromAccountNumber());
+                // 检查余额是否充足，比较当前交易记录里面的余额amount，和账户余额fromAccount的 balance
+                if (fromAccount != null) {
+                    if (fromAccount.getBalance().compareTo(transaction.getAmount()) >= 0) {
+                        // 如果余额充足，自动扣款
+                        BigDecimal newBalance = fromAccount.getBalance().subtract(transaction.getAmount());
+                        bankAccountMapper.updateBalance(fromAccount.getAccountNumber(), newBalance);
 
-                transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
-                updatedCount++;
+                        // 更新转入账户余额
+                        BankAccount toAccount = bankAccountMapper.selectByAccountNumber(transaction.getToAccountNumber());
+                        if (toAccount != null) {
+                            BigDecimal toNewBalance = toAccount.getBalance().add(transaction.getAmount());
+                            bankAccountMapper.updateBalance(toAccount.getAccountNumber(), toNewBalance);
+                        }
+
+                        // 创建扣款交易记录
+                        Transaction deductionTransaction = new Transaction(
+                                generateTransactionId(),
+                                fromAccount.getAccountNumber(),
+                                transaction.getToAccountNumber(),
+                                transaction.getAmount(),
+                                "AUTOMATIC_DEDUCTION",
+                                LocalDateTime.now(),
+                                "逾期自动扣款: " + transaction.getAmount() + "元",
+                                "COMPLETED"
+                        );
+                        transactionMapper.insertTransaction(deductionTransaction);
+
+                        // 更新原交易状态为COMPLETED
+                        Transaction updatedTransaction = new Transaction();
+                        updatedTransaction.setTransactionId(transaction.getTransactionId());
+                        updatedTransaction.setStatus("COMPLETED");
+                        updatedTransaction.setRemark(transaction.getRemark() + " (逾期自动扣款完成)");
+                        transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
+                    } else {
+                        // 如果余额不足，将账户拉入黑名单
+                        bankAccountMapper.updateStatus(fromAccount.getAccountNumber(), "LIMIT");
+
+                        // 创建黑名单记录
+                        Transaction blacklistTransaction = new Transaction(
+                                generateTransactionId(),
+                                fromAccount.getAccountNumber(),
+                                null,
+                                BigDecimal.ZERO,
+                                "LIMIT",
+                                LocalDateTime.now(),
+                                "因逾期未还款且余额不足账户被拉黑",
+                                "COMPLETED"
+                        );
+                        transactionMapper.insertTransaction(blacklistTransaction);
+
+                        // 更新交易状态为BREAK_CONTRACT
+                        Transaction updatedTransaction = new Transaction();
+                        updatedTransaction.setTransactionId(transaction.getTransactionId());
+                        updatedTransaction.setStatus("BREAK_CONTRACT");
+                        updatedTransaction.setRemark(transaction.getRemark() + " (先用后付违约，余额不足被拉黑)");
+                        transactionMapper.updateTransactionTypeAndRemark(updatedTransaction);
+                    }
+
+                    updatedCount++;
+                }
             }
         }
 
@@ -647,7 +723,7 @@ public class BankAccountService {
         if (from == null) {
             throw new RuntimeException("消费者账户不存在");
         }
-        if (!"ACTIVE".equals(from.getStatus()) && !"LIMIT".equals(from.getStatus())) {
+        if (!"ACTIVE".equals(from.getStatus()) ) {
             throw new RuntimeException("消费者账户状态异常");
         }
 
@@ -665,15 +741,6 @@ public class BankAccountService {
             throw new RuntimeException("商家账户状态异常");
         }
 
-        // 检查余额是否充足
-        if (from.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("余额不足！");
-        }
-
-        // 更新转出账户余额
-        BigDecimal fromNewBalance = from.getBalance().subtract(amount);
-        bankAccountMapper.updateBalance(fromAccount, fromNewBalance);
-
         // 更新转入账户余额
         BigDecimal toNewBalance = to.getBalance().add(amount);
         bankAccountMapper.updateBalance(toAccount, toNewBalance);
@@ -684,10 +751,10 @@ public class BankAccountService {
                 fromAccount,
                 toAccount,
                 amount,
-                "PAYLATER", // 商店消费特色交易类型
+                "PAY_LATER", // 商店消费特色交易类型
                 LocalDateTime.now(),
                 "商店消费"+amount+"元",
-                "COMPLETED"
+                "ARREARAGE"
         );
         transactionMapper.insertTransaction(transaction);
 
