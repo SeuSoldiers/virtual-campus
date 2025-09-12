@@ -25,7 +25,11 @@
         </columnConstraints>
         
         <Label text="订单号:" style="-fx-font-weight: bold;" GridPane.columnIndex="0" GridPane.rowIndex="0" />
-        <Label fx:id="orderIdLabel" style="-fx-text-fill: #007bff;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+        <HBox spacing="10.0" alignment="CENTER_LEFT" GridPane.columnIndex="1" GridPane.rowIndex="0">
+           <Label fx:id="orderIdLabel" style="-fx-text-fill: #007bff;" />
+           <Button fx:id="copyOrderIdButton" text="复制" onAction="#copyOrderId" prefWidth="50" prefHeight="25"
+                   style="-fx-font-size: 10px; -fx-background-color: #007bff; -fx-text-fill: white; -fx-background-radius: 4;" />
+        </HBox>
         
         <Label text="订单状态:" style="-fx-font-weight: bold;" GridPane.columnIndex="2" GridPane.rowIndex="0" />
         <Label fx:id="orderStatusLabel" style="-fx-font-weight: bold;" GridPane.columnIndex="3" GridPane.rowIndex="0" />
@@ -66,7 +70,9 @@
    
    <!-- 操作按钮 -->
    <HBox spacing="15.0" alignment="CENTER_RIGHT" style="-fx-padding: 10 0;">
-      <Button fx:id="confirmButton" text="确认收货" visible="false" prefWidth="120" prefHeight="40"
+      <Button fx:id="refreshButton" text="刷新" onAction="#refreshOrderDetail" prefWidth="80" prefHeight="40"
+              style="-fx-font-size: 14px; -fx-background-color: #17a2b8; -fx-text-fill: white; -fx-background-radius: 6;" />
+      <Button fx:id="confirmButton" text="确认收货" onAction="#confirmOrder" visible="false" prefWidth="120" prefHeight="40"
               style="-fx-font-size: 14px; -fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 6;" />
       <Button text="返回首页" onAction="#goBackToHome" prefWidth="120" prefHeight="40"
               style="-fx-font-size: 14px; -fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 6;" />

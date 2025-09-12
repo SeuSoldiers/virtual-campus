@@ -1,13 +1,18 @@
 package seu.virtualcampus.service;
 
+import okhttp3.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import seu.virtualcampus.domain.*;
 import seu.virtualcampus.mapper.OrderMapper;
 import seu.virtualcampus.mapper.OrderItemMapper;
 import seu.virtualcampus.mapper.ProductMapper;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -29,8 +34,18 @@ public class OrderService {
     @Autowired
     private CartService cartService;
     
-    @Autowired
-    private BankAccountService bankAccountService;
+    // 移除直接的BankAccountService依赖，改用HTTP调用
+    // @Autowired
+    // private BankAccountService bankAccountService;
+    
+    // HTTP客户端用于调用银行接口
+    private final OkHttpClient httpClient = new OkHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final String bankApiBaseUrl = "http://localhost:8080/api/accounts";
+
+    // 商店收款账户（从配置获取）
+    @Value("${shop.merchant.account:}")
+    private String merchantAccount;
     
     @Autowired(required = false)
     private StudentInfoService studentInfoService;
@@ -175,12 +190,8 @@ public class OrderService {
             // 批量插入订单项
             orderItemMapper.insertBatch(orderItems);
             
-            // 清理购物车
-            if (cartItemIds != null && !cartItemIds.isEmpty()) {
-                cartService.removeCartItemsByIds(cartItemIds);
-            } else {
-                cartService.clearUserCart(userId);
-            }
+            // 注意：不在创建订单时清空购物车，而是在支付成功后清空
+            // 这样用户可以在支付前取消订单而不影响购物车
             
             result.put("success", true);
             result.put("orderId", orderId);
@@ -202,68 +213,127 @@ public class OrderService {
     public Map<String, Object> payOrder(String userId, String orderId, String accountNumber, String password, String paymentMethod) {
         Map<String, Object> result = new HashMap<>();
         
+        System.out.println("=== 开始处理支付请求 ===");
+        System.out.println("用户ID: " + userId);
+        System.out.println("订单ID: " + orderId);
+        System.out.println("账户号: " + accountNumber);
+        System.out.println("支付方式: " + paymentMethod);
+        
         try {
             // 验证订单
             Order order = orderMapper.selectById(orderId);
             if (order == null) {
+                System.out.println("错误: 订单不存在");
                 result.put("success", false);
                 result.put("message", "订单不存在");
                 return result;
             }
             
+            System.out.println("订单信息: " + order.toString());
+            System.out.println("订单状态: " + order.getStatus());
+            System.out.println("订单金额: " + order.getTotalAmount());
+            
             if (!order.getUserId().equals(userId)) {
+                System.out.println("错误: 用户ID不匹配 - 订单用户: " + order.getUserId() + ", 请求用户: " + userId);
                 result.put("success", false);
                 result.put("message", "无权限访问此订单");
                 return result;
             }
             
             if (!"PENDING".equals(order.getStatus())) {
+                System.out.println("错误: 订单状态不允许支付 - 当前状态: " + order.getStatus());
                 result.put("success", false);
                 result.put("message", "订单状态不允许支付");
                 return result;
             }
             
-            // 处理支付
+            // 校验商家收款账户
+            System.out.println("商家收款账户: " + merchantAccount);
+            if (merchantAccount == null || merchantAccount.isBlank()) {
+                System.out.println("错误: 商家收款账户未配置");
+                result.put("success", false);
+                result.put("message", "商家收款账户未配置，请联系管理员设置 shop.merchant.account");
+                return result;
+            }
+
+            // 计算支付金额
             BigDecimal paymentAmount = BigDecimal.valueOf(order.getTotalAmount());
-            
+            System.out.println("支付金额: " + paymentAmount);
+
+            // 先扣减库存（在同一事务内，支付失败将回滚库存变更）
+            List<OrderItem> orderItems = orderItemMapper.selectByOrderId(orderId);
+            System.out.println("订单项数量: " + orderItems.size());
+            for (OrderItem item : orderItems) {
+                System.out.println("检查库存 - 商品ID: " + item.getProductId() + ", 需要数量: " + item.getQuantity());
+                int updateResult = productMapper.reduceStock(item.getProductId(), item.getQuantity());
+                if (updateResult == 0) {
+                    System.out.println("错误: 库存不足 - 商品ID: " + item.getProductId());
+                    result.put("success", false);
+                    result.put("message", "库存不足，无法完成支付");
+                    return result;
+                }
+                System.out.println("库存扣减成功 - 商品ID: " + item.getProductId());
+            }
+
+            // 根据支付方式调用不同的银行接口
+            System.out.println("开始调用银行接口...");
             try {
-                // 调用银行账户服务处理支付
-                bankAccountService.processWithdrawal(accountNumber, paymentAmount, password);
+                if ("立即付款".equals(paymentMethod)) {
+                    System.out.println("调用立即付款接口 - /api/accounts/shopping");
+                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
+                    // 立即付款：调用shopping接口（即时扣款）
+                    callBankApi("/shopping", accountNumber, password, merchantAccount, paymentAmount);
+                    System.out.println("立即付款调用成功");
+                } else if ("先用后付".equals(paymentMethod)) {
+                    System.out.println("调用先用后付接口 - /api/accounts/paylater");
+                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
+                    // 先用后付：调用paylater接口（延期付款）
+                    callBankApi("/paylater", accountNumber, password, merchantAccount, paymentAmount);
+                    System.out.println("先用后付调用成功");
+                } else {
+                    System.out.println("使用默认支付方式 - /api/accounts/shopping");
+                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
+                    // 兼容旧的支付方式，默认使用立即付款
+                    callBankApi("/shopping", accountNumber, password, merchantAccount, paymentAmount);
+                    System.out.println("默认支付调用成功");
+                }
             } catch (Exception e) {
+                System.out.println("银行接口调用失败: " + e.getMessage());
+                e.printStackTrace();
+                // 回滚库存变更
+                TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
                 result.put("success", false);
                 result.put("message", "支付失败: " + e.getMessage());
                 return result;
             }
             
-            // 支付成功后扣库存
-            List<OrderItem> orderItems = orderItemMapper.selectByOrderId(orderId);
-            for (OrderItem item : orderItems) {
-                int updateResult = productMapper.reduceStock(item.getProductId(), item.getQuantity());
-                if (updateResult == 0) {
-                    // 库存扣减失败，需要回滚支付
-                    try {
-                        bankAccountService.processDeposit(accountNumber, paymentAmount);
-                    } catch (Exception e) {
-                        // 回滚失败，记录严重错误
-                        System.err.println("严重错误：支付回滚失败！订单：" + orderId + "，金额：" + paymentAmount);
-                    }
-                    result.put("success", false);
-                    result.put("message", "库存不足，支付已回滚");
-                    return result;
-                }
-            }
-            
             // 更新订单状态
+            System.out.println("开始更新订单状态...");
             order.setStatus("PAID");
             order.setPaymentStatus("PAID");
             order.setPaymentMethod(paymentMethod);
             order.setUpdatedAt(LocalDateTime.now());
-            orderMapper.update(order);
+            int updateResult = orderMapper.update(order);
+            System.out.println("订单状态更新结果: " + updateResult);
+            
+            // 支付成功后清空购物车
+            System.out.println("开始清空购物车...");
+            try {
+                cartService.clearUserCart(userId);
+                System.out.println("购物车清空成功");
+            } catch (Exception e) {
+                System.out.println("清空购物车失败: " + e.getMessage());
+                // 清空购物车失败不影响支付结果，仅记录日志
+                System.err.println("支付成功但清空购物车失败: " + e.getMessage());
+            }
             
             result.put("success", true);
             result.put("message", "支付成功");
+            System.out.println("=== 支付处理完成，返回成功结果 ===");
             
         } catch (Exception e) {
+            System.out.println("支付处理异常: " + e.getMessage());
+            e.printStackTrace();
             result.put("success", false);
             result.put("message", "支付处理失败: " + e.getMessage());
         }
@@ -444,9 +514,33 @@ public class OrderService {
         
         return result;
     }
-
+    
+    /**
+     * 调用银行账户API接口
+     */
+    private void callBankApi(String endpoint, String fromAccount, String password, String toAccount, BigDecimal amount) throws IOException {
+        String url = bankApiBaseUrl + endpoint + "?fromAccount=" + fromAccount 
+                   + "&password=" + password + "&toAccount=" + toAccount + "&amount=" + amount;
+        
+        System.out.println("发起银行API请求: " + url);
+        
+        Request request = new Request.Builder()
+                .url(url)
+                .post(RequestBody.create("", MediaType.get("application/json")))
+                .build();
+        
+        try (Response response = httpClient.newCall(request).execute()) {
+            String responseBody = response.body() != null ? response.body().string() : "";
+            System.out.println("银行API响应: " + response.code() + " - " + responseBody);
+            
+            if (!response.isSuccessful()) {
+                throw new RuntimeException("银行API调用失败: " + responseBody);
+            }
+        }
+    }
+    
     // ========== 原有方法保留 ==========
-
+    
     public int createOrder(Order order) {
         return orderMapper.insert(order);
     }
