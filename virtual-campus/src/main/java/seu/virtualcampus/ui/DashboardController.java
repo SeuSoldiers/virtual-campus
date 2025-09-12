@@ -61,7 +61,33 @@ public class DashboardController {
         } catch (IllegalArgumentException e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "图标加载失败，资源文件可能损坏: " + iconPath, e);
         }
-        button.setStyle("-fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 8; -fx-background-color: #e0e7ef;");
+        button.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-padding: 16 24;" +
+                        "-fx-background-color: linear-gradient(to bottom, #ffffff, #dfe7f1);" +
+                        "-fx-text-fill: #2d3a4a;" +
+                        "-fx-effect: dropshadow(gaussian, #b0b8c1, 6, 0.2, 0, 2);"
+        );
+
+        // Hover 效果（推荐用 CSS，但也能直接加事件）
+        button.setOnMouseEntered(e -> button.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-padding: 16 24;" +
+                        "-fx-background-color: linear-gradient(to bottom, #f0f6ff, #c8daff);" +
+                        "-fx-text-fill: #1e3a8a;" +
+                        "-fx-effect: dropshadow(gaussian, #7fa8ff, 8, 0.3, 0, 2);"
+        ));
+        button.setOnMouseExited(e -> button.setStyle(
+                "-fx-font-size: 16px;" +
+                        "-fx-background-radius: 12;" +
+                        "-fx-padding: 16 24;" +
+                        "-fx-background-color: linear-gradient(to bottom, #ffffff, #dfe7f1);" +
+                        "-fx-text-fill: #2d3a4a;" +
+                        "-fx-effect: dropshadow(gaussian, #b0b8c1, 6, 0.2, 0, 2);"
+        ));
+
         return button;
     }
 
