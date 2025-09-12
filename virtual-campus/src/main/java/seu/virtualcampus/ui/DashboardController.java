@@ -6,9 +6,13 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
+import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -16,7 +20,7 @@ public class DashboardController {
     @FXML
     private Label welcomeLabel;
     @FXML
-    private HBox entryBox;
+    private GridPane entryBox;
 
     private String userRole;
 
@@ -28,18 +32,37 @@ public class DashboardController {
 
     private void setupEntries() {
         entryBox.getChildren().clear();
+        int col = 0, row = 0;
         if ("student".equalsIgnoreCase(userRole)) {
-            Button studentBtn = new Button("学生个人信息维护");
+            Button studentBtn = createButtonWithIcon("学生个人信息维护", "/seu/virtualcampus/ui/icon.png");
             studentBtn.setOnAction(e -> openStudentUI());
-            entryBox.getChildren().add(studentBtn);
+            entryBox.add(studentBtn, col, row);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
-            Button registrarBtn = new Button("学生信息审核");
+            Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon.png");
             registrarBtn.setOnAction(e -> openRegistrarUI());
-            entryBox.getChildren().add(registrarBtn);
+            entryBox.add(registrarBtn, col, row);
         } else {
-            Button defaultBtn = new Button("默认功能");
-            entryBox.getChildren().add(defaultBtn);
+            Button defaultBtn = createButtonWithIcon("默认功能", "/seu/virtualcampus/ui/icon.png");
+            entryBox.add(defaultBtn, col, row);
         }
+    }
+
+    private Button createButtonWithIcon(String text, String iconPath) {
+        Button button = new Button(text);
+        button.setTooltip(new Tooltip(text));
+        try {
+            Image iconImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath), "资源路径无效: " + iconPath));
+            ImageView icon = new ImageView(iconImage);
+            icon.setFitWidth(32);
+            icon.setFitHeight(32);
+            button.setGraphic(icon);
+        } catch (NullPointerException e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "图标加载失败，路径无效: " + iconPath, e);
+        } catch (IllegalArgumentException e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "图标加载失败，资源文件可能损坏: " + iconPath, e);
+        }
+        button.setStyle("-fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 8; -fx-background-color: #e0e7ef;");
+        return button;
     }
 
     private void openStudentUI() {
