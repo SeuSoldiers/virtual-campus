@@ -4,9 +4,11 @@ package seu.virtualcampus.ui;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.logging.*;
 
 
@@ -36,9 +38,12 @@ public class MainApp extends Application {
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/login.fxml"));
         Scene scene = new Scene(loader.load());
+
+        // 设置应用程序图标
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png"))));
+
         stage.setTitle("虚拟校园登录");
         stage.setScene(scene);
         stage.show();
     }
 }
-
