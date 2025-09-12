@@ -40,6 +40,7 @@ public class CartViewController {
     private Label totalAmountLabel, msgLabel;
     @FXML
     private VBox emptyCartHint;
+    @FXML
     private HBox bottomArea;
     @FXML
     private Button checkoutButton;

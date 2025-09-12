@@ -86,8 +86,8 @@ public class CheckoutController implements Initializable {
 
         // 支付方式
         if (paymentMethodBox != null) {
-            paymentMethodBox.setItems(FXCollections.observableArrayList("立即支付", "先用后付"));
-            paymentMethodBox.setValue("立即支付");
+            paymentMethodBox.setItems(FXCollections.observableArrayList("立即付款", "先用后付"));
+            paymentMethodBox.setValue("立即付款");
         }
 
         // 用户ID
@@ -180,23 +180,41 @@ public class CheckoutController implements Initializable {
         if (currentOrderId == null || currentOrderId.isEmpty()) { showMsg("请先创建订单", true); return; }
         String account = accountNumberField.getText().trim();
         String pwd = accountPasswordField.getText().trim();
+        String paymentMethod = paymentMethodBox != null ? paymentMethodBox.getValue() : "ONLINE";
+        
+        System.out.println("=== 前端开始支付请求 ===");
+        System.out.println("订单ID: " + currentOrderId);
+        System.out.println("用户ID: " + currentUserId);
+        System.out.println("账户: " + account);
+        System.out.println("支付方式: " + paymentMethod);
+        
         if (account.isEmpty() || pwd.isEmpty()) { showMsg("请输入账号和密码", true); return; }
+        
+        String url = baseUrl + "/api/orders/" + currentOrderId + "/pay?userId=" + currentUserId
+                + "&accountNumber=" + account + "&password=" + pwd
+                + "&paymentMethod=" + paymentMethod;
+        System.out.println("请求URL: " + url);
+        
         Request req = new Request.Builder()
-                .url(baseUrl + "/api/orders/" + currentOrderId + "/pay?userId=" + currentUserId
-                        + "&accountNumber=" + account + "&password=" + pwd
-                        + "&paymentMethod=" + (paymentMethodBox != null ? paymentMethodBox.getValue() : "ONLINE"))
+                .url(url)
                 .post(RequestBody.create("", MediaType.get("application/json")))
                 .build();
         httpClient.newCall(req).enqueue(new Callback() {
-            @Override public void onFailure(Call call, IOException e) { Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true)); }
+            @Override public void onFailure(Call call, IOException e) { 
+                System.out.println("支付请求失败: " + e.getMessage());
+                Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true)); 
+            }
             @Override public void onResponse(Call call, Response response) throws IOException {
                 String body = response.body() != null ? response.body().string() : "";
+                System.out.println("支付响应: " + response.code() + " - " + body);
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         showMsg("支付成功！", false);
                         accountNumberField.clear(); accountPasswordField.clear();
                         handlePreview();
-                    } else { showMsg("支付失败: " + body, true); }
+                    } else { 
+                        showMsg("支付失败: " + body, true); 
+                    }
                 });
             }
         });

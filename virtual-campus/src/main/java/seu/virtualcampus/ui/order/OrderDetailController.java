@@ -12,6 +12,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import okhttp3.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +21,9 @@ import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 /**
@@ -68,6 +72,12 @@ public class OrderDetailController implements Initializable {
 
     @FXML
     private Button confirmButton;
+
+    @FXML
+    private Button copyOrderIdButton;
+
+    @FXML
+    private Button refreshButton;
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -138,8 +148,8 @@ public class OrderDetailController implements Initializable {
         // 绑定确认收货按钮事件
         confirmButton.setOnAction(event -> confirmOrder());
 
-        // 获取当前用户ID（实际应用中从会话或全局状态获取）
-        this.currentUserId = "1"; // 测试用户ID
+        // 获取当前用户ID
+        this.currentUserId = MainApp.username != null ? MainApp.username : "guest";
     }
 
     /**
@@ -169,7 +179,7 @@ public class OrderDetailController implements Initializable {
         }
 
         Request request = new Request.Builder()
-                .url(baseUrl + "/api/orders/" + orderId)
+                .url(baseUrl + "/api/orders/" + orderId + "/detail?userId=" + currentUserId)
                 .build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -184,10 +194,105 @@ public class OrderDetailController implements Initializable {
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         try {
-                            OrderDetailResponse orderDetail = objectMapper.readValue(responseBody, OrderDetailResponse.class);
-                            updateOrderDetail(orderDetail);
+                            // 添加调试信息
+                            System.out.println("收到的响应数据: " + responseBody);
+                            
+                            // 解析后端返回的Map结构
+                            @SuppressWarnings("unchecked")
+                            Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
+                            
+                            if (responseMap.get("success") != null && (Boolean) responseMap.get("success")) {
+                                // 获取订单信息
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> orderData = (Map<String, Object>) responseMap.get("order");
+                                @SuppressWarnings("unchecked")
+                                List<Map<String, Object>> orderItemsData = (List<Map<String, Object>>) responseMap.get("orderItems");
+                                
+                                // 构建OrderDetailResponse对象
+                                OrderDetailResponse orderDetail = new OrderDetailResponse();
+                                
+                                // 安全地处理orderId - 可能是String类型
+                                Object orderIdObj = orderData.get("orderId");
+                                if (orderIdObj instanceof String) {
+                                    // 如果是String，尝试提取数字部分或使用hashCode
+                                    String orderIdStr = (String) orderIdObj;
+                                    orderDetail.setId((long) orderIdStr.hashCode());
+                                } else if (orderIdObj instanceof Number) {
+                                    orderDetail.setId(((Number) orderIdObj).longValue());
+                                }
+                                
+                                // 安全地处理userId
+                                Object userIdObj = orderData.get("userId");
+                                if (userIdObj instanceof String) {
+                                    String userIdStr = (String) userIdObj;
+                                    try {
+                                        orderDetail.setUserId(Long.parseLong(userIdStr));
+                                    } catch (NumberFormatException e) {
+                                        orderDetail.setUserId((long) userIdStr.hashCode());
+                                    }
+                                } else if (userIdObj instanceof Number) {
+                                    orderDetail.setUserId(((Number) userIdObj).longValue());
+                                }
+                                
+                                orderDetail.setStatus((String) orderData.get("status"));
+                                
+                                // 安全地处理totalAmount
+                                Object totalAmountObj = orderData.get("totalAmount");
+                                if (totalAmountObj instanceof Number) {
+                                    orderDetail.setTotalAmount(((Number) totalAmountObj).doubleValue());
+                                }
+                                
+                                orderDetail.setPaymentMethod((String) orderData.get("paymentMethod"));
+                                orderDetail.setCreatedAt((String) orderData.get("createdAt"));
+                                orderDetail.setPaidAt((String) orderData.get("paidAt"));
+                                orderDetail.setDeliveredAt((String) orderData.get("deliveredAt"));
+                                orderDetail.setConfirmedAt((String) orderData.get("confirmedAt"));
+                                
+                                // 构建订单项列表
+                                List<OrderItemResponse> items = new ArrayList<>();
+                                for (Map<String, Object> itemData : orderItemsData) {
+                                    OrderItemResponse item = new OrderItemResponse();
+                                    
+                                    // 安全地处理productId - 可能是String类型
+                                    Object productIdObj = itemData.get("productId");
+                                    if (productIdObj instanceof String) {
+                                        String productIdStr = (String) productIdObj;
+                                        item.setProductId((long) productIdStr.hashCode());
+                                    } else if (productIdObj instanceof Number) {
+                                        item.setProductId(((Number) productIdObj).longValue());
+                                    }
+                                    
+                                    item.setProductName((String) itemData.get("productName"));
+                                    
+                                    // 安全地处理数字类型
+                                    Object priceObj = itemData.get("unitPrice");
+                                    if (priceObj instanceof Number) {
+                                        item.setPrice(((Number) priceObj).doubleValue());
+                                    }
+                                    
+                                    Object quantityObj = itemData.get("quantity");
+                                    if (quantityObj instanceof Number) {
+                                        item.setQuantity(((Number) quantityObj).intValue());
+                                    }
+                                    
+                                    Object subtotalObj = itemData.get("subtotal");
+                                    if (subtotalObj instanceof Number) {
+                                        item.setSubtotal(((Number) subtotalObj).doubleValue());
+                                    }
+                                    
+                                    items.add(item);
+                                }
+                                orderDetail.setItems(items);
+                                
+                                updateOrderDetail(orderDetail);
+                            } else {
+                                String errorMessage = (String) responseMap.get("message");
+                                showAlert("错误", "获取订单详情失败: " + errorMessage);
+                            }
                         } catch (Exception e) {
-                            showAlert("错误", "解析订单详情失败: " + e.getMessage());
+                            System.out.println("解析异常: " + e.getMessage());
+                            e.printStackTrace();
+                            showAlert("错误", "解析订单详情失败: " + e.getMessage() + "\n响应内容: " + responseBody);
                         }
                     } else {
                         showAlert("错误", "获取订单详情失败: " + responseBody);
@@ -396,5 +501,29 @@ public class OrderDetailController implements Initializable {
         public void setQuantity(Integer quantity) { this.quantity = quantity; }
         public Double getSubtotal() { return subtotal; }
         public void setSubtotal(Double subtotal) { this.subtotal = subtotal; }
+    }
+
+    /**
+     * 复制订单号到剪贴板
+     */
+    @FXML
+    private void copyOrderId() {
+        if (orderId != null && !orderId.isEmpty()) {
+            final Clipboard clipboard = Clipboard.getSystemClipboard();
+            final ClipboardContent content = new ClipboardContent();
+            content.putString(orderId);
+            clipboard.setContent(content);
+            showAlert("成功", "订单号已复制到剪贴板");
+        } else {
+            showAlert("错误", "订单号为空，无法复制");
+        }
+    }
+
+    /**
+     * 手动刷新订单详情
+     */
+    @FXML
+    private void refreshOrderDetail() {
+        loadOrderDetail();
     }
 }

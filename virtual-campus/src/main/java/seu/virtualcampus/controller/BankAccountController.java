@@ -271,6 +271,5 @@ public class BankAccountController {
         int updatedCount = bankAccountService.checkAndMarkOverdueTransactions();
         return ResponseEntity.ok(updatedCount);
     }
-
-
+    
 }
