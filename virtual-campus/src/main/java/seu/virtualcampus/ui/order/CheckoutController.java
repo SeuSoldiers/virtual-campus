@@ -86,8 +86,8 @@ public class CheckoutController implements Initializable {
 
         // 支付方式
         if (paymentMethodBox != null) {
-            paymentMethodBox.setItems(FXCollections.observableArrayList("ONLINE", "CASH", "CARD"));
-            paymentMethodBox.setValue("ONLINE");
+            paymentMethodBox.setItems(FXCollections.observableArrayList("立即支付", "先用后付"));
+            paymentMethodBox.setValue("立即支付");
         }
 
         // 用户ID

@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="...">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: add changePassword">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/MainApp.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_changestatus.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_changestatus.fxml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_manage.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/seu/virtualcampus/ui/bank_manage.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtualcampus.sqlite" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
