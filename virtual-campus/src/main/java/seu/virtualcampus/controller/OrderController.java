@@ -1,6 +1,8 @@
 package seu.virtualcampus.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.Order;
@@ -14,6 +16,8 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
     // 新版：根据购物车创建订单
     @PostMapping("/create")
@@ -101,8 +105,16 @@ public class OrderController {
 
     @PutMapping("/{orderId}/deliver")
     public ResponseEntity<Map<String, Object>> deliverOrder(@PathVariable String orderId,
-                                                           @RequestParam String adminId) {
+                                                           @RequestParam(required = false) String adminId,
+                                                           @RequestHeader(value = "Authorization", required = false) String token) {
+        log.info("[OrderController] deliverOrder called. orderId={}, adminId={}, tokenPresent={}", orderId, adminId, token != null);
+        if (adminId == null || adminId.isBlank()) {
+            // 无统一认证，这里仅兜底提供一个非空adminId，避免因缺参报400
+            adminId = token != null ? token : "system";
+            log.info("[OrderController] adminId missing, fallback to {}", adminId.equals("system") ? "system" : "token");
+        }
         Map<String, Object> result = orderService.deliverOrder(adminId, orderId);
+        log.info("[OrderController] deliverOrder result: {}", result);
         return ResponseEntity.ok(result);
     }
 

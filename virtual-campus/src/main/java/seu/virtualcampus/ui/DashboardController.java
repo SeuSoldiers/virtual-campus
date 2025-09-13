@@ -44,6 +44,12 @@ public class DashboardController {
             cartBtn.setOnAction(e -> openCartUI());
             cartBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #ff6b35; -fx-text-fill: white;");
             entryBox.getChildren().add(cartBtn);
+
+            // 添加我的订单入口
+            Button ordersBtn = new Button("我的订单");
+            ordersBtn.setOnAction(e -> openOrderListUI());
+            ordersBtn.setStyle("-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #3498db; -fx-text-fill: white;");
+            entryBox.getChildren().add(ordersBtn);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
             Button registrarBtn = new Button("学生信息审核");
             registrarBtn.setOnAction(e -> openRegistrarUI());
@@ -208,6 +214,18 @@ public class DashboardController {
             e.printStackTrace();
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到购物车UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开购物车界面: " + e.getMessage());
+        }
+    }
+
+    private void openOrderListUI() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/order_list.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) entryBox.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到订单列表UI时发生异常", e);
+            showErrorAlert("切换失败", "无法打开订单列表界面，请检查系统状态。");
         }
     }
 

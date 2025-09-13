@@ -74,16 +74,18 @@ public class OrderListController implements Initializable {
 
     // 订单模型类
     public static class OrderModel {
-        private final SimpleLongProperty id;
+        private final SimpleLongProperty id;            // 用于表格显示的数字ID（由字符串orderId提取）
         private final SimpleStringProperty status;
         private final SimpleDoubleProperty totalAmount;
         private final SimpleStringProperty createTime;
+        private final String rawOrderId;               // 原始字符串订单号（用于详情/取消等接口）
 
-        public OrderModel(Long id, String status, Double totalAmount, String createTime) {
+        public OrderModel(Long id, String status, Double totalAmount, String createTime, String rawOrderId) {
             this.id = new SimpleLongProperty(id);
             this.status = new SimpleStringProperty(status);
             this.totalAmount = new SimpleDoubleProperty(totalAmount);
             this.createTime = new SimpleStringProperty(createTime);
+            this.rawOrderId = rawOrderId;
         }
 
         public long getId() { return id.get(); }
@@ -97,6 +99,7 @@ public class OrderListController implements Initializable {
 
         public String getCreateTime() { return createTime.get(); }
         public SimpleStringProperty createTimeProperty() { return createTime; }
+        public String getRawOrderId() { return rawOrderId; }
     }
 
     @Override
@@ -151,7 +154,7 @@ public class OrderListController implements Initializable {
                 
                 detailButton.setOnAction(event -> {
                     OrderModel order = getTableView().getItems().get(getIndex());
-                    showOrderDetail(order.getId());
+                    showOrderDetail(order.getRawOrderId());
                 });
 
                 payButton.setOnAction(event -> {
@@ -161,7 +164,7 @@ public class OrderListController implements Initializable {
 
                 cancelButton.setOnAction(event -> {
                     OrderModel order = getTableView().getItems().get(getIndex());
-                    cancelOrder(order.getId());
+                    cancelOrder(order.getRawOrderId());
                 });
             }
 
@@ -190,8 +193,8 @@ public class OrderListController implements Initializable {
         prevPageButton.setOnAction(event -> goToPreviousPage());
         nextPageButton.setOnAction(event -> goToNextPage());
 
-        // 获取当前用户ID（实际应用中从会话或全局状态获取）
-        this.currentUserId = "1"; // 测试用户ID
+        // 获取当前用户ID
+        this.currentUserId = seu.virtualcampus.ui.MainApp.username != null ? seu.virtualcampus.ui.MainApp.username : "1";
 
         // 初始加载订单列表
         loadOrders();
@@ -202,15 +205,11 @@ public class OrderListController implements Initializable {
      */
     private void loadOrders() {
         String status = getStatusValue(statusChoiceBox.getValue());
-        String url = baseUrl + "/api/orders?userId=" + currentUserId + 
-                     "&page=" + currentPage + "&size=" + pageSize;
-        
-        if (!"ALL".equals(status)) {
-            url += "&status=" + status;
-        }
-
+        // 使用已实现接口：GET /api/orders/user/{userId}
+        String url = baseUrl + "/api/orders/user/" + currentUserId;
         Request request = new Request.Builder()
                 .url(url)
+                .header("Authorization", seu.virtualcampus.ui.MainApp.token != null ? seu.virtualcampus.ui.MainApp.token : "")
                 .build();
 
         httpClient.newCall(request).enqueue(new Callback() {
@@ -225,16 +224,21 @@ public class OrderListController implements Initializable {
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         try {
-                            OrderListResponse orderListResponse = objectMapper.readValue(responseBody, OrderListResponse.class);
-                            updateOrderList(orderListResponse);
-                            
-                            // 更新总页数
-                            String totalCountHeader = response.header("X-Total-Count");
-                            if (totalCountHeader != null) {
-                                int totalCount = Integer.parseInt(totalCountHeader);
-                                totalPages = (int) Math.ceil((double) totalCount / pageSize);
-                                updatePageInfo();
+                            @SuppressWarnings("unchecked")
+                            java.util.List<java.util.Map<String, Object>> raw = objectMapper.readValue(responseBody, java.util.List.class);
+                            // 客户端按状态过滤，并转换为 OrderModel
+                            ObservableList<OrderModel> orders = FXCollections.observableArrayList();
+                            for (java.util.Map<String, Object> m : raw) {
+                                String rawOrderId = String.valueOf(m.get("orderId"));
+                                String st = String.valueOf(m.get("status"));
+                                if (!"ALL".equals(status) && !status.equals(st)) continue;
+                                Double amt = m.get("totalAmount") instanceof Number ? ((Number) m.get("totalAmount")).doubleValue() : 0.0;
+                                String created = m.get("orderDate") != null ? String.valueOf(m.get("orderDate")) : String.valueOf(m.get("createdAt"));
+                                Long numericId = extractNumericId(rawOrderId);
+                                orders.add(new OrderModel(numericId, st, amt, created, rawOrderId));
                             }
+                            ordersTable.setItems(orders);
+                            totalPages = 1; updatePageInfo();
                         } catch (Exception e) {
                             showAlert("错误", "解析订单列表失败: " + e.getMessage());
                         }
@@ -244,6 +248,14 @@ public class OrderListController implements Initializable {
                 });
             }
         });
+    }
+
+    private Long extractNumericId(String rawOrderId) {
+        try {
+            String digits = rawOrderId != null ? rawOrderId.replaceAll("\\D", "") : null;
+            if (digits != null && !digits.isEmpty()) return Long.parseLong(digits);
+        } catch (Exception ignore) {}
+        return rawOrderId != null ? (long) rawOrderId.hashCode() : 0L;
     }
 
     /**
@@ -281,18 +293,11 @@ public class OrderListController implements Initializable {
      * 更新订单列表
      */
     private void updateOrderList(OrderListResponse response) {
+        // 兼容旧接口（未使用）
         ObservableList<OrderModel> orders = FXCollections.observableArrayList();
-
         for (OrderResponse order : response.getOrders()) {
-            OrderModel model = new OrderModel(
-                    order.getId(),
-                    order.getStatus(),
-                    order.getTotalAmount(),
-                    order.getCreatedAt()
-            );
-            orders.add(model);
+            orders.add(new OrderModel(order.getId(), order.getStatus(), order.getTotalAmount(), order.getCreatedAt(), String.valueOf(order.getId())));
         }
-
         ordersTable.setItems(orders);
     }
 
@@ -308,7 +313,7 @@ public class OrderListController implements Initializable {
     /**
      * 显示订单详情
      */
-    private void showOrderDetail(Long orderId) {
+    private void showOrderDetail(String orderId) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/order_detail.fxml"));
             Parent root = loader.load();
@@ -345,7 +350,7 @@ public class OrderListController implements Initializable {
     /**
      * 取消订单
      */
-    private void cancelOrder(Long orderId) {
+    private void cancelOrder(String orderId) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("确认取消");
         confirmation.setHeaderText(null);

@@ -101,8 +101,12 @@ public class AdminShipController implements Initializable {
         shipButton.setDisable(true);
 
         // 构建请求
+        String adminId = MainApp.username != null ? MainApp.username : "admin";
+        String deliverUrl = baseUrl + "/api/orders/" + orderId + "/deliver?adminId=" + adminId;
+        System.out.println("[AdminShip] 发货请求URL: " + deliverUrl + ", role=" + MainApp.role + ", tokenPresent=" + (MainApp.token != null));
+
         Request.Builder requestBuilder = new Request.Builder()
-                .url(baseUrl + "/api/orders/" + orderId + "/deliver")
+                .url(deliverUrl)
                 .put(RequestBody.create("", MediaType.get("application/json")));
 
         // 添加认证头
@@ -125,6 +129,7 @@ public class AdminShipController implements Initializable {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
+                System.out.println("[AdminShip] 发货响应: code=" + response.code() + ", body=" + responseBody);
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         showResult("订单 " + orderId + " 发货成功！", true);
