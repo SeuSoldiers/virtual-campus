@@ -4,16 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: add “立即支付” “先用后付”">
+    <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/TransactionMapper.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/mapper/TransactionMapper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/service/BankAccountService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_transferController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_transferController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_withdrawalController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_withdrawalController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtual-campus/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/virtualcampus.sqlite" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtualcampus.sqlite" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -91,7 +83,8 @@
       <workItem from="1757680132315" duration="84000" />
       <workItem from="1757681363157" duration="1581000" />
       <workItem from="1757684737659" duration="7320000" />
-      <workItem from="1757692817657" duration="4447000" />
+      <workItem from="1757692817657" duration="4626000" />
+      <workItem from="1757738835300" duration="671000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />
@@ -133,7 +126,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757667788516</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）">
+      <option name="closed" value="true" />
+      <created>1757697373284</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1757697373284</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -165,6 +166,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="..." />
     <MESSAGE value="feat: add “立即支付” “先用后付”" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat: add “立即支付” “先用后付”" />
+    <MESSAGE value="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）" />
   </component>
 </project>
