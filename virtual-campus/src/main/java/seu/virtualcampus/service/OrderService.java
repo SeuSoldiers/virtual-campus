@@ -34,9 +34,9 @@ public class OrderService {
     @Autowired
     private CartService cartService;
     
-    // 移除直接的BankAccountService依赖，改用HTTP调用
-    // @Autowired
-    // private BankAccountService bankAccountService;
+    // 优先使用同进程服务调用，避免自调HTTP的不确定性；必要时仍可回退到HTTP调用
+    @Autowired(required = false)
+    private BankAccountService bankAccountService;
     
     // HTTP客户端用于调用银行接口
     private final OkHttpClient httpClient = new OkHttpClient();
@@ -275,28 +275,28 @@ public class OrderService {
                 System.out.println("库存扣减成功 - 商品ID: " + item.getProductId());
             }
 
-            // 根据支付方式调用不同的银行接口
+            // 根据支付方式调用银行模块：优先使用本地服务调用，失败时回退HTTP
             System.out.println("开始调用银行接口...");
             try {
-                if ("立即付款".equals(paymentMethod)) {
-                    System.out.println("调用立即付款接口 - /api/accounts/shopping");
-                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
-                    // 立即付款：调用shopping接口（即时扣款）
-                    callBankApi("/shopping", accountNumber, password, merchantAccount, paymentAmount);
-                    System.out.println("立即付款调用成功");
-                } else if ("先用后付".equals(paymentMethod)) {
-                    System.out.println("调用先用后付接口 - /api/accounts/paylater");
-                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
-                    // 先用后付：调用paylater接口（延期付款）
-                    callBankApi("/paylater", accountNumber, password, merchantAccount, paymentAmount);
-                    System.out.println("先用后付调用成功");
+                if (bankAccountService != null) {
+                    if ("先用后付".equals(paymentMethod)) {
+                        System.out.println("[Bank] 使用本地服务调用: processPayLater");
+                        bankAccountService.processPayLater(accountNumber, password, merchantAccount, paymentAmount);
+                    } else {
+                        System.out.println("[Bank] 使用本地服务调用: processShopping");
+                        bankAccountService.processShopping(accountNumber, password, merchantAccount, paymentAmount);
+                    }
                 } else {
-                    System.out.println("使用默认支付方式 - /api/accounts/shopping");
-                    System.out.println("参数: fromAccount=" + accountNumber + ", toAccount=" + merchantAccount + ", amount=" + paymentAmount);
-                    // 兼容旧的支付方式，默认使用立即付款
-                    callBankApi("/shopping", accountNumber, password, merchantAccount, paymentAmount);
-                    System.out.println("默认支付调用成功");
+                    System.out.println("[Bank] 本地服务不可用，回退HTTP调用");
+                    if ("先用后付".equals(paymentMethod)) {
+                        System.out.println("调用先用后付接口 - /api/accounts/paylater");
+                        callBankApi("/paylater", accountNumber, password, merchantAccount, paymentAmount);
+                    } else {
+                        System.out.println("调用立即付款接口 - /api/accounts/shopping");
+                        callBankApi("/shopping", accountNumber, password, merchantAccount, paymentAmount);
+                    }
                 }
+                System.out.println("银行扣款处理完成");
             } catch (Exception e) {
                 System.out.println("银行接口调用失败: " + e.getMessage());
                 e.printStackTrace();
@@ -317,10 +317,10 @@ public class OrderService {
             System.out.println("订单状态更新结果: " + updateResult);
             
             // 支付成功后清空购物车
-            System.out.println("开始清空购物车...");
+            System.out.println("开始清空购物车... userId=" + userId);
             try {
-                cartService.clearUserCart(userId);
-                System.out.println("购物车清空成功");
+                int cleared = cartService.clearUserCart(userId);
+                System.out.println("购物车清空成功, 受影响记录数=" + cleared);
             } catch (Exception e) {
                 System.out.println("清空购物车失败: " + e.getMessage());
                 // 清空购物车失败不影响支付结果，仅记录日志

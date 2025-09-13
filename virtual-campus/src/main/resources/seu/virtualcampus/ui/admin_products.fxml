@@ -110,7 +110,7 @@
    </center>
    
    <!-- 底部状态栏 -->
-   <bottom>
+      <bottom>
       <HBox alignment="CENTER_LEFT" style="-fx-background-color: #ecf0f1; -fx-padding: 10 20;">
          <Label fx:id="totalCountLabel" text="总计: 0 个商品" style="-fx-font-weight: bold;" />
          <Region HBox.hgrow="ALWAYS" />

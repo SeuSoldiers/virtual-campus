@@ -150,6 +150,23 @@ public class OrderDetailController implements Initializable {
 
         // 获取当前用户ID
         this.currentUserId = MainApp.username != null ? MainApp.username : "guest";
+
+        // 当窗口获得焦点时，自动刷新订单详情，确保支付后状态及时更新
+        // 适配在结算页完成支付、切回本窗口查看详情的场景
+        orderIdLabel.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obsWin, oldWindow, newWindow) -> {
+                    if (newWindow != null) {
+                        ((javafx.stage.Stage) newWindow).focusedProperty().addListener((o, wasFocused, isFocused) -> {
+                            if (isFocused && orderId != null && !orderId.isEmpty()) {
+                                System.out.println("[OrderDetail] 窗口获得焦点，自动刷新详情");
+                                loadOrderDetail();
+                            }
+                        });
+                    }
+                });
+            }
+        });
     }
 
     /**
@@ -182,6 +199,7 @@ public class OrderDetailController implements Initializable {
                 .url(baseUrl + "/api/orders/" + orderId + "/detail?userId=" + currentUserId)
                 .build();
 
+        System.out.println("[OrderDetail] 调用详情接口: orderId=" + orderId + ", userId=" + currentUserId);
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -191,6 +209,7 @@ public class OrderDetailController implements Initializable {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
+                System.out.println("[OrderDetail] 详情响应 code=" + response.code() + ", body=" + responseBody);
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         try {
@@ -308,6 +327,7 @@ public class OrderDetailController implements Initializable {
     private void updateOrderDetail(OrderDetailResponse orderDetail) {
         // 更新订单基本信息
         orderIdLabel.setText(orderDetail.getId() != null ? orderDetail.getId().toString() : "");
+        System.out.println("[OrderDetail] 更新UI: status(raw)=" + orderDetail.getStatus());
         orderStatusLabel.setText(getStatusText(orderDetail.getStatus()));
         totalAmountLabel.setText(String.format("¥%.2f", orderDetail.getTotalAmount() != null ? orderDetail.getTotalAmount() : 0.0));
         paymentMethodLabel.setText(orderDetail.getPaymentMethod() != null ? orderDetail.getPaymentMethod() : "未设置");
@@ -339,6 +359,7 @@ public class OrderDetailController implements Initializable {
      * 根据订单状态更新按钮可见性
      */
     private void updateButtonVisibility(String status) {
+        System.out.println("[OrderDetail] 按钮可见性检查: status=" + status);
         // 仅当状态为 PAID 或 SHIPPED 时显示确认收货按钮
         confirmButton.setVisible("PAID".equals(status) || "SHIPPED".equals(status) || "DELIVERED".equals(status));
     }
@@ -348,6 +369,7 @@ public class OrderDetailController implements Initializable {
      */
     private String getStatusText(String status) {
         if (status == null) return "";
+        System.out.println("[OrderDetail] 状态翻译: status=" + status);
         switch (status) {
             case "PENDING":
                 return "待支付";
@@ -357,6 +379,8 @@ public class OrderDetailController implements Initializable {
                 return "已发货";
             case "DELIVERED":
                 return "已发货";
+            case "COMPLETED":
+                return "已完成";
             case "CONFIRMED":
                 return "已确认";
             case "CANCELLED":

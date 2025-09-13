@@ -108,6 +108,9 @@ public class ProductListController {
 
         // 加载初始数据
         loadProducts();
+
+        // 调整表格高度，使其刚好显示 pageSize 行，避免额外空白区域
+        applyFixedRowHeight();
     }
 
     @FXML
@@ -215,6 +218,8 @@ public class ProductListController {
                             productTable.getItems().clear();
                             productTable.getItems().addAll(products);
                             updatePagination();
+                            // 确保高度按 pageSize 行渲染
+                            applyFixedRowHeight();
                             showMessage("加载成功，共找到 " + totalCount + " 件商品", false);
                         });
                     } catch (Exception e) {
@@ -227,6 +232,19 @@ public class ProductListController {
                 }
             }
         });
+    }
+
+    // 让表格高度刚好容纳 pageSize 行，避免出现表格内部空白
+    private void applyFixedRowHeight() {
+        try {
+            double rowHeight = 36; // 每行高度（根据字体略作调整）
+            productTable.setFixedCellSize(rowHeight);
+            // 行数 + 表头，表头约等于一行高度，略加 0.8 误差避免滚动条
+            double pref = rowHeight * (pageSize + 1.0);
+            productTable.setPrefHeight(pref);
+            productTable.setMinHeight(pref);
+            productTable.setMaxHeight(pref);
+        } catch (Exception ignore) {}
     }
 
     private void updatePagination() {

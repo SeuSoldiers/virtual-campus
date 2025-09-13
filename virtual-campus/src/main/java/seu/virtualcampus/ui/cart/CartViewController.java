@@ -77,7 +77,7 @@ public class CartViewController {
             // 延迟加载数据，避免阻塞UI初始化
             Platform.runLater(() -> {
                 try {
-                    System.out.println("开始加载购物车数据...");
+                    System.out.println("开始加载购物车数据... userId=" + MainApp.username);
                     loadCartData();
                     System.out.println("购物车数据加载请求已发送");
                     logger.info("购物车数据加载开始");
@@ -88,7 +88,25 @@ public class CartViewController {
                     showMessage("加载购物车数据失败: " + e.getMessage(), true);
                 }
             });
-            
+
+            // 当窗口获得焦点时自动刷新购物车，确保在结算页支付成功后返回能看到清空结果
+            if (cartTable != null) {
+                cartTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
+                    if (newScene != null) {
+                        newScene.windowProperty().addListener((obsWin, oldWindow, newWindow) -> {
+                            if (newWindow != null) {
+                                ((Stage) newWindow).focusedProperty().addListener((o, wasFocused, isFocused) -> {
+                                    if (isFocused) {
+                                        System.out.println("[Cart] 窗口获得焦点，自动刷新购物车, userId=" + MainApp.username);
+                                        loadCartData();
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
             System.out.println("=== 购物车控制器初始化完成 ===");
         } catch (Exception e) {
             System.err.println("=== 购物车控制器初始化失败 ===");
@@ -137,9 +155,11 @@ public class CartViewController {
         }
 
         logger.info("正在加载用户 " + MainApp.username + " 的购物车数据");
+        System.out.println("[Cart] 加载购物车数据: userId=" + MainApp.username);
         
+        String url = "http://localhost:8080/api/cart?userId=" + MainApp.username;
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/cart?userId=" + MainApp.username)
+                .url(url)
                 .header("Authorization", MainApp.token != null ? MainApp.token : "")
                 .get()
                 .build();
@@ -148,6 +168,7 @@ public class CartViewController {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 logger.log(Level.WARNING, "加载购物车失败: " + e.getMessage());
+                System.out.println("[Cart] 加载购物车失败(网络): " + e.getMessage());
                 Platform.runLater(() -> showMessage("网络错误，请检查连接", true));
             }
 
@@ -156,16 +177,19 @@ public class CartViewController {
                 if (response.isSuccessful()) {
                     try {
                         String responseBody = response.body().string();
+                        System.out.println("[Cart] 加载购物车成功, body=" + responseBody);
                         List<Cart> carts = mapper.readValue(responseBody, new TypeReference<List<Cart>>() {});
                         
                         // 异步加载商品详情
                         loadProductDetails(carts);
                     } catch (Exception e) {
                         logger.log(Level.WARNING, "解析购物车数据失败: " + e.getMessage());
+                        System.out.println("[Cart] 解析购物车数据失败: " + e.getMessage());
                         Platform.runLater(() -> showMessage("数据解析失败", true));
                     }
                 } else {
                     logger.log(Level.WARNING, "加载购物车失败，状态码: " + response.code());
+                    System.out.println("[Cart] 加载购物车失败, code=" + response.code());
                     Platform.runLater(() -> showMessage("加载失败，状态码: " + response.code(), true));
                 }
             }
@@ -174,6 +198,7 @@ public class CartViewController {
 
     private void loadProductDetails(List<Cart> carts) {
         cartItems.clear();
+        System.out.println("[Cart] 开始加载商品详情, 购物车项数=" + carts.size());
         
         if (carts.isEmpty()) {
             Platform.runLater(() -> {
@@ -191,10 +216,12 @@ public class CartViewController {
                     .get()
                     .build();
 
+            System.out.println("[Cart] 请求商品详情: productId=" + cart.getProductId());
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(@NotNull Call call, @NotNull IOException e) {
                     logger.log(Level.WARNING, "加载商品详情失败: " + e.getMessage());
+                    System.out.println("[Cart] 商品详情请求失败: " + e.getMessage());
                 }
 
                 @Override
@@ -213,12 +240,14 @@ public class CartViewController {
                                 if (cartItems.size() == carts.size()) {
                                     Platform.runLater(() -> {
                                         updateUI();
+                                        System.out.println("[Cart] 商品详情加载完成, 总数=" + cartItems.size());
                                         showMessage("购物车加载完成", false);
                                     });
                                 }
                             }
                         } catch (Exception e) {
                             logger.log(Level.WARNING, "解析商品详情失败: " + e.getMessage());
+                            System.out.println("[Cart] 解析商品详情失败: " + e.getMessage());
                         }
                     }
                 }
@@ -229,6 +258,7 @@ public class CartViewController {
     private void updateUI() {
         cartTable.getItems().clear();
         cartTable.getItems().addAll(cartItems);
+        System.out.println("[Cart] updateUI: itemsInTable=" + cartItems.size());
         
         boolean isEmpty = cartItems.isEmpty();
         emptyCartHint.setVisible(isEmpty);
@@ -376,6 +406,8 @@ public class CartViewController {
         loadCartData();
     }
 
+    // 查看我的订单入口已移至 Dashboard 页面
+
     @FXML
     private void handleCheckout() {
         if (cartItems.isEmpty()) {
@@ -418,6 +450,19 @@ public class CartViewController {
         } catch (Exception e) {
             logger.log(Level.SEVERE, "返回主界面时发生异常", e);
             showMessage("返回失败：" + e.getMessage(), true);
+        }
+    }
+
+    @FXML
+    private void handleOpenOrderList() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/order_list.fxml"));
+            Parent root = loader.load();
+            Stage stage = (Stage) cartTable.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "打开订单列表时发生异常", e);
+            showMessage("打开订单列表失败：" + e.getMessage(), true);
         }
     }
 
