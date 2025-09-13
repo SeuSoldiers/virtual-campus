@@ -17,6 +17,8 @@ import seu.virtualcampus.ui.MainApp;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProductDetailController {
     private static final Logger logger = Logger.getLogger(ProductDetailController.class.getName());
@@ -35,6 +37,10 @@ public class ProductDetailController {
     private String currentProductId;
     private Product currentProduct;
 
+    // 轮询（详情）
+    private ScheduledExecutorService poller;
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
+
     @FXML
     public void initialize() {
         // 初始化数量选择器 (默认范围1-1，加载商品后会更新)
@@ -49,6 +55,7 @@ public class ProductDetailController {
     public void setProductId(String productId) {
         this.currentProductId = productId;
         loadProductDetail();
+        startPolling();
     }
 
     /**
@@ -281,6 +288,44 @@ public class ProductDetailController {
                 }
             }
         });
+    }
+
+    private void startPolling() {
+        if (poller != null && !poller.isShutdown()) return;
+        poller = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "product-detail-poller");
+            t.setDaemon(true);
+            return t;
+        });
+        poller.scheduleAtFixedRate(() -> {
+            if (pollInFlight.compareAndSet(false, true)) {
+                try {
+                    loadProductDetailSilently();
+                } finally {
+                    pollInFlight.set(false);
+                }
+            }
+        }, 10, 10, TimeUnit.SECONDS);
+
+        // 页面关闭时停止
+        if (productIdLabel != null) {
+            productIdLabel.sceneProperty().addListener((obs, o, s) -> {
+                if (s != null) {
+                    s.windowProperty().addListener((obsW, ow, nw) -> {
+                        if (nw != null) {
+                            ((Stage) nw).setOnCloseRequest(e -> stopPolling());
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private void stopPolling() {
+        if (poller != null) {
+            poller.shutdownNow();
+            poller = null;
+        }
     }
 
     /**

@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CartViewController {
     private static final Logger logger = Logger.getLogger(CartViewController.class.getName());
@@ -47,6 +49,10 @@ public class CartViewController {
 
     private List<CartItemView> cartItems = new ArrayList<>();
     private Map<String, Product> productCache = new HashMap<>();
+
+    // 轮询（购物车）
+    private ScheduledExecutorService poller;
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
 
     @FXML
     public void initialize() {
@@ -101,6 +107,8 @@ public class CartViewController {
                                         loadCartData();
                                     }
                                 });
+                                // 页面关闭时停止轮询
+                                ((Stage) newWindow).setOnCloseRequest(e -> stopPolling());
                             }
                         });
                     }
@@ -114,6 +122,8 @@ public class CartViewController {
             logger.log(Level.SEVERE, "购物车初始化失败", e);
             Platform.runLater(() -> showMessage("购物车初始化失败: " + e.getMessage(), true));
         }
+        // 启动低频轮询（30秒）
+        startPolling();
     }
 
     private void initializeTable() {
@@ -297,6 +307,31 @@ public class CartViewController {
                     }
                 }
             });
+        }
+    }
+
+    private void startPolling() {
+        if (poller != null && !poller.isShutdown()) return;
+        poller = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "cart-poller");
+            t.setDaemon(true);
+            return t;
+        });
+        poller.scheduleAtFixedRate(() -> {
+            if (pollInFlight.compareAndSet(false, true)) {
+                try {
+                    loadCartData();
+                } finally {
+                    pollInFlight.set(false);
+                }
+            }
+        }, 30, 30, TimeUnit.SECONDS);
+    }
+
+    private void stopPolling() {
+        if (poller != null) {
+            poller.shutdownNow();
+            poller = null;
         }
     }
 

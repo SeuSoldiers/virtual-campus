@@ -24,6 +24,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProductListController {
     private static final Logger logger = Logger.getLogger(ProductListController.class.getName());
@@ -50,6 +52,11 @@ public class ProductListController {
     private String currentSort = "name,asc";
     private final Map<String, String> sortDisplayToValue = new LinkedHashMap<>();
     private String currentKeyword = "";
+
+    // 轮询相关
+    private ScheduledExecutorService poller;
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
+    private volatile String lastSignature = null;
 
     @FXML
     public void initialize() {
@@ -107,24 +114,37 @@ public class ProductListController {
         });
 
         // 加载初始数据
-        loadProducts();
+        loadProducts(false);
 
         // 调整表格高度，使其刚好显示 pageSize 行，避免额外空白区域
         applyFixedRowHeight();
+
+        // 启动轮询（10秒）
+        startPolling();
+        // 页面关闭时停止轮询
+        productTable.sceneProperty().addListener((obs, oldScene, newScene) -> {
+            if (newScene != null) {
+                newScene.windowProperty().addListener((obsW, oldW, newW) -> {
+                    if (newW != null) {
+                        ((Stage) newW).setOnCloseRequest(e -> stopPolling());
+                    }
+                });
+            }
+        });
     }
 
     @FXML
     private void handleSearch() {
         currentKeyword = searchField.getText().trim();
         currentPage = 1; // 重置到第一页
-        loadProducts();
+        loadProducts(false);
     }
 
     @FXML
     private void handleSortChange() {
         currentSort = sortDisplayToValue.getOrDefault(sortChoiceBox.getValue(), "name,asc");
         currentPage = 1; // 重置到第一页
-        loadProducts();
+        loadProducts(false);
     }
 
     @FXML
@@ -154,7 +174,10 @@ public class ProductListController {
         }
     }
 
-    private void loadProducts() {
+    private void loadProducts() { loadProducts(false); }
+
+    // silent=true 时仅在数据变化时刷新UI且不提示信息
+    private void loadProducts(boolean silent) {
         // 构建请求URL
         HttpUrl.Builder urlBuilder;
         
@@ -183,7 +206,8 @@ public class ProductListController {
             @Override
             public void onFailure(@NotNull Call call, @NotNull IOException e) {
                 logger.log(Level.WARNING, "加载商品列表失败: " + e.getMessage());
-                Platform.runLater(() -> showMessage("网络错误，请检查连接", true));
+                if (!silent) Platform.runLater(() -> showMessage("网络错误，请检查连接", true));
+                pollInFlight.set(false);
             }
 
             @Override
@@ -192,7 +216,8 @@ public class ProductListController {
                     try {
                         String responseBody = response.body().string();
                         List<Product> products = mapper.readValue(responseBody, new TypeReference<List<Product>>() {});
-                        
+                        String signature = buildSignature(products);
+
                         // 读取总数
                         String totalCountHeader = response.header("X-Total-Count");
                         if (totalCountHeader != null) {
@@ -201,24 +226,64 @@ public class ProductListController {
                             totalCount = products.size();
                         }
 
-                        Platform.runLater(() -> {
-                            productTable.getItems().clear();
-                            productTable.getItems().addAll(products);
-                            updatePagination();
-                            // 确保高度按 pageSize 行渲染
-                            applyFixedRowHeight();
-                            showMessage("加载成功，共找到 " + totalCount + " 件商品", false);
-                        });
+                        // 仅在数据变化时刷新UI
+                        if (!signature.equals(lastSignature)) {
+                            lastSignature = signature;
+                            Platform.runLater(() -> {
+                                productTable.getItems().setAll(products);
+                                updatePagination();
+                                applyFixedRowHeight();
+                                if (!silent) showMessage("加载成功，共找到 " + totalCount + " 件商品", false);
+                            });
+                        }
                     } catch (Exception e) {
                         logger.log(Level.WARNING, "解析商品数据失败: " + e.getMessage());
-                        Platform.runLater(() -> showMessage("数据解析失败", true));
+                        if (!silent) Platform.runLater(() -> showMessage("数据解析失败", true));
                     }
                 } else {
                     logger.log(Level.WARNING, "加载商品列表失败，状态码: " + response.code());
-                    Platform.runLater(() -> showMessage("加载失败，状态码: " + response.code(), true));
+                    if (!silent) Platform.runLater(() -> showMessage("加载失败，状态码: " + response.code(), true));
                 }
+                pollInFlight.set(false);
             }
         });
+    }
+
+    private String buildSignature(List<Product> products) {
+        StringBuilder sb = new StringBuilder(products.size() * 16);
+        for (Product p : products) {
+            sb.append(p.getProductId()).append('|')
+              .append(p.getProductName()).append('|')
+              .append(p.getProductPrice()).append('|')
+              .append(p.getAvailableCount()).append('|')
+              .append(p.getStatus()).append('\n');
+        }
+        return Integer.toHexString(sb.toString().hashCode());
+    }
+
+    private void startPolling() {
+        if (poller != null && !poller.isShutdown()) return;
+        poller = Executors.newSingleThreadScheduledExecutor(r -> {
+            Thread t = new Thread(r, "product-list-poller");
+            t.setDaemon(true);
+            return t;
+        });
+        poller.scheduleAtFixedRate(() -> {
+            if (pollInFlight.compareAndSet(false, true)) {
+                try {
+                    loadProducts(true);
+                } catch (Exception ignore) {
+                    pollInFlight.set(false);
+                }
+            }
+        }, 10, 10, TimeUnit.SECONDS);
+    }
+
+    private void stopPolling() {
+        if (poller != null) {
+            poller.shutdownNow();
+            poller = null;
+        }
     }
 
     // 让表格高度刚好容纳 pageSize 行，避免出现表格内部空白
