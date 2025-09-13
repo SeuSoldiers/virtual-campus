@@ -1,6 +1,8 @@
 package seu.virtualcampus.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.Cart;
@@ -14,6 +16,8 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+
+    private static final Logger log = LoggerFactory.getLogger(CartController.class);
 
     @PostMapping("/add")
     public ResponseEntity<String> addCartItem(@RequestBody Cart cart) {
@@ -100,14 +104,18 @@ public class CartController {
                                         @RequestParam String productId, 
                                         @RequestParam int quantity) {
         try {
+            log.info("[CartController] addItem called. userId={}, productId={}, quantity={}", userId, productId, quantity);
             int result = cartService.addItem(userId, productId, quantity);
             if (result > 0) {
+                log.info("[CartController] addItem success. affectedRows={}", result);
                 return ResponseEntity.ok("商品添加到购物车成功");
             } else {
+                log.warn("[CartController] addItem returned 0. userId={}, productId={}, quantity={}", userId, productId, quantity);
                 return ResponseEntity.badRequest().body("添加商品失败");
             }
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            log.error("[CartController] addItem error: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("添加商品异常: " + e.getMessage());
         }
     }
 

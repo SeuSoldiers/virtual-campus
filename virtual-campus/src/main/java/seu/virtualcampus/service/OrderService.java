@@ -3,6 +3,8 @@ package seu.virtualcampus.service;
 import okhttp3.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +23,7 @@ import java.util.*;
 
 @Service
 public class OrderService {
+    private static final Logger log = LoggerFactory.getLogger(OrderService.class);
 
     @Autowired
     private OrderMapper orderMapper;
@@ -392,17 +395,20 @@ public class OrderService {
         Map<String, Object> result = new HashMap<>();
         
         try {
+            log.info("[OrderService] deliver start. adminId={}, orderId={}", adminId, orderId);
             // TODO: 校验管理员身份（后期接统一身份认证）
             // AdminService.validateAdmin(adminId);
             
             Order order = orderMapper.selectById(orderId);
             if (order == null) {
+                log.warn("[OrderService] order not found: {}", orderId);
                 result.put("success", false);
                 result.put("message", "订单不存在");
                 return result;
             }
             
             if (!"PAID".equals(order.getStatus())) {
+                log.warn("[OrderService] invalid status for deliver. orderId={}, status={}", orderId, order.getStatus());
                 result.put("success", false);
                 result.put("message", "只能发货已支付的订单");
                 return result;
@@ -411,12 +417,14 @@ public class OrderService {
             // 更新订单状态为已发货
             order.setStatus("SHIPPED");
             order.setUpdatedAt(LocalDateTime.now());
-            orderMapper.update(order);
+            int rows = orderMapper.update(order);
+            log.info("[OrderService] update order rows: {}", rows);
             
             result.put("success", true);
             result.put("message", "订单发货成功");
             
         } catch (Exception e) {
+            log.error("[OrderService] deliver error: {}", e.getMessage(), e);
             result.put("success", false);
             result.put("message", "发货失败: " + e.getMessage());
         }

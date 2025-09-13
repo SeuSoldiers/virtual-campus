@@ -141,6 +141,51 @@ public class CartViewController {
             new SimpleStringProperty("删除")
         );
 
+        // 操作列 - 改为可点击按钮：点击后减少1件；若数量为1则删除该项
+        actionCol.setCellFactory(col -> new TableCell<>() {
+            private final Button deleteBtn = new Button("删除");
+            private boolean pending = false;
+
+            {
+                deleteBtn.setOnAction(evt -> {
+                    if (pending) return;
+                    CartItemView item = getTableView().getItems().get(getIndex());
+                    if (item == null) return;
+
+                    int currentQty = item.getQuantity();
+                    int newQty = currentQty - 1;
+                    deleteBtn.setDisable(true);
+                    pending = true;
+
+                    System.out.println("[Cart] 点击删除：cartItemId=" + item.getCartItemId() + ", 当前数量=" + currentQty + ", 新数量=" + newQty);
+
+                    if (newQty > 0) {
+                        updateQuantity(item, newQty);
+                    } else {
+                        deleteCartItem(item);
+                    }
+
+                    // 网络请求异步完成后会刷新表格/列表；这里做一个简易的延时恢复，避免按钮长时间不可用
+                    Platform.runLater(() -> {
+                        deleteBtn.setDisable(false);
+                        pending = false;
+                    });
+                });
+                deleteBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #e74c3c; -fx-underline: true;");
+                setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            }
+
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty) {
+                    setGraphic(null);
+                } else {
+                    setGraphic(deleteBtn);
+                }
+            }
+        });
+
         // 监听表格数据变化，自动更新合计，避免异步加载造成的显示不同步
         cartTable.getItems().addListener((javafx.collections.ListChangeListener<CartItemView>) change -> {
             calculateTotal();

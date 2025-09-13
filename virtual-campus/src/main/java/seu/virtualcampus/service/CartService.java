@@ -1,6 +1,8 @@
 package seu.virtualcampus.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import seu.virtualcampus.domain.Cart;
 import seu.virtualcampus.domain.Product;
@@ -20,6 +22,8 @@ public class CartService {
 
     @Autowired
     private ProductMapper productMapper;
+
+    private static final Logger log = LoggerFactory.getLogger(CartService.class);
 
     public int addCartItem(Cart cart) {
         // 检查是否已存在相同商品
@@ -72,9 +76,11 @@ public class CartService {
      * 添加商品到购物车
      */
     public int addItem(String userId, String productId, int quantity) {
+        log.info("[CartService] addItem start. userId={}, productId={}, quantity={}", userId, productId, quantity);
         // 检查商品是否存在
         Product product = productMapper.selectById(productId);
         if (product == null) {
+            log.warn("[CartService] product not found. productId={}", productId);
             throw new RuntimeException("商品不存在");
         }
 
@@ -84,7 +90,10 @@ public class CartService {
         if (existingItem != null) {
             // 如果已存在，更新数量
             int newQuantity = existingItem.getQuantity() + quantity;
-            return cartMapper.updateQuantity(existingItem.getCartItemId(), newQuantity);
+            int rows = cartMapper.updateQuantity(existingItem.getCartItemId(), newQuantity);
+            log.info("[CartService] existing cart item. cartItemId={}, oldQty={}, newQty={}, affectedRows={}",
+                    existingItem.getCartItemId(), existingItem.getQuantity(), newQuantity, rows);
+            return rows;
         } else {
             // 如果不存在，添加新项
             Cart cart = new Cart();
@@ -93,7 +102,9 @@ public class CartService {
             cart.setProductId(productId);
             cart.setQuantity(quantity);
             cart.setIsActive(1);
-            return cartMapper.insert(cart);
+            int rows = cartMapper.insert(cart);
+            log.info("[CartService] inserted new cart item. cartItemId={}, affectedRows={}", cart.getCartItemId(), rows);
+            return rows;
         }
     }
 
