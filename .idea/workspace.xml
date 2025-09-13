@@ -6,6 +6,11 @@
   <component name="ChangeListManager">
     <list default="true" id="589c7e01-ba43-400f-a16b-e0d81dec4008" name="更改" comment="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_administrationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/bank_changestatusController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/java/seu/virtualcampus/ui/order/CheckoutController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtual-campus/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/virtual-campus/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/virtualcampus.sqlite" beforeDir="false" afterPath="$PROJECT_DIR$/virtualcampus.sqlite" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,7 +20,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="YYX02" />
+        <entry key="$PROJECT_DIR$" value="supermerge" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -39,7 +44,7 @@
     &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;Spring Boot.VirtualCampusApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;merge-shopandbank&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;supermerge&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/yichi-zhang/virtual-campus&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -84,7 +89,9 @@
       <workItem from="1757681363157" duration="1581000" />
       <workItem from="1757684737659" duration="7320000" />
       <workItem from="1757692817657" duration="4626000" />
-      <workItem from="1757738835300" duration="671000" />
+      <workItem from="1757738835300" duration="1302000" />
+      <workItem from="1757756803541" duration="801000" />
+      <workItem from="1757762661754" duration="7118000" />
     </task>
     <task id="LOCAL-00001" summary="...">
       <option name="closed" value="true" />
@@ -134,7 +141,15 @@
       <option name="project" value="LOCAL" />
       <updated>1757697373284</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="feat: 商店消费扣除银行卡里的钱功能已实现（立即付款/先用后付）">
+      <option name="closed" value="true" />
+      <created>1757739517508</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1757739517508</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -151,7 +166,7 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="merge-shopandbank" />
+                        <option value="supermerge" />
                       </list>
                     </value>
                   </entry>

@@ -11,6 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert.AlertType;
+import javafx.stage.Window;
 
 import java.io.IOException;
 import java.net.URI;
@@ -19,6 +20,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class bank_changestatusController {
 
@@ -157,8 +160,20 @@ public class bank_changestatusController {
             // 获取当前窗口
             Stage currentStage = (Stage) backbtn.getScene().getWindow();
 
-            // 先关闭当前窗口
-            currentStage.close();
+            // 收集所有需要关闭的窗口（除了将要创建的登录窗口）
+            List<Stage> stagesToClose = new ArrayList<>();
+            for (Window window : Window.getWindows()) {
+                if (window instanceof Stage) {
+                    stagesToClose.add((Stage) window);
+                }
+            }
+
+            // 关闭所有收集到的窗口
+            for (Stage stage : stagesToClose) {
+                if (stage != null && stage.isShowing()) {
+                    stage.close();
+                }
+            }
 
             // 创建新的登录窗口
             FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_login.fxml"));
@@ -175,6 +190,7 @@ public class bank_changestatusController {
             System.out.println("无法加载银行登录页面: " + e.getMessage());
         }
     }
+
 
     // 调用后端更新状态API
     private boolean callUpdateStatusAPI(String accountNumber, String newStatus) {

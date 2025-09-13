@@ -189,7 +189,7 @@ public class CheckoutController implements Initializable {
             String paymentMethod = paymentMethodBox.getValue(); // 使用 getValue() 而不是 getSelectedItem()
             String fromAccount = accountNumberField.getText().trim();
             String password = accountPasswordField.getText().trim(); // 直接获取文本而不是 getPassword()
-            String toAccount = "AC1757590242160D31314"; // 默认商家账户（要根据数据库里规定的那个商家的银行账户账号来更改）
+            String toAccount = "AC1757654040349D143E9"; // 默认商家账户（要根据数据库里规定的那个商家的银行账户账号来更改）
             System.out.println("[Checkout] pay: orderId=" + currentOrderId + ", userId=" + currentUserId + ", method=" + paymentMethod + ", fromAccount=" + fromAccount);
 
             // 验证输入

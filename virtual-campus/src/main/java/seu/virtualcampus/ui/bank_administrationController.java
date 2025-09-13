@@ -998,9 +998,32 @@ public class bank_administrationController {
             showAlert("错误", "请输入账户号码");
             return;
         }
+        ObservableList<Transaction> allTransactions = TableView4.getItems();
 
-        // 调用后端API获取特定账户相关的所有交易记录
-        //findTransactionsByAccountNumber(accountNumber);
+        // 如果当前表格为空或没有数据，则从后端重新加载数据
+        if (allTransactions == null || allTransactions.isEmpty()) {
+            // 先加载所有违约交易记录
+            loadAllTransactions();
+            return;
+        }
+        allTransactions=TableView4.getItems();
+        // 筛选出 fromAccountNumber 等于输入账户号的交易记录
+        ObservableList<Transaction> filteredTransactions = FXCollections.observableArrayList();
+
+        for (Transaction transaction : allTransactions) {
+            if (accountNumber.equals(transaction.getFromAccountNumber())) {
+                filteredTransactions.add(transaction);
+            }
+        }
+
+        // 将筛选结果填入 TableView4
+        TableView4.setItems(filteredTransactions);
+
+        // 如果没有找到匹配的记录，提示用户
+        if (filteredTransactions.isEmpty()) {
+            showAlert("提示", "未找到账户号码为 " + accountNumber + " 的违约交易记录");
+        }
+
     }
 
 
