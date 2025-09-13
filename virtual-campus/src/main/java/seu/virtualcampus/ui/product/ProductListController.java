@@ -154,19 +154,6 @@ public class ProductListController {
         }
     }
 
-    @FXML
-    private void handleBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) productTable.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "返回主界面时发生异常", e);
-            showMessage("返回失败：" + e.getMessage(), true);
-        }
-    }
-
     private void loadProducts() {
         // 构建请求URL
         HttpUrl.Builder urlBuilder;
@@ -276,16 +263,28 @@ public class ProductListController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_detail.fxml"));
             Parent root = loader.load();
-            
-            // 获取控制器并传入商品ID
             ProductDetailController controller = loader.getController();
             controller.setProductId(productId);
-            
-            Stage stage = (Stage) productTable.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            // 压栈并切换
+            MainApp.pushAndSet(productTable, root);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "打开商品详情时发生异常", e);
             showMessage("打开详情失败：" + e.getMessage(), true);
+        }
+    }
+
+    @FXML
+    private void handleBack() {
+        if (!MainApp.goBack(productTable)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) productTable.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "返回上一页失败", e);
+                showMessage("返回失败：" + e.getMessage(), true);
+            }
         }
     }
 

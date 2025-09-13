@@ -107,22 +107,8 @@ public class DashboardController {
             System.out.println("DEBUG: FXML文件找到: " + fxmlUrl.toString());
             
             System.out.println("DEBUG: 开始加载FXML文件");
-            FXMLLoader loader = new FXMLLoader(fxmlUrl);
-            
-            System.out.println("DEBUG: 开始解析FXML");
-            Parent root = loader.load();
-            System.out.println("DEBUG: FXML解析完成");
-            
-            System.out.println("DEBUG: 获取当前舞台");
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            if (stage == null) {
-                System.out.println("ERROR: 无法获取当前舞台");
-                showErrorAlert("界面错误", "无法获取当前窗口。");
-                return;
-            }
-            
-            System.out.println("DEBUG: 设置新场景");
-            stage.setScene(new Scene(root));
+            System.out.println("DEBUG: 导航到管理商品界面");
+            MainApp.navigateTo("/seu/virtualcampus/ui/admin_products.fxml", entryBox);
             System.out.println("DEBUG: 管理商品界面打开成功");
             
         } catch (Exception e) {
@@ -138,10 +124,7 @@ public class DashboardController {
      */
     private void openAdminShipUI() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/admin_ship.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/admin_ship.fxml", entryBox);
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到发货管理UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开发货管理界面，请检查系统状态。");
@@ -161,10 +144,7 @@ public class DashboardController {
 
     private void openStudentUI() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/student.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/student.fxml", entryBox);
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到学生UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开学生界面，请检查系统状态。");
@@ -173,10 +153,7 @@ public class DashboardController {
 
     private void openRegistrarUI() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/registrar.fxml", entryBox);
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到教务UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开教务界面，请检查系统状态。");
@@ -185,10 +162,7 @@ public class DashboardController {
 
     private void openProductListUI() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/product_list.fxml", entryBox);
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到商品列表UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开商品列表界面，请检查系统状态。");
@@ -198,16 +172,7 @@ public class DashboardController {
     private void openCartUI() {
         try {
             System.out.println("开始加载购物车界面...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            System.out.println("FXML路径: " + getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            Parent root = loader.load();
-            System.out.println("FXML加载成功");
-            
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            
+            MainApp.navigateTo("/seu/virtualcampus/ui/cart.fxml", entryBox);
             System.out.println("购物车界面切换成功");
         } catch (Exception e) {
             System.err.println("购物车界面加载详细错误信息:");
@@ -219,10 +184,7 @@ public class DashboardController {
 
     private void openOrderListUI() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/order_list.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) entryBox.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/order_list.fxml", entryBox);
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到订单列表UI时发生异常", e);
             showErrorAlert("切换失败", "无法打开订单列表界面，请检查系统状态。");

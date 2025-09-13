@@ -1,6 +1,11 @@
 package seu.virtualcampus.ui.admin;
 
 import javafx.application.Platform;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+import seu.virtualcampus.ui.MainApp;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -820,6 +825,24 @@ public class AdminProductsController implements Initializable {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    /**
+     * 返回上一级（管理员/教务）页面
+     */
+    @FXML
+    private void handleBack() {
+        if (!MainApp.goBack(productsTable)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) productsTable.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("管理员界面");
+            } catch (Exception e) {
+                showAlert("错误", "返回上一页失败: " + e.getMessage());
+            }
+        }
     }
 
     // 数据传输对象类

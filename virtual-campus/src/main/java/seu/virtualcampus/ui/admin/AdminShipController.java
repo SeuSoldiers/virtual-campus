@@ -150,16 +150,16 @@ public class AdminShipController implements Initializable {
      */
     @FXML
     private void handleBack() {
-        try {
-            // 返回到管理员界面
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
-            Parent root = loader.load();
-            
-            Stage stage = (Stage) orderIdField.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.setTitle("管理员界面");
-        } catch (IOException e) {
-            showAlert("错误", "返回管理页面失败: " + e.getMessage());
+        if (!MainApp.goBack(orderIdField)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) orderIdField.getScene().getWindow();
+                stage.setScene(new Scene(root));
+                stage.setTitle("管理员界面");
+            } catch (IOException e) {
+                showAlert("错误", "返回管理页面失败: " + e.getMessage());
+            }
         }
     }
 

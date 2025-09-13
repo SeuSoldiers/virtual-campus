@@ -207,16 +207,7 @@ public class ProductDetailController {
     private void handleViewCart() {
         try {
             System.out.println("商品详情页开始加载购物车界面...");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            System.out.println("FXML路径: " + getClass().getResource("/seu/virtualcampus/ui/cart.fxml"));
-            
-            Parent root = loader.load();
-            System.out.println("FXML加载成功");
-            
-            Stage stage = (Stage) productIdLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            
+            MainApp.navigateTo("/seu/virtualcampus/ui/cart.fxml", productIdLabel);
             System.out.println("购物车界面切换成功");
         } catch (Exception e) {
             System.err.println("商品详情页购物车界面加载详细错误信息:");
@@ -228,14 +219,16 @@ public class ProductDetailController {
 
     @FXML
     private void handleBackToList() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) productIdLabel.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "返回商品列表时发生异常", e);
-            showMessage("返回失败：" + e.getMessage(), true);
+        if (!MainApp.goBack(productIdLabel)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) productIdLabel.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "返回商品列表时发生异常", e);
+                showMessage("返回失败：" + e.getMessage(), true);
+            }
         }
     }
 

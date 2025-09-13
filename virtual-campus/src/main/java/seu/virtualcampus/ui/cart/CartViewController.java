@@ -475,10 +475,7 @@ public class CartViewController {
     @FXML
     private void handleGoShopping() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) cartTable.getScene().getWindow();
-            stage.setScene(new Scene(root));
+            MainApp.navigateTo("/seu/virtualcampus/ui/product_list.fxml", cartTable);
         } catch (Exception e) {
             logger.log(Level.SEVERE, "返回商品列表时发生异常", e);
             showMessage("返回失败：" + e.getMessage(), true);
@@ -487,14 +484,16 @@ public class CartViewController {
 
     @FXML
     private void handleBack() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-            Parent root = loader.load();
-            Stage stage = (Stage) cartTable.getScene().getWindow();
-            stage.setScene(new Scene(root));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "返回主界面时发生异常", e);
-            showMessage("返回失败：" + e.getMessage(), true);
+        if (!MainApp.goBack(cartTable)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) cartTable.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "返回主界面时发生异常", e);
+                showMessage("返回失败：" + e.getMessage(), true);
+            }
         }
     }
 

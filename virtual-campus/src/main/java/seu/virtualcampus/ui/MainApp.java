@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.logging.*;
 
 
@@ -18,6 +20,50 @@ public class MainApp extends Application {
     //**************************************
     private static Stage primaryStage;
     //*****************************************
+    // 简易导航栈：保存之前的 Scene，实现“返回上一页”
+    private static final Deque<Scene> NAV_STACK = new ArrayDeque<>();
+
+    public static void navigateTo(String fxmlPath, javafx.scene.Node anyNodeInCurrentScene) {
+        try {
+            Stage stage = (Stage) anyNodeInCurrentScene.getScene().getWindow();
+            // 将当前 Scene 入栈
+            if (stage.getScene() != null) {
+                NAV_STACK.push(stage.getScene());
+            }
+            FXMLLoader loader = new FXMLLoader(MainApp.class.getResource(fxmlPath));
+            Scene scene = new Scene(loader.load());
+            stage.setScene(scene);
+        } catch (IOException e) {
+            System.err.println("导航失败: " + e.getMessage());
+        }
+    }
+
+    public static boolean goBack(javafx.scene.Node anyNodeInCurrentScene) {
+        try {
+            Stage stage = (Stage) anyNodeInCurrentScene.getScene().getWindow();
+            if (!NAV_STACK.isEmpty()) {
+                Scene prev = NAV_STACK.pop();
+                stage.setScene(prev);
+                return true;
+            }
+        } catch (Exception e) {
+            System.err.println("返回上一页失败: " + e.getMessage());
+        }
+        return false;
+    }
+
+    // 辅助：在压栈当前场景后切换到给定根节点对应的新场景
+    public static void pushAndSet(javafx.scene.Node anyNodeInCurrentScene, javafx.scene.Parent root) {
+        try {
+            Stage stage = (Stage) anyNodeInCurrentScene.getScene().getWindow();
+            if (stage.getScene() != null) {
+                NAV_STACK.push(stage.getScene());
+            }
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            System.err.println("pushAndSet 失败: " + e.getMessage());
+        }
+    }
     public static void switchToStudentScene() throws Exception {
         FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("/seu/virtualcampus/ui/student.fxml"));
         primaryStage.setScene(new Scene(loader.load()));

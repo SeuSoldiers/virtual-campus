@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import okhttp3.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.net.URL;
@@ -36,6 +37,8 @@ public class OrderListController implements Initializable {
 
     @FXML
     private Button refreshButton;
+    @FXML
+    private Button backButton;
 
     @FXML
     private TableView<OrderModel> ordersTable;
@@ -70,7 +73,8 @@ public class OrderListController implements Initializable {
     private String currentUserId;
     private int currentPage = 1;
     private int totalPages = 1;
-    private final int pageSize = 10;
+    private final int pageSize = 10; // 每页固定 10 条
+    private ObservableList<OrderModel> allOrders = FXCollections.observableArrayList();
 
     // 订单模型类
     public static class OrderModel {
@@ -104,9 +108,9 @@ public class OrderListController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // 初始化状态选择框
+        // 初始化状态选择框（“已确认”改为“已完成”）
         statusChoiceBox.setItems(FXCollections.observableArrayList(
-                "全部", "待支付", "已支付", "已发货", "已确认", "已取消"
+                "全部", "待支付", "已支付", "已发货", "已完成", "已取消"
         ));
         statusChoiceBox.setValue("全部");
 
@@ -192,6 +196,7 @@ public class OrderListController implements Initializable {
         refreshButton.setOnAction(event -> loadOrders());
         prevPageButton.setOnAction(event -> goToPreviousPage());
         nextPageButton.setOnAction(event -> goToNextPage());
+        if (backButton != null) backButton.setOnAction(e -> handleBack());
 
         // 获取当前用户ID
         this.currentUserId = seu.virtualcampus.ui.MainApp.username != null ? seu.virtualcampus.ui.MainApp.username : "1";
@@ -226,7 +231,7 @@ public class OrderListController implements Initializable {
                         try {
                             @SuppressWarnings("unchecked")
                             java.util.List<java.util.Map<String, Object>> raw = objectMapper.readValue(responseBody, java.util.List.class);
-                            // 客户端按状态过滤，并转换为 OrderModel
+                            // 客户端按状态过滤，并转换为 OrderModel；随后进行前端分页
                             ObservableList<OrderModel> orders = FXCollections.observableArrayList();
                             for (java.util.Map<String, Object> m : raw) {
                                 String rawOrderId = String.valueOf(m.get("orderId"));
@@ -237,8 +242,12 @@ public class OrderListController implements Initializable {
                                 Long numericId = extractNumericId(rawOrderId);
                                 orders.add(new OrderModel(numericId, st, amt, created, rawOrderId));
                             }
-                            ordersTable.setItems(orders);
-                            totalPages = 1; updatePageInfo();
+                            // 保存全集并分页显示
+                            allOrders.setAll(orders);
+                            totalPages = Math.max(1, (int) Math.ceil(allOrders.size() / (double) pageSize));
+                            currentPage = Math.min(currentPage, totalPages);
+                            showPage(currentPage);
+                            updatePageInfo();
                         } catch (Exception e) {
                             showAlert("错误", "解析订单列表失败: " + e.getMessage());
                         }
@@ -258,6 +267,24 @@ public class OrderListController implements Initializable {
         return rawOrderId != null ? (long) rawOrderId.hashCode() : 0L;
     }
 
+    // 展示指定页（1-based）
+    private void showPage(int page) {
+        if (allOrders.isEmpty()) {
+            ordersTable.setItems(FXCollections.observableArrayList());
+            updatePageInfo();
+            return;
+        }
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, allOrders.size());
+        if (start >= end) {
+            currentPage = 1;
+            start = 0;
+            end = Math.min(pageSize, allOrders.size());
+        }
+        ordersTable.setItems(FXCollections.observableArrayList(allOrders.subList(start, end)));
+        updatePageInfo();
+    }
+
     /**
      * 搜索订单
      */
@@ -274,7 +301,7 @@ public class OrderListController implements Initializable {
     private void goToPreviousPage() {
         if (currentPage > 1) {
             currentPage--;
-            loadOrders();
+            showPage(currentPage);
         }
     }
 
@@ -285,7 +312,7 @@ public class OrderListController implements Initializable {
     private void goToNextPage() {
         if (currentPage < totalPages) {
             currentPage++;
-            loadOrders();
+            showPage(currentPage);
         }
     }
 
@@ -386,23 +413,32 @@ public class OrderListController implements Initializable {
         });
     }
 
+    /** 返回上一页（若无历史则回到Dashboard） */
+    @FXML
+    private void handleBack() {
+        if (!MainApp.goBack(ordersTable)) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
+                Parent root = loader.load();
+                Stage stage = (Stage) ordersTable.getScene().getWindow();
+                stage.setScene(new Scene(root));
+            } catch (IOException e) {
+                showAlert("错误", "返回首页失败: " + e.getMessage());
+            }
+        }
+    }
+
     /**
      * 获取状态值
      */
     private String getStatusValue(String statusText) {
         switch (statusText) {
-            case "待支付":
-                return "PENDING";
-            case "已支付":
-                return "PAID";
-            case "已发货":
-                return "DELIVERED";
-            case "已确认":
-                return "CONFIRMED";
-            case "已取消":
-                return "CANCELLED";
-            default:
-                return "ALL";
+            case "待支付": return "PENDING";
+            case "已支付": return "PAID";
+            case "已发货": return "SHIPPED";     // 统一为 SHIPPED
+            case "已完成": return "COMPLETED";   // “已确认”改为“已完成”
+            case "已取消": return "CANCELLED";
+            default: return "ALL";
         }
     }
 
@@ -410,19 +446,16 @@ public class OrderListController implements Initializable {
      * 获取状态显示文本
      */
     private String getStatusText(String status) {
+        if (status == null) return "";
         switch (status) {
-            case "PENDING":
-                return "待支付";
-            case "PAID":
-                return "已支付";
-            case "DELIVERED":
-                return "已发货";
-            case "CONFIRMED":
-                return "已确认";
-            case "CANCELLED":
-                return "已取消";
-            default:
-                return status;
+            case "PENDING": return "待支付";
+            case "PAID": return "已支付";
+            case "DELIVERED": return "已发货"; // 兼容旧值
+            case "SHIPPED": return "已发货";
+            case "CONFIRMED": return "已完成";  // 兼容旧值
+            case "COMPLETED": return "已完成";
+            case "CANCELLED": return "已取消";
+            default: return status;
         }
     }
 
