@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.CourseSelectionController">
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="选课系统" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;" />
+            <Button fx:id="backButton" text="返回" onAction="#handleBack" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+            <Button fx:id="timetableButton" text="我的课程表" onAction="#handleTimetable" style="-fx-background-color: #3498db; -fx-text-fill: white;" />
+            <Label fx:id="studentIdLabel" style="-fx-text-fill: white; -fx-font-size: 14px;" />
+        </HBox>
+    </top>
+    <center>
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <Tab text="所有课程">
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <Label text="搜索课程:" />
+                        <TextField fx:id="searchField" promptText="输入课程名称或ID" />
+                        <Button fx:id="searchButton" text="搜索" />
+                        <Button fx:id="refreshButton" text="刷新" />
+                    </HBox>
+                    <TableView fx:id="courseTable" style="-fx-padding: 10;">
+                        <columns>
+                            <TableColumn text="课程ID" fx:id="courseIdColumn" />
+                            <TableColumn text="课程名称" fx:id="courseNameColumn" />
+                            <TableColumn text="授课教师" fx:id="teacherColumn" />
+                            <TableColumn text="学分" fx:id="creditColumn" />
+                            <TableColumn text="容量" fx:id="capacityColumn" />
+                            <TableColumn text="已选人数" fx:id="enrollmentColumn" />
+                            <TableColumn text="上课时间" fx:id="timeColumn" />
+                            <TableColumn text="上课地点" fx:id="locationColumn" />
+                            <TableColumn text="操作" fx:id="actionColumn" />
+                        </columns>
+                    </TableView>
+                    <!-- 在课程表格下方添加分页控件 -->
+                    <HBox fx:id="paginationContainer" alignment="CENTER" spacing="10" style="-fx-padding: 10;">
+                        <Button fx:id="prevPageButton" text="上一页" />
+                        <Label fx:id="pageInfoLabel" />
+                        <Button fx:id="nextPageButton" text="下一页" />
+                    </HBox>
+                    <Label fx:id="loadingLabel" text="加载中..." />
+                </VBox>
+            </Tab>
+            <Tab text="已选课程">
+                <VBox spacing="10" style="-fx-padding: 15;">
+                    <TableView fx:id="selectedCourseTable" style="-fx-padding: 10;">
+                        <columns>
+                            <TableColumn text="课程ID" fx:id="selectedCourseIdColumn" />
+                            <TableColumn text="课程名称" fx:id="selectedCourseNameColumn" />
+                            <TableColumn text="授课教师" fx:id="selectedTeacherColumn" />
+                            <TableColumn text="学分" fx:id="selectedCreditColumn" />
+                            <TableColumn text="上课时间" fx:id="selectedTimeColumn" />
+                            <TableColumn text="上课地点" fx:id="selectedLocationColumn" />
+                            <TableColumn text="操作" fx:id="selectedActionColumn" />
+                        </columns>
+                    </TableView>
+                    <Label fx:id="noCoursesLabel" text="暂无已选课程" visible="false" />
+                </VBox>
+            </Tab>
+        </TabPane>
+    </center>
+</BorderPane>

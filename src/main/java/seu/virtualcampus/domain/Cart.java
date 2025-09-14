@@ -1,0 +1,16 @@
+package seu.virtualcampus.domain;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class Cart {
+    private String cartItemId;
+    private String userId;
+    private String productId;
+    private Integer quantity;
+    private Integer isActive;
+}
