@@ -89,6 +89,39 @@ public class LoginController {
     }
 
     @FXML
+    private void handleRegisterAndLogin() {
+        String username = usernameField.getText();
+        String password = passwordField.getText();
+        ObjectMapper mapper = new ObjectMapper();
+        String json = String.format("{\"username\":\"%s\",\"password\":\"%s\",\"role\":\"student\"}", username, password);
+        RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
+        Request request = new Request.Builder()
+                .url("http://localhost:8080/api/auth/register")
+                .post(body)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                logger.log(Level.WARNING, "网络错误: " + e.getMessage());
+                Platform.runLater(() -> msgLabel.setText("网络错误，请检查连接"));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                final String responseBody = response.body() != null ? response.body().string() : null;
+                logger.info("注册 Response code: " + response.code());
+                logger.info("注册 Response body: " + responseBody);
+                if (!response.isSuccessful()) {
+                    Platform.runLater(() -> msgLabel.setText("注册失败: " + (responseBody != null ? responseBody : "用户名已存在或参数错误")));
+                    return;
+                }
+                // 注册成功后自动登录
+                Platform.runLater(() -> handleLogin());
+            }
+        });
+    }
+
+    @FXML
     private void handleExit() {
         Platform.exit();
     }

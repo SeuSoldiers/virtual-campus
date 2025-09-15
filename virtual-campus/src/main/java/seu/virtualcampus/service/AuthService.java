@@ -47,4 +47,20 @@ public class AuthService {
     public void logout(String token) {
         tokenStore.remove(token);
     }
+
+    public boolean register(String username, String password, String role) {
+        User exist;
+        try {
+            exist = userMapper.findByUsername(Integer.parseInt(username));
+        } catch (NumberFormatException e) {
+            return false; // 用户名必须为数字
+        }
+        if (exist != null) return false;
+        User user = new User();
+        user.setUsername(Integer.parseInt(username));
+        user.setPassword(password);
+        user.setRole(role);
+        int res = userMapper.insert(user);
+        return res > 0;
+    }
 }

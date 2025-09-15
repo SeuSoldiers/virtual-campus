@@ -12,6 +12,8 @@
                    style="-fx-font-size: 18px; -fx-pref-width: 260; -fx-background-radius: 8; -fx-padding: 8;"/>
     <Button text="登录" onAction="#handleLogin"
             style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #4f8cff; -fx-text-fill: white;"/>
+    <Button text="注册" onAction="#handleRegisterAndLogin"
+            style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #4fcc7f; -fx-text-fill: white;"/>
     <Button text="退出" onAction="#handleExit"
             style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #ff4f4f; -fx-text-fill: white;"/>
     <Label fx:id="msgLabel" textFill="red" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
