@@ -189,14 +189,14 @@ public class ProductListController {
 
         if (!currentKeyword.isEmpty()) {
             // 搜索模式
-            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/products/search")).newBuilder()
+            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/products/search")).newBuilder()
                     .addQueryParameter("keyword", currentKeyword)
                     .addQueryParameter("page", String.valueOf(currentPage))
                     .addQueryParameter("size", String.valueOf(pageSize))
                     .addQueryParameter("sort", currentSort);
         } else {
             // 普通列表模式
-            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/products")).newBuilder()
+            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/products")).newBuilder()
                     .addQueryParameter("page", String.valueOf(currentPage))
                     .addQueryParameter("size", String.valueOf(pageSize))
                     .addQueryParameter("sort", currentSort);

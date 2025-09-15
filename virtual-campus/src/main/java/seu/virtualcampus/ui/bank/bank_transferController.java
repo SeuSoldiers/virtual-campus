@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import seu.virtualcampus.ui.MainApp;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -91,7 +92,7 @@ public class bank_transferController {
             }
 
             // 构建URL参数
-            String baseUrl = "http://localhost:8080/api/accounts/transfer";
+            String baseUrl = "http://" + MainApp.host + "/api/accounts/transfer";
             String url = String.format("%s?fromAccount=%s&toAccount=%s&amount=%s&password=%s",
                     baseUrl, fromAccount, toAccount, amount.toString(),
                     URLEncoder.encode(password, StandardCharsets.UTF_8.toString()));

@@ -65,7 +65,7 @@ public class bank_manageController {
             return;
         }
 
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/accountInfo";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/accountInfo";
 
         Request request = new Request.Builder()
                 .url(url)

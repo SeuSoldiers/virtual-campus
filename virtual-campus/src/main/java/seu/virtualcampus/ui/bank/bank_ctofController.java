@@ -166,7 +166,7 @@ public class bank_ctofController {
         BigDecimal amount = new BigDecimal(amounttext.getText());
 
         // 构造请求URL
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/current-to-fixed";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/current-to-fixed";
 
         // 构造请求体
         Map<String, String> requestBody = new HashMap<>();

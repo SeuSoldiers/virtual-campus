@@ -7,6 +7,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import seu.virtualcampus.ui.MainApp;
 
 import java.math.BigDecimal;
 import java.net.URI;
@@ -56,7 +57,7 @@ public class bank_depositController {
             String accountNumber = bank_utils.getCurrentAccountNumber();
 
             // 构建URL参数
-            String baseUrl = "http://localhost:8080/api/accounts"; // 根据实际服务地址调整
+            String baseUrl = "http://" + MainApp.host + "/api/accounts"; // 根据实际服务地址调整
             String url = String.format("%s/%s/deposit?amount=%s",
                     baseUrl, accountNumber, amount.toString());
 

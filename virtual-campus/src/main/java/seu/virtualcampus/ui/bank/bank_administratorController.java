@@ -49,7 +49,6 @@ public class bank_administratorController {
             // 创建新场景并设置到舞台
             Scene openAccountScene = new Scene(openAccountRoot);
             currentStage.setScene(openAccountScene);
-            currentStage.setTitle("银行登录界面");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -91,7 +90,7 @@ public class bank_administratorController {
 
     private void verifyAdminAndPassword(String accountNumber, String password) {
         // 构造URL，使用管理员验证端点
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/verify-admin-password";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/verify-admin-password";
 
 
         // 构造请求参数

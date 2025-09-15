@@ -48,7 +48,7 @@ public class RegistrarController {
 
     private void loadPending() {
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/audit/pending")
+                .url("http://" + MainApp.host + "/api/audit/pending")
                 .header("Authorization", MainApp.token)
                 .get()
                 .build();
@@ -112,7 +112,7 @@ public class RegistrarController {
         String json = String.format("{\"approve\":%b,\"remark\":\"%s\"}", approve, remark.replace("\"", "\\\""));
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/audit/review/" + id)
+                .url("http://" + MainApp.host + "/api/audit/review/" + id)
                 .header("Authorization", MainApp.token)
                 .post(body)
                 .build();

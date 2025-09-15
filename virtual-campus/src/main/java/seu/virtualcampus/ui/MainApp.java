@@ -16,8 +16,13 @@ public class MainApp extends Application {
     public static String token; // 登录后保存 token
     public static String role; // 'student' 或 'registrar'
     public static String username; // 新增，保存当前用户名
+    public static String host = "127.0.0.1:12345"; // 新增，保存后端服务地址（ip:port）
 
     public static void main(String[] args) {
+        // 支持自定义ip和端口号，作为程序参数传递
+        if (args.length > 0 && args[0] != null && args[0].matches("\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+")) {
+            host = args[0];
+        }
         // 设置日志编码为UTF-8，防止中文乱码
         LogManager logManager = LogManager.getLogManager();
         Logger rootLogger = logManager.getLogger("");
@@ -42,7 +47,7 @@ public class MainApp extends Application {
         // 设置应用程序图标
         stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png"))));
 
-        stage.setTitle("虚拟校园登录");
+        stage.setTitle("虚拟校园");
         stage.setScene(scene);
         stage.show();
     }

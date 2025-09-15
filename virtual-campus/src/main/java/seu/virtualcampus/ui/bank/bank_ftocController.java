@@ -154,7 +154,7 @@ public class bank_ftocController implements Initializable {
 
     private void convertFixedToCurrent(Transaction transaction, String password) {
         // 构造请求URL
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/fixed-to-current";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/fixed-to-current";
 
         // 构造请求体
         Map<String, String> requestBody = new HashMap<>();
@@ -308,7 +308,7 @@ public class bank_ftocController implements Initializable {
             return;
         }
 
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/fixed-deposits";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/fixed-deposits";
 
         Request request = new Request.Builder()
                 .url(url)

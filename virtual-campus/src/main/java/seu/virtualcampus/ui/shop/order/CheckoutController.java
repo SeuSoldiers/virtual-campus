@@ -17,6 +17,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ import java.util.ResourceBundle;
 public class CheckoutController implements Initializable {
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://" + MainApp.host;
     @FXML
     private TableView<OrderItemModel> orderItemsTable;
     @FXML

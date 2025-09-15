@@ -69,7 +69,7 @@ public class ProductDetailController {
         }
 
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/products/" + currentProductId)
+                .url("http://" + MainApp.host + "/api/products/" + currentProductId)
                 .header("Authorization", MainApp.token)
                 .get()
                 .build();
@@ -164,7 +164,7 @@ public class ProductDetailController {
         int quantity = quantitySpinner.getValue();
 
         // 构建请求URL
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/add-item")).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/cart/add-item")).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .addQueryParameter("productId", currentProduct.getProductId())
                 .addQueryParameter("quantity", String.valueOf(quantity))
@@ -246,7 +246,7 @@ public class ProductDetailController {
         }
 
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/products/" + currentProductId)
+                .url("http://" + MainApp.host + "/api/products/" + currentProductId)
                 .header("Authorization", MainApp.token)
                 .get()
                 .build();

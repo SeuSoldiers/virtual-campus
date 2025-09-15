@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.net.URI;
@@ -183,7 +184,6 @@ public class bank_changestatusController {
             Stage loginStage = new Stage();
             Scene loginScene = new Scene(loginRoot);
             loginStage.setScene(loginScene);
-            loginStage.setTitle("银行登录界面");
             loginStage.show();
 
         } catch (IOException e) {
@@ -196,7 +196,7 @@ public class bank_changestatusController {
     // 调用后端更新状态API
     private boolean callUpdateStatusAPI(String accountNumber, String newStatus) {
         try {
-            String baseUrl = "http://localhost:8080/api/accounts";
+            String baseUrl = "http://" + MainApp.host + "/api/accounts";
             String url = String.format("%s/%s/status?newStatus=%s",
                     baseUrl, accountNumber, URLEncoder.encode(newStatus, StandardCharsets.UTF_8.toString()));
 
@@ -221,7 +221,7 @@ public class bank_changestatusController {
     // 获取账户信息
     private String callGetAccountInfoAPI(String accountNumber) {
         try {
-            String baseUrl = "http://localhost:8080/api/accounts";
+            String baseUrl = "http://" + MainApp.host + "/api/accounts";
             String url = String.format("%s/%s/accountInfo", baseUrl, accountNumber);
 
             HttpClient client = HttpClient.newHttpClient();
@@ -354,7 +354,7 @@ public class bank_changestatusController {
     // 调用后端更新密码API
     private boolean callUpdatePasswordAPI(String accountNumber, String oldPassword, String newPassword) {
         try {
-            String baseUrl = "http://localhost:8080/api/accounts";
+            String baseUrl = "http://" + MainApp.host + "/api/accounts";
             String url = String.format("%s/%s/password", baseUrl, accountNumber);
 
             HttpClient client = HttpClient.newHttpClient();

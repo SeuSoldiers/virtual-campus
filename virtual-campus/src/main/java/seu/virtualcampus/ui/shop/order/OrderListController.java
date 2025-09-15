@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.net.URL;
@@ -30,7 +31,7 @@ public class OrderListController implements Initializable {
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://" + MainApp.host;
     private final int pageSize = 10; // 每页固定 10 条
     @FXML
     private ChoiceBox<String> statusChoiceBox;

@@ -23,7 +23,7 @@ public class AdminShipController implements Initializable {
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://" + MainApp.host;
     @FXML
     private TextField orderIdField;
     @FXML

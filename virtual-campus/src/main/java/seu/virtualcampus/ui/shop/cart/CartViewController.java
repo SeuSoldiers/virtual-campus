@@ -210,7 +210,7 @@ public class CartViewController {
         logger.info("正在加载用户 " + MainApp.username + " 的购物车数据");
         logger.info(" 加载购物车数据: userId=" + MainApp.username);
 
-        String url = "http://localhost:8080/api/cart?userId=" + MainApp.username;
+        String url = "http://" + MainApp.host + "/api/cart?userId=" + MainApp.username;
         Request request = new Request.Builder()
                 .url(url)
                 .header("Authorization", MainApp.token != null ? MainApp.token : "")
@@ -268,7 +268,7 @@ public class CartViewController {
         // 为每个购物车项加载商品详情
         for (Cart cart : carts) {
             Request request = new Request.Builder()
-                    .url("http://localhost:8080/api/products/" + cart.getProductId())
+                    .url("http://" + MainApp.host + "/api/products/" + cart.getProductId())
                     .header("Authorization", MainApp.token)
                     .get()
                     .build();
@@ -369,7 +369,7 @@ public class CartViewController {
             return;
         }
 
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId())).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/cart/" + item.getCartItemId())).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .addQueryParameter("quantity", String.valueOf(newQuantity))
                 .build();
@@ -415,7 +415,7 @@ public class CartViewController {
     }
 
     private void deleteCartItem(CartItemView item) {
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId())).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/cart/" + item.getCartItemId())).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .build();
 
@@ -464,7 +464,7 @@ public class CartViewController {
 
         if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
             Request request = new Request.Builder()
-                    .url("http://localhost:8080/api/cart/clear?userId=" + MainApp.username)
+                    .url("http://" + MainApp.host + "/api/cart/clear?userId=" + MainApp.username)
                     .header("Authorization", MainApp.token)
                     .delete()
                     .build();
@@ -520,7 +520,7 @@ public class CartViewController {
 
     @FXML
     private void handleGoShopping() {
-        DashboardController.navigateToScene("/seu/virtualcampus/ui/dashboard.fxml", cartTable);
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/shop/product_list.fxml", cartTable);
     }
 
     @FXML

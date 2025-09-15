@@ -25,15 +25,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 /**
  * 订单详情页面控制器
  */
 public class OrderDetailController implements Initializable {
+    private static final Logger logger = Logger.getLogger(OrderDetailController.class.getName());
 
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://" + MainApp.host;
     @FXML
     private Label orderIdLabel;
     @FXML
@@ -116,7 +118,7 @@ public class OrderDetailController implements Initializable {
                     if (newWindow != null) {
                         ((javafx.stage.Stage) newWindow).focusedProperty().addListener((o, wasFocused, isFocused) -> {
                             if (isFocused && orderId != null && !orderId.isEmpty()) {
-                                System.out.println("[OrderDetail] 窗口获得焦点，自动刷新详情");
+                                logger.info("[OrderDetail] 窗口获得焦点，自动刷新详情");
                                 loadOrderDetail();
                             }
                         });
@@ -151,12 +153,10 @@ public class OrderDetailController implements Initializable {
             showAlert("错误", "订单ID为空");
             return;
         }
-
         Request request = new Request.Builder()
                 .url(baseUrl + "/api/orders/" + orderId + "/detail?userId=" + currentUserId)
                 .build();
-
-        System.out.println("[OrderDetail] 调用详情接口: orderId=" + orderId + ", userId=" + currentUserId);
+        logger.info(String.format("[OrderDetail] 调用详情接口: orderId=%s, userId=%s", orderId, currentUserId));
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -166,13 +166,12 @@ public class OrderDetailController implements Initializable {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
-                System.out.println("[OrderDetail] 详情响应 code=" + response.code() + ", body=" + responseBody);
+                logger.info(String.format("[OrderDetail] 详情响应 code=%d, body=%s", response.code(), responseBody));
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         try {
                             // 添加调试信息
-                            System.out.println("收到的响应数据: " + responseBody);
-
+                            logger.fine(String.format("收到的响应数据: %s", responseBody));
                             // 解析后端返回的Map结构
                             @SuppressWarnings("unchecked")
                             Map<String, Object> responseMap = objectMapper.readValue(responseBody, Map.class);
@@ -266,8 +265,7 @@ public class OrderDetailController implements Initializable {
                                 showAlert("错误", "获取订单详情失败: " + errorMessage);
                             }
                         } catch (Exception e) {
-                            System.out.println("解析异常: " + e.getMessage());
-                            e.printStackTrace();
+                            logger.severe(String.format("解析异常: %s", e.getMessage()));
                             showAlert("错误", "解析订单详情失败: " + e.getMessage() + "\n响应内容: " + responseBody);
                         }
                     } else {
@@ -284,7 +282,7 @@ public class OrderDetailController implements Initializable {
     private void updateOrderDetail(OrderDetailResponse orderDetail) {
         // 更新订单基本信息
         orderIdLabel.setText(orderDetail.getId() != null ? orderDetail.getId().toString() : "");
-        System.out.println("[OrderDetail] 更新UI: status(raw)=" + orderDetail.getStatus());
+        logger.info(String.format("[OrderDetail] 更新UI: status(raw)=%s", orderDetail.getStatus()));
         orderStatusLabel.setText(getStatusText(orderDetail.getStatus()));
         totalAmountLabel.setText(String.format("¥%.2f", orderDetail.getTotalAmount() != null ? orderDetail.getTotalAmount() : 0.0));
         paymentMethodLabel.setText(orderDetail.getPaymentMethod() != null ? orderDetail.getPaymentMethod() : "未设置");
@@ -316,7 +314,7 @@ public class OrderDetailController implements Initializable {
      * 根据订单状态更新按钮可见性
      */
     private void updateButtonVisibility(String status) {
-        System.out.println("[OrderDetail] 按钮可见性检查: status=" + status);
+        logger.info(String.format("[OrderDetail] 按钮可见性检查: status=%s", status));
         // 仅当状态为 PAID 或 SHIPPED 时显示确认收货按钮
         confirmButton.setVisible("PAID".equals(status) || "SHIPPED".equals(status) || "DELIVERED".equals(status));
     }
@@ -326,7 +324,7 @@ public class OrderDetailController implements Initializable {
      */
     private String getStatusText(String status) {
         if (status == null) return "";
-        System.out.println("[OrderDetail] 状态翻译: status=" + status);
+        logger.info(String.format("[OrderDetail] 状态翻译: status=%s", status));
         switch (status) {
             case "PENDING":
                 return "待支付";
@@ -356,7 +354,6 @@ public class OrderDetailController implements Initializable {
             showAlert("错误", "订单ID为空");
             return;
         }
-
         // 确认对话框
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
         confirmation.setTitle("确认收货");
@@ -369,7 +366,6 @@ public class OrderDetailController implements Initializable {
                         .url(baseUrl + "/api/orders/" + orderId + "/confirm")
                         .put(RequestBody.create("", MediaType.get("application/json")))
                         .build();
-
                 httpClient.newCall(request).enqueue(new Callback() {
                     @Override
                     public void onFailure(Call call, IOException e) {

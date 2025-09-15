@@ -70,7 +70,7 @@ public class bank_loginController {
 
     private void verifyAccountAndPassword(String accountNumber, String password) {
         // 构造请求URL
-        String url = "http://localhost:8080/api/accounts/" + accountNumber + "/verify-password";
+        String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/verify-password";
 
         // 构造请求参数
         RequestBody formBody = new FormBody.Builder()
@@ -198,7 +198,6 @@ public class bank_loginController {
                 Parent root = loader.load();
 
                 Stage loginStage = new Stage();
-                loginStage.setTitle("银行登录界面");
                 loginStage.setScene(new Scene(root));
                 // 设置窗口图标
                 loginStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png")));

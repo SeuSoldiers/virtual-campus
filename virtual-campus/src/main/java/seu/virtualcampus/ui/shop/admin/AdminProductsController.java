@@ -28,7 +28,7 @@ import java.util.logging.Logger;
 public class AdminProductsController implements Initializable {
 
     private static final Logger LOGGER = Logger.getLogger(AdminProductsController.class.getName());
-    private final String baseUrl = "http://localhost:8080";
+    private final String baseUrl = "http://" + MainApp.host;
     private final int pageSize = 20;
     // 搜索和筛选控件
     @FXML

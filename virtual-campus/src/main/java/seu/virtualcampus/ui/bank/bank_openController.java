@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -77,7 +78,7 @@ public class bank_openController {
 
             // 创建HTTP请求，使用POST方法发送表单数据
             Request request = new Request.Builder()
-                    .url("http://localhost:8080/api/accounts/open")
+                    .url("http://" + MainApp.host + "/api/accounts/open")
                     .post(formBody)  // 使用表单数据
                     .build();
 

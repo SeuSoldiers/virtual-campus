@@ -61,7 +61,7 @@ public class StudentController {
 
     private void loadStudentInfo() {
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/student/me")
+                .url("http://" + MainApp.host + "/api/student/me")
                 .header("Authorization", MainApp.token)
                 .get()
                 .build();
@@ -105,7 +105,7 @@ public class StudentController {
 
     private void loadAuditRecords() {
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/audit/mine")
+                .url("http://" + MainApp.host + "/api/audit/mine")
                 .header("Authorization", MainApp.token)
                 .get()
                 .build();
@@ -176,7 +176,7 @@ public class StudentController {
             String json = mapper.writeValueAsString(info);
             RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
             Request request = new Request.Builder()
-                    .url("http://localhost:8080/api/student/submit")
+                    .url("http://" + MainApp.host + "/api/student/submit")
                     .header("Authorization", MainApp.token)
                     .post(body)
                     .build();

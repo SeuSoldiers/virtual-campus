@@ -38,7 +38,7 @@ public class LoginController {
 
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/auth/login")
+                .url("http://" + MainApp.host + "/api/auth/login")
                 .post(body)
                 .build();
 
@@ -96,7 +96,7 @@ public class LoginController {
         String json = String.format("{\"username\":\"%s\",\"password\":\"%s\",\"role\":\"student\"}", username, password);
         RequestBody body = RequestBody.create(json, MediaType.parse("application/json"));
         Request request = new Request.Builder()
-                .url("http://localhost:8080/api/auth/register")
+                .url("http://" + MainApp.host + "/api/auth/register")
                 .post(body)
                 .build();
         client.newCall(request).enqueue(new Callback() {

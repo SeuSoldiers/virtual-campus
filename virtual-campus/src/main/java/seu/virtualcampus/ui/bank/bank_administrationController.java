@@ -27,7 +27,13 @@ import java.util.Optional;
 public class bank_administrationController {
 
     // API基础URL
-    private static final String BASE_URL = "http://localhost:8080/api/accounts";
+    private static final String BASE_URL = "http://" + MainApp.host + "/api/accounts";
+    // HTTP客户端
+    private final OkHttpClient client = new OkHttpClient();
+    private final ObjectMapper mapper = new ObjectMapper()
+            .findAndRegisterModules()
+            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     //账户管理
     @FXML
     private TableView<BankAccount> TableView1;
@@ -148,12 +154,6 @@ public class bank_administrationController {
     private TableColumn<Transaction, String> type_column2;
     @FXML
     private TableColumn<Transaction, String> type_column4;
-    // HTTP客户端
-    private OkHttpClient client = new OkHttpClient();
-    private ObjectMapper mapper = new ObjectMapper()
-            .findAndRegisterModules()
-            .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-            .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
     @FXML
     public void initialize() {
@@ -636,7 +636,6 @@ public class bank_administrationController {
             Parent root = loader.load();
 
             Stage loginStage = new Stage();
-            loginStage.setTitle("银行登录界面");
             loginStage.setScene(new Scene(root));
             loginStage.show();
 

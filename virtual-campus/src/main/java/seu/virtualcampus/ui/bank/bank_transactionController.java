@@ -22,7 +22,7 @@ import java.util.List;
 public class bank_transactionController {
 
     // API基础URL
-    private static final String BASE_URL = "http://localhost:8080/api/accounts";
+    private static final String BASE_URL = "http://" + MainApp.host + "/api/accounts";
     @FXML
     private TableView<Transaction> transactionTableView;
     @FXML

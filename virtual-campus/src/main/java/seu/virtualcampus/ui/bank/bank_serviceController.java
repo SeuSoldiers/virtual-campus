@@ -33,9 +33,6 @@ public class bank_serviceController {
     private Button infobtn;
 
     @FXML
-    private Button storebtn;
-
-    @FXML
     private Button transferbtn;
 
     @FXML
@@ -147,7 +144,6 @@ public class bank_serviceController {
             Parent root = loader.load();
 
             Stage loginStage = new Stage();
-            loginStage.setTitle("银行登录界面");
             loginStage.setScene(new Scene(root));
             loginStage.show();
 

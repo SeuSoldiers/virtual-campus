@@ -160,7 +160,7 @@ public class DashboardController {
             try {
                 okhttp3.OkHttpClient client = new okhttp3.OkHttpClient();
                 okhttp3.Request request = new okhttp3.Request.Builder()
-                        .url("http://localhost:8080/api/auth/logout")
+                        .url("http://" + MainApp.host + "/api/auth/logout")
                         .header("Authorization", seu.virtualcampus.ui.MainApp.token)
                         .post(okhttp3.RequestBody.create(new byte[0], null))
                         .build();
