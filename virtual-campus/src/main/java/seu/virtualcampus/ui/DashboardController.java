@@ -83,21 +83,21 @@ public class DashboardController {
             entryBox.add(registrarBtn, col++, row);
         } else if ("ShopMgr".equalsIgnoreCase(userRole)) {
             Button adminProductsBtn = createButtonWithIcon("商品管理", "/seu/virtualcampus/ui/icon.png");
-            adminProductsBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/admin_products.fxml", entryBox));
+            adminProductsBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/admin_products.fxml", entryBox));
             entryBox.add(adminProductsBtn, col++, row);
 
             Button adminShopBtn = createButtonWithIcon("发货管理", "/seu/virtualcampus/ui/icon.png");
-            adminShopBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/admin_ship.fxml", entryBox));
+            adminShopBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/admin_shop.fxml", entryBox));
             entryBox.add(adminShopBtn, col++, row);
         }
         Button productBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon.png");
-        productBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/product_list.fxml", entryBox));
+        productBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/product_list.fxml", entryBox));
         entryBox.add(productBtn, col++, row);
         Button cartBtn = createButtonWithIcon("我的购物车", "/seu/virtualcampus/ui/icon.png");
-        cartBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/cart.fxml", entryBox));
+        cartBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/cart.fxml", entryBox));
         entryBox.add(cartBtn, col++, row);
         Button ordersBtn = createButtonWithIcon("我的订单", "/seu/virtualcampus/ui/icon.png");
-        ordersBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/order_list.fxml", entryBox));
+        ordersBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/order_list.fxml", entryBox));
         entryBox.add(ordersBtn, col++, row);
     }
 

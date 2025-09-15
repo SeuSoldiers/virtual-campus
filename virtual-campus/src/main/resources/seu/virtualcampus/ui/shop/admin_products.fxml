@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="seu.virtualcampus.ui.shop.admin.AdminProductsController"
+            style="-fx-background-color: linear-gradient(to bottom, #a1c4fd, #d0e1ff);">
+
+    <!-- 顶部工具栏 -->
+    <top>
+        <VBox spacing="15" style="-fx-background-color: #f8f9fa; -fx-padding: 20;">
+            <Label text="商品管理" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+            <!-- 搜索和筛选 -->
+            <HBox spacing="15" alignment="CENTER_LEFT">
+                <Button text="返回" onAction="#handleBack"
+                        style="-fx-background-color: #6aa8ff; -fx-text-fill: white; -fx-background-radius: 5;"/>
+                <Label text="搜索:" style="-fx-font-weight: bold;"/>
+                <TextField fx:id="searchField" promptText="商品名称或ID" prefWidth="200"/>
+
+                <Label text="状态:" style="-fx-font-weight: bold;"/>
+                <ChoiceBox fx:id="statusFilter" prefWidth="120"/>
+
+                <Button fx:id="searchButton" text="搜索" onAction="#handleSearch"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-background-radius: 5;"/>
+                <Button fx:id="refreshButton" text="刷新" onAction="#handleRefresh"
+                        style="-fx-background-color: #95a5a6; -fx-text-fill: white; -fx-background-radius: 5;"/>
+                <Button fx:id="addNewButton" text="新增商品" onAction="#handleAddNew"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 5;"/>
+            </HBox>
+        </VBox>
+    </top>
+
+    <!-- 中央内容区域 -->
+    <center>
+        <HBox spacing="20" style="-fx-padding: 20;">
+
+            <!-- 左侧商品列表 -->
+            <VBox spacing="15" HBox.hgrow="ALWAYS" style="-fx-min-width: 600;">
+                <Label text="商品列表" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #34495e;"/>
+
+                <TableView fx:id="productsTable" prefHeight="500"
+                           style="-fx-background-color: white; -fx-background-radius: 8;">
+                    <columns>
+                        <TableColumn fx:id="idColumn" text="ID" prefWidth="80"/>
+                        <TableColumn fx:id="nameColumn" text="商品名称" prefWidth="150"/>
+                        <TableColumn fx:id="priceColumn" text="价格" prefWidth="100"/>
+                        <TableColumn fx:id="stockColumn" text="库存" prefWidth="80"/>
+                        <TableColumn fx:id="statusColumn" text="状态" prefWidth="80"/>
+                        <TableColumn fx:id="actionColumn" text="操作" prefWidth="200"/>
+                    </columns>
+                </TableView>
+
+                <!-- 分页控件 -->
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="prevPageButton" text="上一页" onAction="#handlePrevPage"/>
+                    <Label fx:id="pageInfoLabel" text="第 1 页 / 共 1 页"/>
+                    <Button fx:id="nextPageButton" text="下一页" onAction="#handleNextPage"/>
+                </HBox>
+            </VBox>
+
+            <!-- 右侧编辑表单 -->
+            <VBox spacing="20" prefWidth="350"
+                  style="-fx-background-color: #ffffff; -fx-background-radius: 10; -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 2);">
+
+                <Label text="商品信息" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+                <!-- 隐藏的ID字段 -->
+                <TextField fx:id="idField" visible="false" managed="false"/>
+
+                <VBox spacing="10">
+                    <Label text="商品名称:" style="-fx-font-weight: bold;"/>
+                    <TextField fx:id="nameField" promptText="请输入商品名称"
+                               style="-fx-background-radius: 5; -fx-padding: 8;"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="商品价格:" style="-fx-font-weight: bold;"/>
+                    <TextField fx:id="priceField" promptText="请输入价格（元）"
+                               style="-fx-background-radius: 5; -fx-padding: 8;"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="库存数量:" style="-fx-font-weight: bold;"/>
+                    <TextField fx:id="stockField" promptText="请输入库存数量"
+                               style="-fx-background-radius: 5; -fx-padding: 8;"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="商品状态:" style="-fx-font-weight: bold;"/>
+                    <ChoiceBox fx:id="statusChoiceBox" prefWidth="300"/>
+                </VBox>
+
+                <VBox spacing="10">
+                    <Label text="商品描述:" style="-fx-font-weight: bold;"/>
+                    <TextArea fx:id="descriptionArea" promptText="请输入商品描述" prefRowCount="3"
+                              style="-fx-background-radius: 5;"/>
+                </VBox>
+
+                <!-- 操作按钮 -->
+                <HBox spacing="10" alignment="CENTER">
+                    <Button fx:id="saveButton" text="保存" onAction="#handleSave" prefWidth="120"
+                            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"/>
+                    <Button fx:id="clearButton" text="清空" onAction="#handleClear" prefWidth="120"
+                            style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-background-radius: 5; -fx-font-weight: bold;"/>
+                </HBox>
+
+                <!-- 状态提示 -->
+                <Label fx:id="statusLabel" style="-fx-font-size: 14px; -fx-padding: 10 0;"/>
+            </VBox>
+        </HBox>
+    </center>
+
+    <!-- 底部状态栏 -->
+    <bottom>
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: #ecf0f1; -fx-padding: 10 20;">
+            <Label fx:id="totalCountLabel" text="总计: 0 个商品" style="-fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="currentUserLabel" style="-fx-font-style: italic;"/>
+        </HBox>
+    </bottom>
+
+</BorderPane>

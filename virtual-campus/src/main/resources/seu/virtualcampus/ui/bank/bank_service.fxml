@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0"
+            prefWidth="600.0"
+            style="-fx-background-color: linear-gradient(to bottom, #a1c4fd, #ffffff);" xmlns="http://javafx.com/javafx/24.0.1"
+            fx:controller="seu.virtualcampus.ui.bank.bank_serviceController">
+    <children>
+        <Button fx:id="accountbtn" layoutX="80.0" layoutY="153.0" mnemonicParsing="false"
+                onAction="#bankservice_account" prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1); -fx-background-radius: 8px;"
+                text="账户管理" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="depositbtn" layoutX="251.0" layoutY="153.0" mnemonicParsing="false"
+                onAction="#bankservice_deposit" prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="存款业务" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="withdrawalbtn" layoutX="420.0" layoutY="153.0" mnemonicParsing="false"
+                onAction="#bankservice_withdrawal" prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="取款业务" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="transferbtn" layoutX="80.0" layoutY="236.0" mnemonicParsing="false"
+                onAction="#bankservice_transfer" prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="转账汇款" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="fxbtn" layoutX="251.0" layoutY="236.0" mnemonicParsing="false" onAction="#bankservice_fc"
+                prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="定活互转" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="infobtn" layoutX="420.0" layoutY="236.0" mnemonicParsing="false"
+                onAction="#bankservice_transaction" prefHeight="44.0" prefWidth="100.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="交易查询" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="storebtn" layoutX="243.0" layoutY="321.0" mnemonicParsing="false" onAction="#bankservice_store"
+                prefHeight="44.0" prefWidth="116.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #92c1f6); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="商店分期功能" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Button fx:id="exitbtn" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#bankservice_exit"
+                prefHeight="28.0" prefWidth="59.0"
+                style="-fx-background-color: linear-gradient(to bottom, #4b6cb7, #182848); -fx-background-radius: 8px; -fx-effect: innershadow(gaussian, rgba(255, 255, 255, 0.4), 5, 0.5, 0, 2), /* 顶部高光 */        dropshadow(three-pass-box, rgba(0,0,0,0.5), 6, 0, 0, 1);"
+                text="退出" textFill="#99d4ff">
+            <font>
+                <Font name="System Bold" size="14.0"/>
+            </font>
+        </Button>
+        <Label alignment="CENTER" layoutX="140.0" layoutY="42.0" prefHeight="66.0" prefWidth="319.0"
+               style="-fx-background-color: #ffffff; -fx-background-radius: 22px; -fx-border-color: #82adff; -fx-border-width: 6px; -fx-border-radius: 20px;"
+               text="银行服务大厅" textFill="#2a13d4">
+            <font>
+                <Font name="System Bold" size="36.0"/>
+            </font>
+        </Label>
+    </children>
+</AnchorPane>
