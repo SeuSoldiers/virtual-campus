@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
@@ -87,7 +87,7 @@
             <artifactId>okhttp</artifactId>
             <version>4.11.0</version>
         </dependency>
-        
+
     </dependencies>
 
     <build>
@@ -118,7 +118,34 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>3.3.3</version>
+                <executions>
+                    <!-- 后端 JAR -->
+                    <execution>
+                        <id>backend</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>seu.virtualcampus.VirtualCampusApplication</mainClass>
+                            <classifier>backend</classifier>
+                        </configuration>
+                    </execution>
+
+                    <!-- 前端 JAR -->
+                    <execution>
+                        <id>frontend</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <configuration>
+                            <mainClass>seu.virtualcampus.ui.MainApp</mainClass>
+                            <classifier>frontend</classifier>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
+
         </plugins>
     </build>
 </project>
