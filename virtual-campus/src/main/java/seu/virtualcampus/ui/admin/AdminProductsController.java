@@ -19,12 +19,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * 管理员商品管理控制器
  */
 public class AdminProductsController implements Initializable {
 
+    private static final Logger LOGGER = Logger.getLogger(AdminProductsController.class.getName());
     private final String baseUrl = "http://localhost:8080";
     private final int pageSize = 20;
     // 搜索和筛选控件
@@ -100,120 +103,116 @@ public class AdminProductsController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            System.out.println("DEBUG: AdminProductsController 开始初始化");
-            System.out.println("DEBUG: location = " + location);
-            System.out.println("DEBUG: 当前用户角色: " + MainApp.role);
-            System.out.println("DEBUG: 当前用户名: " + MainApp.username);
+            LOGGER.fine("AdminProductsController 开始初始化");
+            LOGGER.fine("location = " + location);
+            LOGGER.fine("当前用户角色: " + MainApp.role);
+            LOGGER.fine("当前用户名: " + MainApp.username);
 
             // 延迟初始化，避免因类加载问题导致FXML加载失败
             try {
-                System.out.println("DEBUG: 初始化 HTTP 客户端");
+                LOGGER.fine("初始化 HTTP 客户端");
                 this.httpClient = new OkHttpClient();
-                System.out.println("DEBUG: HTTP 客户端初始化成功");
+                LOGGER.fine("HTTP 客户端初始化成功");
             } catch (Throwable t) {
-                System.out.println("ERROR: HTTP 客户端初始化失败: " + t.getMessage());
+                LOGGER.severe("HTTP 客户端初始化失败: " + t.getMessage());
                 showAlert("初始化错误", "网络组件初始化失败: " + t.getMessage());
                 return;
             }
             try {
-                System.out.println("DEBUG: 初始化 JSON 解析器");
+                LOGGER.fine("初始化 JSON 解析器");
                 this.objectMapper = new ObjectMapper();
-                // 配置忽略未知字段，避免因后端新增字段导致解析失败
                 this.objectMapper.configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                System.out.println("DEBUG: JSON 解析器初始化成功");
+                LOGGER.fine("JSON 解析器初始化成功");
             } catch (Throwable t) {
-                System.out.println("ERROR: JSON 解析器初始化失败: " + t.getMessage());
+                LOGGER.severe("JSON 解析器初始化失败: " + t.getMessage());
                 showAlert("初始化错误", "JSON组件初始化失败: " + t.getMessage());
                 return;
             }
 
-            System.out.println("DEBUG: 检查表格组件");
-            // 检查所有必要的FXML元素是否正确加载
+            LOGGER.fine("检查表格组件");
             if (productsTable == null || idColumn == null || nameColumn == null ||
                     priceColumn == null || stockColumn == null || statusColumn == null || actionColumn == null) {
-                System.out.println("ERROR: 表格组件未正确加载");
-                System.out.println("  productsTable = " + productsTable);
-                System.out.println("  idColumn = " + idColumn);
-                System.out.println("  nameColumn = " + nameColumn);
-                System.out.println("  priceColumn = " + priceColumn);
-                System.out.println("  stockColumn = " + stockColumn);
-                System.out.println("  statusColumn = " + statusColumn);
-                System.out.println("  actionColumn = " + actionColumn);
+                LOGGER.severe("表格组件未正确加载");
+                LOGGER.severe("  productsTable = " + productsTable);
+                LOGGER.severe("  idColumn = " + idColumn);
+                LOGGER.severe("  nameColumn = " + nameColumn);
+                LOGGER.severe("  priceColumn = " + priceColumn);
+                LOGGER.severe("  stockColumn = " + stockColumn);
+                LOGGER.severe("  statusColumn = " + statusColumn);
+                LOGGER.severe("  actionColumn = " + actionColumn);
                 showAlert("初始化错误", "表格组件未正确加载");
                 return;
             }
-            System.out.println("DEBUG: 表格组件检查通过");
+            LOGGER.fine("表格组件检查通过");
 
-            System.out.println("DEBUG: 检查搜索组件");
+            LOGGER.fine("检查搜索组件");
             if (searchField == null || statusFilter == null || searchButton == null ||
                     refreshButton == null || addNewButton == null) {
-                System.out.println("ERROR: 搜索组件未正确加载");
-                System.out.println("  searchField = " + searchField);
-                System.out.println("  statusFilter = " + statusFilter);
-                System.out.println("  searchButton = " + searchButton);
-                System.out.println("  refreshButton = " + refreshButton);
-                System.out.println("  addNewButton = " + addNewButton);
+                LOGGER.severe("搜索组件未正确加载");
+                LOGGER.severe("  searchField = " + searchField);
+                LOGGER.severe("  statusFilter = " + statusFilter);
+                LOGGER.severe("  searchButton = " + searchButton);
+                LOGGER.severe("  refreshButton = " + refreshButton);
+                LOGGER.severe("  addNewButton = " + addNewButton);
                 showAlert("初始化错误", "搜索组件未正确加载");
                 return;
             }
-            System.out.println("DEBUG: 搜索组件检查通过");
+            LOGGER.fine("搜索组件检查通过");
 
-            System.out.println("DEBUG: 检查表单组件");
+            LOGGER.fine("检查表单组件");
             if (nameField == null || priceField == null || stockField == null ||
                     statusChoiceBox == null || descriptionArea == null || saveButton == null || clearButton == null) {
-                System.out.println("ERROR: 表单组件未正确加载");
-                System.out.println("  nameField = " + nameField);
-                System.out.println("  priceField = " + priceField);
-                System.out.println("  stockField = " + stockField);
-                System.out.println("  statusChoiceBox = " + statusChoiceBox);
-                System.out.println("  descriptionArea = " + descriptionArea);
-                System.out.println("  saveButton = " + saveButton);
-                System.out.println("  clearButton = " + clearButton);
+                LOGGER.severe("表单组件未正确加载");
+                LOGGER.severe("  nameField = " + nameField);
+                LOGGER.severe("  priceField = " + priceField);
+                LOGGER.severe("  stockField = " + stockField);
+                LOGGER.severe("  statusChoiceBox = " + statusChoiceBox);
+                LOGGER.severe("  descriptionArea = " + descriptionArea);
+                LOGGER.severe("  saveButton = " + saveButton);
+                LOGGER.severe("  clearButton = " + clearButton);
                 showAlert("初始化错误", "表单组件未正确加载");
                 return;
             }
-            System.out.println("DEBUG: 表单组件检查通过");
+            LOGGER.fine("表单组件检查通过");
 
-            System.out.println("DEBUG: 检查状态显示组件");
+            LOGGER.fine("检查状态显示组件");
             if (statusLabel == null || totalCountLabel == null || currentUserLabel == null || pageInfoLabel == null) {
-                System.out.println("ERROR: 状态显示组件未正确加载");
-                System.out.println("  statusLabel = " + statusLabel);
-                System.out.println("  totalCountLabel = " + totalCountLabel);
-                System.out.println("  currentUserLabel = " + currentUserLabel);
-                System.out.println("  pageInfoLabel = " + pageInfoLabel);
+                LOGGER.severe("状态显示组件未正确加载");
+                LOGGER.severe("  statusLabel = " + statusLabel);
+                LOGGER.severe("  totalCountLabel = " + totalCountLabel);
+                LOGGER.severe("  currentUserLabel = " + currentUserLabel);
+                LOGGER.severe("  pageInfoLabel = " + pageInfoLabel);
                 showAlert("初始化错误", "状态显示组件未正确加载");
                 return;
             }
-            System.out.println("DEBUG: 状态显示组件检查通过");
+            LOGGER.fine("状态显示组件检查通过");
 
-            // 检查管理员权限
-            System.out.println("DEBUG: 检查管理员权限");
+            LOGGER.fine("检查管理员权限");
             if (!isAdmin()) {
-                System.out.println("ERROR: 用户没有管理员权限，当前角色: " + MainApp.role);
+                LOGGER.severe("用户没有管理员权限，当前角色: " + MainApp.role);
                 showAlert("权限错误", "您没有管理员权限，无法访问此页面");
                 return;
             }
-            System.out.println("DEBUG: 管理员权限检查通过");
+            LOGGER.fine("管理员权限检查通过");
 
-            System.out.println("DEBUG: 初始化表格列");
+            LOGGER.fine("初始化表格列");
             initializeTableColumns();
-            System.out.println("DEBUG: 表格列初始化完成");
+            LOGGER.fine("表格列初始化完成");
 
-            System.out.println("DEBUG: 初始化事件处理");
+            LOGGER.fine("初始化事件处理");
             initializeEventHandlers();
-            System.out.println("DEBUG: 事件处理初始化完成");
+            LOGGER.fine("事件处理初始化完成");
 
-            System.out.println("DEBUG: 更新用户显示");
+            LOGGER.fine("更新用户显示");
             updateCurrentUserDisplay();
-            System.out.println("DEBUG: 用户显示更新完成");
+            LOGGER.fine("用户显示更新完成");
 
-            System.out.println("DEBUG: 加载商品数据");
+            LOGGER.fine("加载商品数据");
             loadProducts();
-            System.out.println("DEBUG: AdminProductsController 初始化完成");
+            LOGGER.fine("AdminProductsController 初始化完成");
 
         } catch (Exception e) {
-            System.out.println("ERROR: AdminProductsController 初始化异常: " + e.getClass().getSimpleName() + " - " + e.getMessage());
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "AdminProductsController 初始化异常: " + e.getClass().getSimpleName() + " - " + e.getMessage(), e);
             showAlert("初始化失败", "管理商品界面初始化失败: " + e.getMessage());
         }
     }
@@ -323,7 +322,7 @@ public class AdminProductsController implements Initializable {
      * 检查是否为管理员
      */
     private boolean isAdmin() {
-        return "admin".equals(MainApp.role) || "registrar".equals(MainApp.role);
+        return "ShopMgr".equalsIgnoreCase(MainApp.role);
     }
 
     /**
@@ -341,9 +340,9 @@ public class AdminProductsController implements Initializable {
         String searchText = searchField.getText() != null ? searchField.getText().trim() : "";
         String status = getStatusValue(statusFilter.getValue());
 
-        System.out.println("DEBUG: loadProducts 被调用");
-        System.out.println("DEBUG: 处理后的搜索文本: '" + searchText + "'");
-        System.out.println("DEBUG: 处理后的状态: '" + status + "'");
+        LOGGER.fine("loadProducts 被调用");
+        LOGGER.fine("处理后的搜索文本: '" + searchText + "'");
+        LOGGER.fine("处理后的状态: '" + status + "'");
 
         String url = baseUrl + "/api/products?page=" + currentPage + "&size=" + pageSize + "&sort=name,asc";
 
@@ -351,18 +350,18 @@ public class AdminProductsController implements Initializable {
             try {
                 String encodedSearchText = java.net.URLEncoder.encode(searchText, "UTF-8");
                 url += "&search=" + encodedSearchText;
-                System.out.println("DEBUG: 添加搜索参数: " + encodedSearchText);
+                LOGGER.fine("添加搜索参数: " + encodedSearchText);
             } catch (java.io.UnsupportedEncodingException e) {
-                System.out.println("ERROR: URL编码失败: " + e.getMessage());
+                LOGGER.log(Level.WARNING, "URL编码失败: " + e.getMessage(), e);
                 url += "&search=" + searchText;
             }
         }
         if (!"ALL".equals(status)) {
             url += "&status=" + status;
-            System.out.println("DEBUG: 添加状态参数: " + status);
+            LOGGER.fine("添加状态参数: " + status);
         }
 
-        System.out.println("DEBUG: 最终请求URL: " + url);
+        LOGGER.fine("最终请求URL: " + url);
 
         Request.Builder requestBuilder = new Request.Builder().url(url);
 
@@ -478,9 +477,9 @@ public class AdminProductsController implements Initializable {
      */
     @FXML
     private void handleSearch() {
-        System.out.println("DEBUG: handleSearch 被调用");
-        System.out.println("DEBUG: 搜索文本: '" + (searchField.getText() != null ? searchField.getText() : "null") + "'");
-        System.out.println("DEBUG: 状态筛选: '" + (statusFilter.getValue() != null ? statusFilter.getValue() : "null") + "'");
+        LOGGER.fine("handleSearch 被调用");
+        LOGGER.fine("搜索文本: '" + (searchField.getText() != null ? searchField.getText() : "null") + "'");
+        LOGGER.fine("状态筛选: '" + (statusFilter.getValue() != null ? statusFilter.getValue() : "null") + "'");
         currentPage = 1;
         loadProducts();
     }

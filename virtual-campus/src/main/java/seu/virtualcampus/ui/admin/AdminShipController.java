@@ -69,7 +69,7 @@ public class AdminShipController implements Initializable {
      * 检查是否为管理员
      */
     private boolean isAdmin() {
-        return "admin".equals(MainApp.role) || "registrar".equals(MainApp.role);
+        return "ShopMgr".equalsIgnoreCase(MainApp.role);
     }
 
     /**

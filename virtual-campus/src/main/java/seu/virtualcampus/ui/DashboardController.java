@@ -66,7 +66,7 @@ public class DashboardController {
 
     public void setUserInfo(String username, String role) {
         this.userRole = role;
-        welcomeLabel.setText("欢迎，" + username + "！");
+        welcomeLabel.setText(String.format("欢迎，%s(%s)！", username, role));
         setupEntries();
     }
 

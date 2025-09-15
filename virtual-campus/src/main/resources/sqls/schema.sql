@@ -154,7 +154,7 @@ CREATE TABLE IF NOT EXISTS order_item
     unitPrice REAL CHECK (unitPrice >= 0),
     subtotal  REAL CHECK (subtotal >= 0),
     FOREIGN KEY (orderId) REFERENCES orders (orderId),
-    FOREIGN KEY (productId) REFERENCES product (productId)
+    FOREIGN KEY (productId) REFERENCES product (productId) ON DELETE CASCADE
 );
 
 -- 创建购物车表
@@ -165,7 +165,7 @@ CREATE TABLE IF NOT EXISTS cart
     productId  TEXT NOT NULL,
     quantity   INTEGER CHECK (quantity > 0),
     isActive   INTEGER DEFAULT 1,
-    FOREIGN KEY (productId) REFERENCES product (productId)
+    FOREIGN KEY (productId) REFERENCES product (productId) ON DELETE CASCADE
 );
 -- 为books表添加索引
 CREATE INDEX IF NOT EXISTS idx_books_title ON books (title);
