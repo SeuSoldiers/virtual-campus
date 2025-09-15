@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox xmlns:fx="http://javafx.com/fxml" spacing="24" alignment="CENTER"
+      fx:controller="seu.virtualcampus.ui.RegistrarController"
+      style="-fx-font-family: 'Microsoft YaHei'; -fx-background-color: linear-gradient(to bottom, #f8fafc, #e0e7ef); -fx-padding: 48 64; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, #b0b8c1, 16, 0.2, 0, 4);">
+    <Button text="返回" onAction="#handleBack"
+            style="-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 4 18; -fx-background-color: #b0b8c1; -fx-text-fill: #2d3a4a;"/>
+    <Label text="待审核记录"
+           style="-fx-font-size: 26px; -fx-font-weight: bold; -fx-text-fill: #2d3a4a; -fx-padding: 0 0 16 0;"/>
+    <TableView fx:id="auditTable" prefHeight="320" prefWidth="820" style="-fx-font-size: 15px;">
+        <columns>
+            <TableColumn fx:id="idCol" text="ID" prefWidth="50"/>
+            <TableColumn fx:id="studentIdCol" text="学生ID"/>
+            <TableColumn fx:id="fieldCol" text="字段"/>
+            <TableColumn fx:id="oldValueCol" text="旧值" prefWidth="120"/>
+            <TableColumn fx:id="newValueCol" text="新值" prefWidth="120"/>
+            <TableColumn fx:id="timeCol" text="提交时间" prefWidth="140"/>
+            <TableColumn fx:id="reviewTimeCol" text="审核时间" prefWidth="140"/>
+            <TableColumn fx:id="remarkCol" text="审核意见" prefWidth="120"/>
+        </columns>
+    </TableView>
+    <HBox spacing="12" alignment="CENTER_LEFT">
+        <Label text="审核意见：" style="-fx-font-size: 16px;"/>
+        <TextArea fx:id="remarkField" promptText="请输入审核意见" prefRowCount="2" prefWidth="400" wrapText="true"
+                  style="-fx-font-size: 15px;"/>
+    </HBox>
+    <HBox spacing="16" alignment="CENTER">
+        <Button text="通过选中项" onAction="#handleApprove"
+                style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #4f8cff; -fx-text-fill: white;"/>
+        <Button text="拒绝选中项" onAction="#handleReject"
+                style="-fx-font-size: 18px; -fx-background-radius: 8; -fx-padding: 8 32; -fx-background-color: #ff4f4f; -fx-text-fill: white;"/>
+    </HBox>
+    <Label fx:id="msgLabel" textFill="green" style="-fx-font-size: 14px; -fx-padding: 8 0 0 0;"/>
+</VBox>
