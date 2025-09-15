@@ -99,7 +99,7 @@ public class bank_changestatusController {
     // 获取账户当前状态
     private String getCurrentAccountStatus() {
         try {
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
                 return null;
             }
@@ -128,7 +128,7 @@ public class bank_changestatusController {
     // 更新账户状态
     private void updateAccountStatus(String newStatus) {
         try {
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
                 showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
                 return;
@@ -277,7 +277,7 @@ public class bank_changestatusController {
     @FXML
     public void initialize() {
         try {
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber != null && !accountNumber.isEmpty()) {
                 // 调用后端接口获取账户状态
                 String currentStatus = callGetAccountInfoAPI(accountNumber);
@@ -303,7 +303,7 @@ public class bank_changestatusController {
     @FXML
     public void changepassword(ActionEvent actionEvent) {
         try {
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
                 showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
                 return;

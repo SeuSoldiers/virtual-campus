@@ -5,14 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import seu.virtualcampus.ui.DashboardController;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -46,24 +43,7 @@ public class bank_openController {
 
 
     public void back(ActionEvent actionEvent) {
-        try {
-            // 加载开户界面的FXML文件
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_login.fxml"));
-            Parent openAccountRoot = loader.load();
-
-            // 获取当前舞台（Stage）
-            Stage currentStage = (Stage) back_btn.getScene().getWindow();
-
-            // 创建新场景并设置到舞台
-            Scene openAccountScene = new Scene(openAccountRoot);
-            currentStage.setScene(openAccountScene);
-            currentStage.setTitle("银行登录界面");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载登录界面: " + e.getMessage());
-            showAlert("错误", "无法加载登录界面");
-        }
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", back_btn);
     }
 
     @FXML

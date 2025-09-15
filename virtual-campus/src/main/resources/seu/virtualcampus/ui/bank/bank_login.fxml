@@ -3,9 +3,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.*?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity"
             prefHeight="350.0" prefWidth="520.0"
-            style="-fx-background-color: linear-gradient(to bottom, #c2e9fb, #a1c4fd);" xmlns="http://javafx.com/javafx/24.0.1"
+            style="-fx-background-color: linear-gradient(to bottom, #c2e9fb, #a1c4fd);"
+            xmlns="http://javafx.com/javafx/24.0.1"
             fx:controller="seu.virtualcampus.ui.bank.bank_loginController">
     <children>
         <Button fx:id="Login_btn" layoutX="119.0" layoutY="265.0" mnemonicParsing="false" onAction="#login"
@@ -46,6 +48,13 @@
         <Button fx:id="administrator_btn" layoutX="403.0" layoutY="14.0" mnemonicParsing="false"
                 onAction="#administrator" style="-fx-background-color: linear-gradient(to bottom, #ffffff,#dbf8ff);"
                 text="银行管理员系统" textFill="#0f3e5e">
+            <font>
+                <Font name="System Bold" size="12.0"/>
+            </font>
+        </Button>
+        <Button fx:id="back_btn" layoutX="20.0" layoutY="14.0" mnemonicParsing="false"
+                onAction="#back" style="-fx-background-color: linear-gradient(to bottom, #ffffff,#dbf8ff);"
+                text="返回" textFill="#0f3e5e">
             <font>
                 <Font name="System Bold" size="12.0"/>
             </font>

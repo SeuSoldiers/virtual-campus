@@ -53,7 +53,7 @@ public class bank_depositController {
             }
 
             // 获取当前选中的账户
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
 
             // 构建URL参数
             String baseUrl = "http://localhost:8080/api/accounts"; // 根据实际服务地址调整

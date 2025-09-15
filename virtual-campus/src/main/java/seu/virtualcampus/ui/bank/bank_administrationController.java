@@ -577,7 +577,7 @@ public class bank_administrationController {
 
         // 检查是否试图撤销自己的管理员权限
         // 假设当前管理员的账户号存储在某个地方，这里我们通过MainApp获取
-        String currentAdminAccountNumber = Bank_MainApp.getCurrentAccountNumber(); // 需要实现这个方法
+        String currentAdminAccountNumber = bank_utils.getCurrentAccountNumber(); // 需要实现这个方法
         if (selectedAccount.getAccountNumber().equals(currentAdminAccountNumber)) {
             showAlert("错误", "不能撤销自己的管理员权限");
             return;

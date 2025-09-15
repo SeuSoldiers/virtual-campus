@@ -58,7 +58,7 @@ public class bank_transactionController {
             .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
     // 当前账户号码
-    private String currentAccountNumber = Bank_MainApp.getCurrentAccountNumber();
+    private String currentAccountNumber = bank_utils.getCurrentAccountNumber();
 
     @FXML
     void transaction_back(ActionEvent event) {

@@ -236,7 +236,7 @@ public class bank_ftocController implements Initializable {
         setupTableColumns();
         // 获取账户号码（这里假设从某个全局变量或参数中获取）
         // 在实际应用中，您可能需要通过参数传递或从共享状态中获取
-        accountNumber = Bank_MainApp.getCurrentAccountNumber(); // 假设有一个这样的方法
+        accountNumber = bank_utils.getCurrentAccountNumber(); // 假设有一个这样的方法
 
         // 加载定期存款记录
         loadFixedDepositRecords();

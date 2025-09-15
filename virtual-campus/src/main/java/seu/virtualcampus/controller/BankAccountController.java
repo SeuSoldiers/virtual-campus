@@ -1,26 +1,27 @@
 // BankAccountController.java
 package seu.virtualcampus.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.BankAccount;
 import seu.virtualcampus.domain.Transaction;
 import seu.virtualcampus.service.BankAccountService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/api/accounts")
 public class BankAccountController {
 
+    private static final Logger logger = Logger.getLogger(BankAccountController.class.getName());
     @Autowired
     private BankAccountService bankAccountService;
 
@@ -31,7 +32,7 @@ public class BankAccountController {
             @RequestParam String accountType,
             @RequestParam String password,
             @RequestParam BigDecimal initialDeposit) {
-        BankAccount account = bankAccountService.createAccount(userId, accountType, password,initialDeposit);
+        BankAccount account = bankAccountService.createAccount(userId, accountType, password, initialDeposit);
         return ResponseEntity.ok(account);
     }
 
@@ -119,12 +120,11 @@ public class BankAccountController {
             boolean isValid = bankAccountService.verifyAdminPassword(accountNumber, password);
             return ResponseEntity.ok(isValid);
         } catch (RuntimeException e) {
-            // 账户不存在或其他运行时异常，返回false
+            // 账户不存在或其他运行时异常，记录错误日志并返回false
+            logger.severe("验证管理员密码时发生异常: " + e.getMessage());
             return ResponseEntity.badRequest().body(false);
         }
     }
-
-
 
 
     // 新增：更新账户密码
@@ -165,7 +165,6 @@ public class BankAccountController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-
 
 
     // 活期转定期
@@ -236,10 +235,11 @@ public class BankAccountController {
 
     /**
      * 商店消费接口
+     *
      * @param fromAccount 消费者账户
-     * @param password 消费者账户密码
-     * @param toAccount 商家账户
-     * @param amount 消费金额
+     * @param password    消费者账户密码
+     * @param toAccount   商家账户
+     * @param amount      消费金额
      * @return 交易记录
      */
     @PostMapping("/shopping")
@@ -262,8 +262,10 @@ public class BankAccountController {
         Transaction transaction = bankAccountService.processPayLater(fromAccount, password, toAccount, amount);
         return ResponseEntity.ok(transaction);
     }
+
     /**
      * 检查并更新违约交易状态
+     *
      * @return 更新的交易数量
      */
     @GetMapping("/check-overdue-transactions")
@@ -271,5 +273,5 @@ public class BankAccountController {
         int updatedCount = bankAccountService.checkAndMarkOverdueTransactions();
         return ResponseEntity.ok(updatedCount);
     }
-    
+
 }

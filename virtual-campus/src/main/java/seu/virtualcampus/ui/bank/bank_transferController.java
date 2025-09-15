@@ -78,7 +78,7 @@ public class bank_transferController {
             }
 
             // 获取当前转出账户
-            String fromAccount = Bank_MainApp.getCurrentAccountNumber();
+            String fromAccount = bank_utils.getCurrentAccountNumber();
             if (fromAccount == null || fromAccount.isEmpty()) {
                 showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
                 return;

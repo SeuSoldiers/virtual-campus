@@ -125,8 +125,8 @@ public class bank_administratorController {
 
                         if (isValid) {
                             // 登录成功，设置当前账户信息
-                            Bank_MainApp.setCurrentAccountNumber(accountNumber);
-                            Bank_MainApp.addAccountNumber(accountNumber);
+                            bank_utils.setCurrentAccountNumber(accountNumber);
+                            bank_utils.addAccountNumber(accountNumber);
 
                             Platform.runLater(() -> {
                                 // 跳转到银行操作员系统

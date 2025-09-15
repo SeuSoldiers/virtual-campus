@@ -99,6 +99,10 @@ public class DashboardController {
         Button ordersBtn = createButtonWithIcon("我的订单", "/seu/virtualcampus/ui/icon.png");
         ordersBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/order_list.fxml", entryBox));
         entryBox.add(ordersBtn, col++, row);
+
+        Button bankLoginBtn = createButtonWithIcon("银行登录", "/seu/virtualcampus/ui/icon.png");
+        bankLoginBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", entryBox));
+        entryBox.add(bankLoginBtn, col++, row);
     }
 
     private Button createButtonWithIcon(String text, String iconPath) {

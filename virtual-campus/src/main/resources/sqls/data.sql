@@ -8,6 +8,13 @@ VALUES (1001, '123', 'registrar');
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1002, '123', 'ShopMgr');
 
+-- 插入银行管理员账户
+INSERT OR IGNORE INTO bank_account (accountNumber, userId, password, accountType, Balance, status, createdDate)
+VALUES ('bankAdmin', '2001', '123456', 'ADMINISTRATOR', 1000.0, 'ACTIVE', '2025-09-12 13:14:00');
+-- 插入商家账户
+INSERT OR IGNORE INTO bank_account (accountNumber, userId, password, accountType, Balance, status, createdDate)
+VALUES ('AC1757661314119456D38', '1002', '123456', 'USER', 0.0, 'ACTIVE', '2025-09-13 13:14:00');
+
 -- 插入学生信息
 INSERT OR IGNORE INTO student_info (student_id, name, major, address, phone, ethnicity, political_status, gender,
                                     place_of_origin)

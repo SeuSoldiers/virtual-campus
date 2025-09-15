@@ -161,7 +161,7 @@ public class bank_ctofController {
     }
 
     private void convertCurrentToFixed(String term) {
-        String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+        String accountNumber = bank_utils.getCurrentAccountNumber();
         String password = passwordtext.getText();
         BigDecimal amount = new BigDecimal(amounttext.getText());
 

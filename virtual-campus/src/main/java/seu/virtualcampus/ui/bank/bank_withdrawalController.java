@@ -66,7 +66,7 @@ public class bank_withdrawalController {
             }
 
             // 获取当前选中的账户
-            String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+            String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
                 showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
                 return;

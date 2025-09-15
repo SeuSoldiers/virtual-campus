@@ -13,6 +13,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -36,6 +37,9 @@ public class bank_loginController {
 
     @FXML
     private TextField Password_text;
+
+    @FXML
+    private Button back_btn; // 添加返回按钮的 @FXML 引用
 
     // 添加HTTP客户端
     private OkHttpClient client = new OkHttpClient();
@@ -99,8 +103,8 @@ public class bank_loginController {
 
                         if (isValid) {
                             // 登录成功，设置当前账户信息
-                            Bank_MainApp.setCurrentAccountNumber(accountNumber);
-                            Bank_MainApp.addAccountNumber(accountNumber);
+                            bank_utils.setCurrentAccountNumber(accountNumber);
+                            bank_utils.addAccountNumber(accountNumber);
 
                             Platform.runLater(() -> {
                                 // 跳转到银行服务大厅
@@ -128,7 +132,7 @@ public class bank_loginController {
     private void navigateToBankService() {
         try {
             // 加载新的银行服务大厅窗口
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_service.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/bank/bank_service.fxml"));
             Parent root = loader.load();
 
             // 创建新场景
@@ -140,6 +144,8 @@ public class bank_loginController {
             bankServiceStage.setScene(scene);
             bankServiceStage.setResizable(false);
             bankServiceStage.centerOnScreen();
+            // 设置窗口图标
+            bankServiceStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png")));
 
             // 设置新窗口的关闭请求处理
             bankServiceStage.setOnCloseRequest(e -> {
@@ -194,6 +200,8 @@ public class bank_loginController {
                 Stage loginStage = new Stage();
                 loginStage.setTitle("银行登录界面");
                 loginStage.setScene(new Scene(root));
+                // 设置窗口图标
+                loginStage.getIcons().add(new javafx.scene.image.Image(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png")));
                 loginStage.show();
 
             } catch (IOException e) {
@@ -207,45 +215,15 @@ public class bank_loginController {
 
 
     public void open(ActionEvent actionEvent) {
-        //
-        try {
-            // 加载开户界面的FXML文件
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_open.fxml"));
-            Parent openAccountRoot = loader.load();
-
-            // 获取当前舞台（Stage）
-            Stage currentStage = (Stage) Open_btn.getScene().getWindow();
-
-            // 创建新场景并设置到舞台
-            Scene openAccountScene = new Scene(openAccountRoot);
-            currentStage.setScene(openAccountScene);
-            currentStage.setTitle("银行开户界面");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载开户界面: " + "请检查当前用户状态/网络状况！");
-            showAlert("提示", "无法加载开户界面");
-        }
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_open.fxml", Open_btn);
     }
 
     public void administrator(ActionEvent actionEvent) {
-        try {
-            // 加载管理员登录界面的FXML文件
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_administrator.fxml"));
-            Parent Root = loader.load();
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_administrator.fxml", administrator_btn);
+    }
 
-            // 获取当前舞台（Stage）
-            Stage currentStage = (Stage) administrator_btn.getScene().getWindow();
-
-            // 创建新场景并设置到舞台
-            Scene adScene = new Scene(Root);
-            currentStage.setScene(adScene);
-            currentStage.setTitle("银行管理员登录界面");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载管理员登录界面: " + "请检查当前用户状态/网络状况！");
-            showAlert("提示", "无法加载管理员登录界面");
-        }
+    // 返回按钮的事件处理方法
+    public void back(ActionEvent actionEvent) {
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", back_btn);
     }
 }

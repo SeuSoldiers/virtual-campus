@@ -59,7 +59,7 @@ public class bank_manageController {
     }
 
     private void loadAccountInfo() {
-        String accountNumber = Bank_MainApp.getCurrentAccountNumber();
+        String accountNumber = bank_utils.getCurrentAccountNumber();
         if (accountNumber == null || accountNumber.isEmpty()) {
             showAlert("错误", "未选择账户");
             return;
