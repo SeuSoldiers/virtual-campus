@@ -1,24 +1,18 @@
 package seu.virtualcampus.ui.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import seu.virtualcampus.ui.MainApp;
-import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import okhttp3.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -31,86 +25,76 @@ import java.util.ResourceBundle;
  */
 public class AdminProductsController implements Initializable {
 
+    private final String baseUrl = "http://localhost:8080";
+    private final int pageSize = 20;
     // 搜索和筛选控件
-    @FXML private TextField searchField;
-    @FXML private ChoiceBox<String> statusFilter;
-    @FXML private Button searchButton;
-    @FXML private Button refreshButton;
-    @FXML private Button addNewButton;
-
+    @FXML
+    private TextField searchField;
+    @FXML
+    private ChoiceBox<String> statusFilter;
+    @FXML
+    private Button searchButton;
+    @FXML
+    private Button refreshButton;
+    @FXML
+    private Button addNewButton;
     // 商品列表
-    @FXML private TableView<ProductModel> productsTable;
-    @FXML private TableColumn<ProductModel, String> idColumn;
-    @FXML private TableColumn<ProductModel, String> nameColumn;
-    @FXML private TableColumn<ProductModel, Double> priceColumn;
-    @FXML private TableColumn<ProductModel, Integer> stockColumn;
-    @FXML private TableColumn<ProductModel, String> statusColumn;
-    @FXML private TableColumn<ProductModel, Void> actionColumn;
-
+    @FXML
+    private TableView<ProductModel> productsTable;
+    @FXML
+    private TableColumn<ProductModel, String> idColumn;
+    @FXML
+    private TableColumn<ProductModel, String> nameColumn;
+    @FXML
+    private TableColumn<ProductModel, Double> priceColumn;
+    @FXML
+    private TableColumn<ProductModel, Integer> stockColumn;
+    @FXML
+    private TableColumn<ProductModel, String> statusColumn;
+    @FXML
+    private TableColumn<ProductModel, Void> actionColumn;
     // 分页控件
-    @FXML private Button prevPageButton;
-    @FXML private Label pageInfoLabel;
-    @FXML private Button nextPageButton;
-
+    @FXML
+    private Button prevPageButton;
+    @FXML
+    private Label pageInfoLabel;
+    @FXML
+    private Button nextPageButton;
     // 编辑表单
-    @FXML private TextField idField;
-    @FXML private TextField nameField;
-    @FXML private TextField priceField;
-    @FXML private TextField stockField;
-    @FXML private ChoiceBox<String> statusChoiceBox;
-    @FXML private TextArea descriptionArea;
-    @FXML private Button saveButton;
-    @FXML private Button clearButton;
-
+    @FXML
+    private TextField idField;
+    @FXML
+    private TextField nameField;
+    @FXML
+    private TextField priceField;
+    @FXML
+    private TextField stockField;
+    @FXML
+    private ChoiceBox<String> statusChoiceBox;
+    @FXML
+    private TextArea descriptionArea;
+    @FXML
+    private Button saveButton;
+    @FXML
+    private Button clearButton;
     // 状态显示
-    @FXML private Label statusLabel;
-    @FXML private Label totalCountLabel;
-    @FXML private Label currentUserLabel;
-
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Label totalCountLabel;
+    @FXML
+    private Label currentUserLabel;
     private OkHttpClient httpClient;
     private ObjectMapper objectMapper;
-    private final String baseUrl = "http://localhost:8080";
     private int currentPage = 1;
     private int totalPages = 1;
-    private final int pageSize = 20;
     private boolean isEditMode = false;
 
-    // 商品模型类
-    public static class ProductModel {
-        private final SimpleStringProperty id;
-        private final SimpleStringProperty name;
-        private final SimpleDoubleProperty price;
-        private final SimpleIntegerProperty stock;
-        private final SimpleStringProperty status;
-        private final SimpleStringProperty description;
-
-        public ProductModel(String id, String name, Double price, Integer stock, String status, String description) {
-            this.id = new SimpleStringProperty(id != null ? id : "");
-            this.name = new SimpleStringProperty(name != null ? name : "");
-            this.price = new SimpleDoubleProperty(price != null ? price : 0.0);
-            this.stock = new SimpleIntegerProperty(stock != null ? stock : 0);
-            this.status = new SimpleStringProperty(status != null ? status : "");
-            this.description = new SimpleStringProperty(description != null ? description : "");
-        }
-
-        // Getters
-        public String getId() { return id.get(); }
-        public SimpleStringProperty idProperty() { return id; }
-
-        public String getName() { return name.get(); }
-        public SimpleStringProperty nameProperty() { return name; }
-
-        public double getPrice() { return price.get(); }
-        public SimpleDoubleProperty priceProperty() { return price; }
-
-        public int getStock() { return stock.get(); }
-        public SimpleIntegerProperty stockProperty() { return stock; }
-
-        public String getStatus() { return status.get(); }
-        public SimpleStringProperty statusProperty() { return status; }
-
-        public String getDescription() { return description.get(); }
-        public SimpleStringProperty descriptionProperty() { return description; }
+    private static String normalizeStatus(String backendStatus) {
+        if (backendStatus == null) return "OFF";
+        String s = backendStatus.trim().toUpperCase();
+        if ("ACTIVE".equals(s) || "ON".equals(s)) return "ON";
+        return "OFF";
     }
 
     @Override
@@ -120,7 +104,7 @@ public class AdminProductsController implements Initializable {
             System.out.println("DEBUG: location = " + location);
             System.out.println("DEBUG: 当前用户角色: " + MainApp.role);
             System.out.println("DEBUG: 当前用户名: " + MainApp.username);
-            
+
             // 延迟初始化，避免因类加载问题导致FXML加载失败
             try {
                 System.out.println("DEBUG: 初始化 HTTP 客户端");
@@ -142,11 +126,11 @@ public class AdminProductsController implements Initializable {
                 showAlert("初始化错误", "JSON组件初始化失败: " + t.getMessage());
                 return;
             }
-            
+
             System.out.println("DEBUG: 检查表格组件");
             // 检查所有必要的FXML元素是否正确加载
-            if (productsTable == null || idColumn == null || nameColumn == null || 
-                priceColumn == null || stockColumn == null || statusColumn == null || actionColumn == null) {
+            if (productsTable == null || idColumn == null || nameColumn == null ||
+                    priceColumn == null || stockColumn == null || statusColumn == null || actionColumn == null) {
                 System.out.println("ERROR: 表格组件未正确加载");
                 System.out.println("  productsTable = " + productsTable);
                 System.out.println("  idColumn = " + idColumn);
@@ -159,10 +143,10 @@ public class AdminProductsController implements Initializable {
                 return;
             }
             System.out.println("DEBUG: 表格组件检查通过");
-            
+
             System.out.println("DEBUG: 检查搜索组件");
-            if (searchField == null || statusFilter == null || searchButton == null || 
-                refreshButton == null || addNewButton == null) {
+            if (searchField == null || statusFilter == null || searchButton == null ||
+                    refreshButton == null || addNewButton == null) {
                 System.out.println("ERROR: 搜索组件未正确加载");
                 System.out.println("  searchField = " + searchField);
                 System.out.println("  statusFilter = " + statusFilter);
@@ -173,10 +157,10 @@ public class AdminProductsController implements Initializable {
                 return;
             }
             System.out.println("DEBUG: 搜索组件检查通过");
-            
+
             System.out.println("DEBUG: 检查表单组件");
-            if (nameField == null || priceField == null || stockField == null || 
-                statusChoiceBox == null || descriptionArea == null || saveButton == null || clearButton == null) {
+            if (nameField == null || priceField == null || stockField == null ||
+                    statusChoiceBox == null || descriptionArea == null || saveButton == null || clearButton == null) {
                 System.out.println("ERROR: 表单组件未正确加载");
                 System.out.println("  nameField = " + nameField);
                 System.out.println("  priceField = " + priceField);
@@ -189,7 +173,7 @@ public class AdminProductsController implements Initializable {
                 return;
             }
             System.out.println("DEBUG: 表单组件检查通过");
-            
+
             System.out.println("DEBUG: 检查状态显示组件");
             if (statusLabel == null || totalCountLabel == null || currentUserLabel == null || pageInfoLabel == null) {
                 System.out.println("ERROR: 状态显示组件未正确加载");
@@ -201,7 +185,7 @@ public class AdminProductsController implements Initializable {
                 return;
             }
             System.out.println("DEBUG: 状态显示组件检查通过");
-            
+
             // 检查管理员权限
             System.out.println("DEBUG: 检查管理员权限");
             if (!isAdmin()) {
@@ -214,19 +198,19 @@ public class AdminProductsController implements Initializable {
             System.out.println("DEBUG: 初始化表格列");
             initializeTableColumns();
             System.out.println("DEBUG: 表格列初始化完成");
-            
+
             System.out.println("DEBUG: 初始化事件处理");
             initializeEventHandlers();
             System.out.println("DEBUG: 事件处理初始化完成");
-            
+
             System.out.println("DEBUG: 更新用户显示");
             updateCurrentUserDisplay();
             System.out.println("DEBUG: 用户显示更新完成");
-            
+
             System.out.println("DEBUG: 加载商品数据");
             loadProducts();
             System.out.println("DEBUG: AdminProductsController 初始化完成");
-            
+
         } catch (Exception e) {
             System.out.println("ERROR: AdminProductsController 初始化异常: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             e.printStackTrace();
@@ -266,9 +250,9 @@ public class AdminProductsController implements Initializable {
                     setText(null);
                 } else {
                     setText("ON".equals(item) ? "上架" : "下架");
-                    setStyle("ON".equals(item) ? 
-                        "-fx-text-fill: #27ae60; -fx-font-weight: bold;" : 
-                        "-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
+                    setStyle("ON".equals(item) ?
+                            "-fx-text-fill: #27ae60; -fx-font-weight: bold;" :
+                            "-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
                 }
             }
         });
@@ -322,10 +306,10 @@ public class AdminProductsController implements Initializable {
         // 初始化ChoiceBox的选项和默认值
         statusFilter.getItems().addAll("全部", "上架", "下架");
         statusFilter.setValue("全部");
-        
+
         statusChoiceBox.getItems().addAll("ON", "OFF");
         statusChoiceBox.setValue("ON");
-        
+
         searchButton.setOnAction(event -> handleSearch());
         refreshButton.setOnAction(event -> handleRefresh());
         addNewButton.setOnAction(event -> handleAddNew());
@@ -346,8 +330,8 @@ public class AdminProductsController implements Initializable {
      * 更新当前用户显示
      */
     private void updateCurrentUserDisplay() {
-        currentUserLabel.setText("当前用户: " + (MainApp.username != null ? MainApp.username : "未知用户") + 
-                                " | 角色: " + (MainApp.role != null ? MainApp.role : "未知角色"));
+        currentUserLabel.setText("当前用户: " + (MainApp.username != null ? MainApp.username : "未知用户") +
+                " | 角色: " + (MainApp.role != null ? MainApp.role : "未知角色"));
     }
 
     /**
@@ -356,13 +340,13 @@ public class AdminProductsController implements Initializable {
     private void loadProducts() {
         String searchText = searchField.getText() != null ? searchField.getText().trim() : "";
         String status = getStatusValue(statusFilter.getValue());
-        
+
         System.out.println("DEBUG: loadProducts 被调用");
         System.out.println("DEBUG: 处理后的搜索文本: '" + searchText + "'");
         System.out.println("DEBUG: 处理后的状态: '" + status + "'");
-        
+
         String url = baseUrl + "/api/products?page=" + currentPage + "&size=" + pageSize + "&sort=name,asc";
-        
+
         if (!searchText.isEmpty()) {
             try {
                 String encodedSearchText = java.net.URLEncoder.encode(searchText, "UTF-8");
@@ -377,11 +361,11 @@ public class AdminProductsController implements Initializable {
             url += "&status=" + status;
             System.out.println("DEBUG: 添加状态参数: " + status);
         }
-        
+
         System.out.println("DEBUG: 最终请求URL: " + url);
 
         Request.Builder requestBuilder = new Request.Builder().url(url);
-        
+
         // 添加管理员认证头
         if (MainApp.token != null) {
             requestBuilder.header("Authorization", MainApp.token);
@@ -430,7 +414,7 @@ public class AdminProductsController implements Initializable {
                                 ProductListResponse productListResponse = objectMapper.readValue(responseBody, ProductListResponse.class);
                                 updateProductTable(productListResponse);
                             }
-                            
+
                             // 更新总页数
                             String totalCountHeader = response.header("X-Total-Count");
                             if (totalCountHeader != null) {
@@ -439,7 +423,7 @@ public class AdminProductsController implements Initializable {
                                 updatePageInfo();
                                 totalCountLabel.setText("总计: " + totalCount + " 个商品");
                             }
-                            
+
                             statusLabel.setText("加载成功");
                             statusLabel.setStyle("-fx-text-fill: #27ae60;");
                         } catch (Exception e) {
@@ -561,7 +545,7 @@ public class AdminProductsController implements Initializable {
             String backendStatus = "ON".equalsIgnoreCase(statusChoiceBox.getValue()) ? "ACTIVE" : "INACTIVE";
             payload.put("status", backendStatus);
             String requestBody = objectMapper.writeValueAsString(payload);
-            
+
             Request.Builder requestBuilder;
             if (isEditMode && !idField.getText().isEmpty()) {
                 // 更新商品
@@ -636,7 +620,7 @@ public class AdminProductsController implements Initializable {
         stockField.setText(String.valueOf(product.getStock()));
         statusChoiceBox.setValue(product.getStatus());
         descriptionArea.setText(product.getDescription());
-        
+
         isEditMode = true;
         statusLabel.setText("编辑模式 - 商品ID: " + product.getId());
         statusLabel.setStyle("-fx-text-fill: #f39c12;");
@@ -832,16 +816,74 @@ public class AdminProductsController implements Initializable {
      */
     @FXML
     private void handleBack() {
-        if (!MainApp.goBack(productsTable)) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) productsTable.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("管理员界面");
-            } catch (Exception e) {
-                showAlert("错误", "返回上一页失败: " + e.getMessage());
-            }
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", productsTable);
+    }
+
+    // 商品模型类
+    public static class ProductModel {
+        private final SimpleStringProperty id;
+        private final SimpleStringProperty name;
+        private final SimpleDoubleProperty price;
+        private final SimpleIntegerProperty stock;
+        private final SimpleStringProperty status;
+        private final SimpleStringProperty description;
+
+        public ProductModel(String id, String name, Double price, Integer stock, String status, String description) {
+            this.id = new SimpleStringProperty(id != null ? id : "");
+            this.name = new SimpleStringProperty(name != null ? name : "");
+            this.price = new SimpleDoubleProperty(price != null ? price : 0.0);
+            this.stock = new SimpleIntegerProperty(stock != null ? stock : 0);
+            this.status = new SimpleStringProperty(status != null ? status : "");
+            this.description = new SimpleStringProperty(description != null ? description : "");
+        }
+
+        // Getters
+        public String getId() {
+            return id.get();
+        }
+
+        public SimpleStringProperty idProperty() {
+            return id;
+        }
+
+        public String getName() {
+            return name.get();
+        }
+
+        public SimpleStringProperty nameProperty() {
+            return name;
+        }
+
+        public double getPrice() {
+            return price.get();
+        }
+
+        public SimpleDoubleProperty priceProperty() {
+            return price;
+        }
+
+        public int getStock() {
+            return stock.get();
+        }
+
+        public SimpleIntegerProperty stockProperty() {
+            return stock;
+        }
+
+        public String getStatus() {
+            return status.get();
+        }
+
+        public SimpleStringProperty statusProperty() {
+            return status;
+        }
+
+        public String getDescription() {
+            return description.get();
+        }
+
+        public SimpleStringProperty descriptionProperty() {
+            return description;
         }
     }
 
@@ -849,8 +891,13 @@ public class AdminProductsController implements Initializable {
     public static class ProductListResponse {
         private List<ProductResponse> products;
 
-        public List<ProductResponse> getProducts() { return products; }
-        public void setProducts(List<ProductResponse> products) { this.products = products; }
+        public List<ProductResponse> getProducts() {
+            return products;
+        }
+
+        public void setProducts(List<ProductResponse> products) {
+            this.products = products;
+        }
     }
 
     public static class ProductResponse {
@@ -862,18 +909,53 @@ public class AdminProductsController implements Initializable {
         private String description;
 
         // getters and setters
-        public String getId() { return id; }
-        public void setId(String id) { this.id = id; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public Double getPrice() { return price; }
-        public void setPrice(Double price) { this.price = price; }
-        public Integer getStock() { return stock; }
-        public void setStock(Integer stock) { this.stock = stock; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Double getPrice() {
+            return price;
+        }
+
+        public void setPrice(Double price) {
+            this.price = price;
+        }
+
+        public Integer getStock() {
+            return stock;
+        }
+
+        public void setStock(Integer stock) {
+            this.stock = stock;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
     }
 
     public static class ProductRequest {
@@ -884,16 +966,45 @@ public class AdminProductsController implements Initializable {
         private String description;
 
         // getters and setters
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public Double getPrice() { return price; }
-        public void setPrice(Double price) { this.price = price; }
-        public Integer getStock() { return stock; }
-        public void setStock(Integer stock) { this.stock = stock; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getDescription() { return description; }
-        public void setDescription(String description) { this.description = description; }
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public Double getPrice() {
+            return price;
+        }
+
+        public void setPrice(Double price) {
+            this.price = price;
+        }
+
+        public Integer getStock() {
+            return stock;
+        }
+
+        public void setStock(Integer stock) {
+            this.stock = stock;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public void setDescription(String description) {
+            this.description = description;
+        }
     }
 
     // 与后端领域对象字段对齐的载体
@@ -905,24 +1016,52 @@ public class AdminProductsController implements Initializable {
         private String status;
         private String productType;
 
-        public String getProductId() { return productId; }
-        public void setProductId(String productId) { this.productId = productId; }
-        public String getProductName() { return productName; }
-        public void setProductName(String productName) { this.productName = productName; }
-        public Double getProductPrice() { return productPrice; }
-        public void setProductPrice(Double productPrice) { this.productPrice = productPrice; }
-        public Integer getAvailableCount() { return availableCount; }
-        public void setAvailableCount(Integer availableCount) { this.availableCount = availableCount; }
-        public String getStatus() { return status; }
-        public void setStatus(String status) { this.status = status; }
-        public String getProductType() { return productType; }
-        public void setProductType(String productType) { this.productType = productType; }
-    }
+        public String getProductId() {
+            return productId;
+        }
 
-    private static String normalizeStatus(String backendStatus) {
-        if (backendStatus == null) return "OFF";
-        String s = backendStatus.trim().toUpperCase();
-        if ("ACTIVE".equals(s) || "ON".equals(s)) return "ON";
-        return "OFF";
+        public void setProductId(String productId) {
+            this.productId = productId;
+        }
+
+        public String getProductName() {
+            return productName;
+        }
+
+        public void setProductName(String productName) {
+            this.productName = productName;
+        }
+
+        public Double getProductPrice() {
+            return productPrice;
+        }
+
+        public void setProductPrice(Double productPrice) {
+            this.productPrice = productPrice;
+        }
+
+        public Integer getAvailableCount() {
+            return availableCount;
+        }
+
+        public void setAvailableCount(Integer availableCount) {
+            this.availableCount = availableCount;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getProductType() {
+            return productType;
+        }
+
+        public void setProductType(String productType) {
+            this.productType = productType;
+        }
     }
 }

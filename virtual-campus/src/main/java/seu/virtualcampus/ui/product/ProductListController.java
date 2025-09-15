@@ -15,23 +15,28 @@ import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.Product;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProductListController {
     private static final Logger logger = Logger.getLogger(ProductListController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-
+    private final Map<String, String> sortDisplayToValue = new LinkedHashMap<>();
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
+    private final int pageSize = 10;
     @FXML
     private TextField searchField;
     @FXML
@@ -44,18 +49,13 @@ public class ProductListController {
     private Button prevButton, nextButton;
     @FXML
     private Label pageInfoLabel, msgLabel;
-
     // 分页相关变量
     private int currentPage = 1;
-    private int pageSize = 10;
     private long totalCount = 0;
     private String currentSort = "name,asc";
-    private final Map<String, String> sortDisplayToValue = new LinkedHashMap<>();
     private String currentKeyword = "";
-
     // 轮询相关
     private ScheduledExecutorService poller;
-    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
     private volatile String lastSignature = null;
 
     @FXML
@@ -76,28 +76,32 @@ public class ProductListController {
         // 初始化表格列
         idCol.setCellValueFactory(new PropertyValueFactory<>("productId"));
         nameCol.setCellValueFactory(new PropertyValueFactory<>("productName"));
-        priceCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getProductPrice()))
+        priceCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getProductPrice()))
         );
-        stockCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(cellData.getValue().getAvailableCount().toString())
+        stockCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getAvailableCount().toString())
         );
         typeCol.setCellValueFactory(new PropertyValueFactory<>("productType"));
         statusCol.setCellValueFactory(cellData -> {
             String status = cellData.getValue().getStatus();
             return new SimpleStringProperty("ACTIVE".equals(status) ? "上架" : "下架");
         });
-        
+
         // 操作列
-        actionCol.setCellFactory(col -> new TableCell<Product, String>() {
+        actionCol.setCellFactory(col -> new TableCell<>() {
             private final Button detailButton = new Button("查看详情");
-            
+
             {
                 detailButton.setStyle("-fx-font-size: 12px; -fx-background-radius: 6; -fx-padding: 2 8; -fx-background-color: #4f8cff; -fx-text-fill: white;");
                 detailButton.setOnAction(e -> {
                     Product product = getTableView().getItems().get(getIndex());
                     if (product != null) {
-                        openProductDetail(product.getProductId());
+                        try {
+                            openProductDetail(product.getProductId());
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
                     }
                 });
             }
@@ -126,7 +130,7 @@ public class ProductListController {
             if (newScene != null) {
                 newScene.windowProperty().addListener((obsW, oldW, newW) -> {
                     if (newW != null) {
-                        ((Stage) newW).setOnCloseRequest(e -> stopPolling());
+                        newW.setOnCloseRequest(e -> stopPolling());
                     }
                 });
             }
@@ -148,7 +152,7 @@ public class ProductListController {
     }
 
     @FXML
-    private void handleTableClick(MouseEvent event) {
+    private void handleTableClick(MouseEvent event) throws IOException {
         if (event.getClickCount() == 2) { // 双击
             Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
@@ -174,23 +178,25 @@ public class ProductListController {
         }
     }
 
-    private void loadProducts() { loadProducts(false); }
+    private void loadProducts() {
+        loadProducts(false);
+    }
 
     // silent=true 时仅在数据变化时刷新UI且不提示信息
     private void loadProducts(boolean silent) {
         // 构建请求URL
         HttpUrl.Builder urlBuilder;
-        
+
         if (!currentKeyword.isEmpty()) {
             // 搜索模式
-            urlBuilder = HttpUrl.parse("http://localhost:8080/api/products/search").newBuilder()
+            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/products/search")).newBuilder()
                     .addQueryParameter("keyword", currentKeyword)
                     .addQueryParameter("page", String.valueOf(currentPage))
                     .addQueryParameter("size", String.valueOf(pageSize))
                     .addQueryParameter("sort", currentSort);
         } else {
             // 普通列表模式
-            urlBuilder = HttpUrl.parse("http://localhost:8080/api/products").newBuilder()
+            urlBuilder = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/products")).newBuilder()
                     .addQueryParameter("page", String.valueOf(currentPage))
                     .addQueryParameter("size", String.valueOf(pageSize))
                     .addQueryParameter("sort", currentSort);
@@ -211,11 +217,15 @@ public class ProductListController {
             }
 
             @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+            public void onResponse(@NotNull Call call, @NotNull Response response) {
                 if (response.isSuccessful()) {
                     try {
-                        String responseBody = response.body().string();
-                        List<Product> products = mapper.readValue(responseBody, new TypeReference<List<Product>>() {});
+                        String responseBody = null;
+                        if (response.body() != null) {
+                            responseBody = response.body().string();
+                        }
+                        List<Product> products = mapper.readValue(responseBody, new TypeReference<>() {
+                        });
                         String signature = buildSignature(products);
 
                         // 读取总数
@@ -253,10 +263,10 @@ public class ProductListController {
         StringBuilder sb = new StringBuilder(products.size() * 16);
         for (Product p : products) {
             sb.append(p.getProductId()).append('|')
-              .append(p.getProductName()).append('|')
-              .append(p.getProductPrice()).append('|')
-              .append(p.getAvailableCount()).append('|')
-              .append(p.getStatus()).append('\n');
+                    .append(p.getProductName()).append('|')
+                    .append(p.getProductPrice()).append('|')
+                    .append(p.getAvailableCount()).append('|')
+                    .append(p.getStatus()).append('\n');
         }
         return Integer.toHexString(sb.toString().hashCode());
     }
@@ -296,27 +306,28 @@ public class ProductListController {
             productTable.setPrefHeight(pref);
             productTable.setMinHeight(pref);
             productTable.setMaxHeight(pref);
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+        }
     }
 
     private void updatePagination() {
         long totalPages = Math.max(1, (totalCount + pageSize - 1) / pageSize);
-        
+
         // 更新分页信息
-        pageInfoLabel.setText(String.format("第 %d 页，共 %d 页 (总计 %d 条)", 
+        pageInfoLabel.setText(String.format("第 %d 页，共 %d 页 (总计 %d 条)",
                 currentPage, totalPages, totalCount));
-        
+
         // 更新按钮状态
         prevButton.setDisable(currentPage <= 1);
         nextButton.setDisable(currentPage >= totalPages);
-        
+
         // 更新按钮样式
         if (currentPage > 1) {
             prevButton.setStyle("-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 6 18; -fx-background-color: #4f8cff; -fx-text-fill: white;");
         } else {
             prevButton.setStyle("-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 6 18; -fx-background-color: #b0b8c1; -fx-text-fill: #2d3a4a;");
         }
-        
+
         if (currentPage < totalPages) {
             nextButton.setStyle("-fx-font-size: 16px; -fx-background-radius: 8; -fx-padding: 6 18; -fx-background-color: #4f8cff; -fx-text-fill: white;");
         } else {
@@ -324,39 +335,25 @@ public class ProductListController {
         }
     }
 
-    private void openProductDetail(String productId) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_detail.fxml"));
-            Parent root = loader.load();
-            ProductDetailController controller = loader.getController();
-            controller.setProductId(productId);
-            // 压栈并切换
-            MainApp.pushAndSet(productTable, root);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "打开商品详情时发生异常", e);
-            showMessage("打开详情失败：" + e.getMessage(), true);
-        }
+    private void openProductDetail(String productId) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_detail.fxml"));
+        Parent root = loader.load();
+        ProductDetailController controller = loader.getController();
+        controller.setProductId(productId);
+        // 切换
+        Stage stage = (Stage) productTable.getScene().getWindow();
+        stage.setScene(new Scene(root));
     }
 
     @FXML
     private void handleBack() {
-        if (!MainApp.goBack(productTable)) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) productTable.getScene().getWindow();
-                stage.setScene(new Scene(root));
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "返回上一页失败", e);
-                showMessage("返回失败：" + e.getMessage(), true);
-            }
-        }
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", productTable);
     }
 
     private void showMessage(String message, boolean isError) {
         msgLabel.setText(message);
         msgLabel.setTextFill(isError ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.GREEN);
-        
+
         // 3秒后清除消息
         new Thread(() -> {
             try {

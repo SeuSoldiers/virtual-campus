@@ -1,15 +1,15 @@
 package seu.virtualcampus.ui.admin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.stage.Stage;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import okhttp3.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -21,21 +21,17 @@ import java.util.ResourceBundle;
  */
 public class AdminShipController implements Initializable {
 
-    @FXML
-    private TextField orderIdField;
-
-    @FXML
-    private Button shipButton;
-
-    @FXML
-    private Label resultLabel;
-
-    @FXML
-    private Label currentUserLabel;
-
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl = "http://localhost:8080";
+    @FXML
+    private TextField orderIdField;
+    @FXML
+    private Button shipButton;
+    @FXML
+    private Label resultLabel;
+    @FXML
+    private Label currentUserLabel;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -150,17 +146,7 @@ public class AdminShipController implements Initializable {
      */
     @FXML
     private void handleBack() {
-        if (!MainApp.goBack(orderIdField)) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/registrar.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) orderIdField.getScene().getWindow();
-                stage.setScene(new Scene(root));
-                stage.setTitle("管理员界面");
-            } catch (IOException e) {
-                showAlert("错误", "返回管理页面失败: " + e.getMessage());
-            }
-        }
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", orderIdField);
     }
 
     /**
@@ -168,7 +154,7 @@ public class AdminShipController implements Initializable {
      */
     private void showResult(String message, Boolean isSuccess) {
         resultLabel.setText(message);
-        
+
         if (isSuccess == null) {
             // 进行中状态
             resultLabel.setStyle("-fx-text-fill: #3498db; -fx-font-weight: bold;");

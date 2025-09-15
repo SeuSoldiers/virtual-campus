@@ -5,6 +5,8 @@ INSERT OR IGNORE INTO users (username, password, role)
 VALUES (220232, '123', 'student');
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1001, '123', 'registrar');
+INSERT OR IGNORE INTO users (username, password, role)
+VALUES (1002, '123', 'ShopMgr');
 
 -- 插入学生信息
 INSERT OR IGNORE INTO student_info (student_id, name, major, address, phone, ethnicity, political_status, gender,

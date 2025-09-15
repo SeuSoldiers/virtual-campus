@@ -3,28 +3,32 @@ package seu.virtualcampus.ui.product;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.Product;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ProductDetailController {
     private static final Logger logger = Logger.getLogger(ProductDetailController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
     @FXML
     private Label productIdLabel, productNameLabel, priceLabel, stockLabel, typeLabel, statusLabel, msgLabel;
     @FXML
@@ -33,13 +37,10 @@ public class ProductDetailController {
     private Button addToCartButton;
     @FXML
     private VBox purchaseArea;
-
     private String currentProductId;
     private Product currentProduct;
-
     // 轮询（详情）
     private ScheduledExecutorService poller;
-    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
 
     @FXML
     public void initialize() {
@@ -84,7 +85,10 @@ public class ProductDetailController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        String responseBody = response.body().string();
+                        String responseBody = null;
+                        if (response.body() != null) {
+                            responseBody = response.body().string();
+                        }
                         Product product = mapper.readValue(responseBody, Product.class);
                         currentProduct = product;
 
@@ -115,7 +119,7 @@ public class ProductDetailController {
         priceLabel.setText("¥" + String.format("%.2f", product.getProductPrice()));
         stockLabel.setText(product.getAvailableCount() + " 件");
         typeLabel.setText(product.getProductType());
-        
+
         // 状态显示和颜色
         String status = product.getStatus();
         if ("ACTIVE".equals(status)) {
@@ -158,9 +162,9 @@ public class ProductDetailController {
         }
 
         int quantity = quantitySpinner.getValue();
-        
+
         // 构建请求URL
-        HttpUrl url = HttpUrl.parse("http://localhost:8080/api/cart/add-item").newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/add-item")).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .addQueryParameter("productId", currentProduct.getProductId())
                 .addQueryParameter("quantity", String.valueOf(quantity))
@@ -196,7 +200,10 @@ public class ProductDetailController {
                         loadProductDetailSilently();
                     } else {
                         try {
-                            String errorMsg = response.body().string();
+                            String errorMsg = null;
+                            if (response.body() != null) {
+                                errorMsg = response.body().string();
+                            }
                             System.err.println("[UI] Add-to-cart failed. code=" + response.code() + ", body=" + errorMsg);
                             showMessage("添加失败: " + errorMsg, true);
                         } catch (IOException e) {
@@ -212,31 +219,12 @@ public class ProductDetailController {
 
     @FXML
     private void handleViewCart() {
-        try {
-            System.out.println("商品详情页开始加载购物车界面...");
-            MainApp.navigateTo("/seu/virtualcampus/ui/cart.fxml", productIdLabel);
-            System.out.println("购物车界面切换成功");
-        } catch (Exception e) {
-            System.err.println("商品详情页购物车界面加载详细错误信息:");
-            e.printStackTrace();
-            logger.log(Level.SEVERE, "打开购物车时发生异常", e);
-            showMessage("打开购物车失败：" + e.getMessage(), true);
-        }
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/cart.fxml", productIdLabel);
     }
 
     @FXML
     private void handleBackToList() {
-        if (!MainApp.goBack(productIdLabel)) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/product_list.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) productIdLabel.getScene().getWindow();
-                stage.setScene(new Scene(root));
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "返回商品列表时发生异常", e);
-                showMessage("返回失败：" + e.getMessage(), true);
-            }
-        }
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/product_list.fxml", productIdLabel);
     }
 
     /**
@@ -274,7 +262,10 @@ public class ProductDetailController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        String responseBody = response.body().string();
+                        String responseBody = null;
+                        if (response.body() != null) {
+                            responseBody = response.body().string();
+                        }
                         Product product = mapper.readValue(responseBody, Product.class);
                         currentProduct = product;
 
@@ -334,7 +325,7 @@ public class ProductDetailController {
     private void showMessage(String message, boolean isError) {
         msgLabel.setText(message);
         msgLabel.setTextFill(isError ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.GREEN);
-        
+
         // 3秒后清除消息
         new Thread(() -> {
             try {

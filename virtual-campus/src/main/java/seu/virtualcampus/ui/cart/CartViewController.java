@@ -10,30 +10,33 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.VBox;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import lombok.Data;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.Cart;
 import seu.virtualcampus.domain.Product;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CartViewController {
     private static final Logger logger = Logger.getLogger(CartViewController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-
+    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
+    private final List<CartItemView> cartItems = new ArrayList<>();
+    private final Map<String, Product> productCache = new HashMap<>();
     @FXML
     private TableView<CartItemView> cartTable;
     @FXML
@@ -46,20 +49,15 @@ public class CartViewController {
     private HBox bottomArea;
     @FXML
     private Button checkoutButton;
-
-    private List<CartItemView> cartItems = new ArrayList<>();
-    private Map<String, Product> productCache = new HashMap<>();
-
     // 轮询（购物车）
     private ScheduledExecutorService poller;
-    private final AtomicBoolean pollInFlight = new AtomicBoolean(false);
 
     @FXML
     public void initialize() {
         try {
             System.out.println("=== 购物车控制器开始初始化 ===");
             logger.info("开始初始化购物车界面");
-            
+
             System.out.println("初始化表格...");
             initializeTable();
             System.out.println("表格初始化完成");
@@ -75,11 +73,11 @@ public class CartViewController {
                         + ", typeCol=" + (typeCol != null) + ", statusCol=" + (statusCol != null) + ", actionCol=" + (actionCol != null));
             }
             if (totalAmountLabel == null || msgLabel == null || emptyCartHint == null || bottomArea == null || checkoutButton == null) {
-                System.err.println("[DEBUG] 某些控件未注入: totalAmountLabel=" + (totalAmountLabel != null) + 
+                System.err.println("[DEBUG] 某些控件未注入: totalAmountLabel=" + (totalAmountLabel != null) +
                         ", msgLabel=" + (msgLabel != null) + ", emptyCartHint=" + (emptyCartHint != null) +
                         ", bottomArea=" + (bottomArea != null) + ", checkoutButton=" + (checkoutButton != null));
             }
-            
+
             // 延迟加载数据，避免阻塞UI初始化
             Platform.runLater(() -> {
                 try {
@@ -129,26 +127,26 @@ public class CartViewController {
     private void initializeTable() {
         // 初始化表格列
         nameCol.setCellValueFactory(new PropertyValueFactory<>("productName"));
-        priceCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getUnitPrice()))
+        priceCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getUnitPrice()))
         );
         typeCol.setCellValueFactory(new PropertyValueFactory<>("productType"));
         statusCol.setCellValueFactory(cellData -> {
             String status = cellData.getValue().getStatus();
             return new SimpleStringProperty("ACTIVE".equals(status) ? "上架" : "下架");
         });
-        subtotalCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getSubtotal()))
+        subtotalCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty("¥" + String.format("%.2f", cellData.getValue().getSubtotal()))
         );
 
         // 数量列 - 简化版本
-        quantityCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty(String.valueOf(cellData.getValue().getQuantity()))
+        quantityCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getQuantity()))
         );
 
         // 操作列 - 简化版本
-        actionCol.setCellValueFactory(cellData -> 
-            new SimpleStringProperty("删除")
+        actionCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty("删除")
         );
 
         // 操作列 - 改为可点击按钮：点击后减少1件；若数量为1则删除该项
@@ -211,7 +209,7 @@ public class CartViewController {
 
         logger.info("正在加载用户 " + MainApp.username + " 的购物车数据");
         System.out.println("[Cart] 加载购物车数据: userId=" + MainApp.username);
-        
+
         String url = "http://localhost:8080/api/cart?userId=" + MainApp.username;
         Request request = new Request.Builder()
                 .url(url)
@@ -231,10 +229,14 @@ public class CartViewController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 if (response.isSuccessful()) {
                     try {
-                        String responseBody = response.body().string();
+                        String responseBody = null;
+                        if (response.body() != null) {
+                            responseBody = response.body().string();
+                        }
                         System.out.println("[Cart] 加载购物车成功, body=" + responseBody);
-                        List<Cart> carts = mapper.readValue(responseBody, new TypeReference<List<Cart>>() {});
-                        
+                        List<Cart> carts = mapper.readValue(responseBody, new TypeReference<List<Cart>>() {
+                        });
+
                         // 异步加载商品详情
                         loadProductDetails(carts);
                     } catch (Exception e) {
@@ -254,7 +256,7 @@ public class CartViewController {
     private void loadProductDetails(List<Cart> carts) {
         cartItems.clear();
         System.out.println("[Cart] 开始加载商品详情, 购物车项数=" + carts.size());
-        
+
         if (carts.isEmpty()) {
             Platform.runLater(() -> {
                 updateUI();
@@ -283,14 +285,17 @@ public class CartViewController {
                 public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     if (response.isSuccessful()) {
                         try {
-                            String responseBody = response.body().string();
+                            String responseBody = null;
+                            if (response.body() != null) {
+                                responseBody = response.body().string();
+                            }
                             Product product = mapper.readValue(responseBody, Product.class);
                             productCache.put(product.getProductId(), product);
-                            
+
                             CartItemView cartItemView = new CartItemView(cart, product);
                             synchronized (cartItems) {
                                 cartItems.add(cartItemView);
-                                
+
                                 // 当所有商品详情都加载完成时更新UI
                                 if (cartItems.size() == carts.size()) {
                                     Platform.runLater(() -> {
@@ -339,12 +344,12 @@ public class CartViewController {
         cartTable.getItems().clear();
         cartTable.getItems().addAll(cartItems);
         System.out.println("[Cart] updateUI: itemsInTable=" + cartItems.size());
-        
+
         boolean isEmpty = cartItems.isEmpty();
         emptyCartHint.setVisible(isEmpty);
         cartTable.setVisible(!isEmpty);
         bottomArea.setVisible(!isEmpty);
-        
+
         calculateTotal();
     }
 
@@ -364,7 +369,7 @@ public class CartViewController {
             return;
         }
 
-        HttpUrl url = HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId()).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId())).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .addQueryParameter("quantity", String.valueOf(newQuantity))
                 .build();
@@ -393,7 +398,10 @@ public class CartViewController {
                         showMessage("数量更新成功", false);
                     } else {
                         try {
-                            String errorMsg = response.body().string();
+                            String errorMsg = null;
+                            if (response.body() != null) {
+                                errorMsg = response.body().string();
+                            }
                             showMessage("更新失败: " + errorMsg, true);
                         } catch (IOException e) {
                             showMessage("更新失败，状态码: " + response.code(), true);
@@ -407,7 +415,7 @@ public class CartViewController {
     }
 
     private void deleteCartItem(CartItemView item) {
-        HttpUrl url = HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId()).newBuilder()
+        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://localhost:8080/api/cart/" + item.getCartItemId())).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .build();
 
@@ -433,7 +441,10 @@ public class CartViewController {
                         showMessage("商品已删除", false);
                     } else {
                         try {
-                            String errorMsg = response.body().string();
+                            String errorMsg = null;
+                            if (response.body() != null) {
+                                errorMsg = response.body().string();
+                            }
                             showMessage("删除失败: " + errorMsg, true);
                         } catch (IOException e) {
                             showMessage("删除失败，状态码: " + response.code(), true);
@@ -509,26 +520,22 @@ public class CartViewController {
 
     @FXML
     private void handleGoShopping() {
-        try {
-            MainApp.navigateTo("/seu/virtualcampus/ui/product_list.fxml", cartTable);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "返回商品列表时发生异常", e);
-            showMessage("返回失败：" + e.getMessage(), true);
-        }
+        navigateToScene("/seu/virtualcampus/ui/product_list.fxml");
     }
 
     @FXML
     private void handleBack() {
-        if (!MainApp.goBack(cartTable)) {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-                Parent root = loader.load();
-                Stage stage = (Stage) cartTable.getScene().getWindow();
-                stage.setScene(new Scene(root));
-            } catch (Exception e) {
-                logger.log(Level.SEVERE, "返回主界面时发生异常", e);
-                showMessage("返回失败：" + e.getMessage(), true);
-            }
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", cartTable);
+    }
+
+    private void navigateToScene(String fxmlPath) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            Parent root = loader.load();
+            Stage stage = (Stage) cartTable.getScene().getWindow();
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "页面跳转异常: " + fxmlPath, e);
         }
     }
 
@@ -548,7 +555,7 @@ public class CartViewController {
     private void showMessage(String message, boolean isError) {
         msgLabel.setText(message);
         msgLabel.setTextFill(isError ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.GREEN);
-        
+
         // 3秒后清除消息
         new Thread(() -> {
             try {
@@ -561,6 +568,7 @@ public class CartViewController {
     }
 
     // 内部类：购物车项视图模型
+    @Data
     public static class CartItemView {
         private final Cart cart;
         private final Product product;
@@ -579,19 +587,33 @@ public class CartViewController {
         }
 
         // Getters
-        public String getCartItemId() { return cart.getCartItemId(); }
-        public String getProductId() { return product.getProductId(); }
-        public String getProductName() { return product.getProductName(); }
-        public String getProductType() { return product.getProductType(); }
-        public String getStatus() { return product.getStatus(); }
-        public double getUnitPrice() { return product.getProductPrice(); }
-        public int getQuantity() { return quantity; }
-        public int getAvailableCount() { return product.getAvailableCount(); }
-        public double getSubtotal() { return subtotal; }
+        public String getCartItemId() {
+            return cart.getCartItemId();
+        }
+
+        public String getProductId() {
+            return product.getProductId();
+        }
+
+        public String getProductName() {
+            return product.getProductName();
+        }
+
+        public String getStatus() {
+            return product.getStatus();
+        }
+
+        public double getUnitPrice() {
+            return product.getProductPrice();
+        }
 
         public void setQuantity(int quantity) {
             this.quantity = quantity;
             updateSubtotal();
+        }
+
+        public int getAvailableCount() {
+            return product.getAvailableCount();
         }
     }
 }

@@ -218,31 +218,7 @@ public class StudentController {
 
     @FXML
     private void handleBack() {
-        try {
-            javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-            javafx.scene.Parent root = loader.load();
-            seu.virtualcampus.ui.DashboardController controller = loader.getController();
-            controller.setUserInfo(seu.virtualcampus.ui.MainApp.username, seu.virtualcampus.ui.MainApp.role);
-            javafx.stage.Stage stage = (javafx.stage.Stage) nameField.getScene().getWindow();
-            stage.setScene(new javafx.scene.Scene(root));
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "返回dashboard时发生异常", e);
-        }
-    }
-
-    @FXML
-    private void openProductList() {
-        MainApp.openProductList();
-    }
-
-    @FXML
-    private void openCart() {
-        MainApp.openCart();
-    }
-
-    @FXML
-    private void openOrderList() {
-        MainApp.openOrderList();
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", nameField);
     }
 
     // 审核记录视图模型
