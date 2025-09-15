@@ -1,7 +1,8 @@
 package seu.virtualcampus.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import seu.virtualcampus.domain.Book;
 import seu.virtualcampus.domain.BorrowRecord;
 import seu.virtualcampus.domain.ReservationRecord;
@@ -12,7 +13,8 @@ import seu.virtualcampus.service.ReservationRecordService;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequestMapping("/api/library")
 public class LibraryController {
 
     @Autowired
@@ -27,6 +29,13 @@ public class LibraryController {
     /**
      * 1. 查询图书 - 服务端函数
      */
+    @GetMapping("/books")
+    public ResponseEntity<List<Book>> queryBooksApi(@RequestParam Map<String, String> queryParams) {
+        List<Book> books = queryBooks(queryParams);
+        return ResponseEntity.ok(books);
+    }
+
+
     public List<Book> queryBooks(Map<String, String> queryParams) {
         String title = queryParams.get("title");
         String author = queryParams.get("author");
@@ -52,6 +61,15 @@ public class LibraryController {
     /**
      * 2. 借阅图书 - 服务端函数
      */
+
+    @PostMapping("/borrow")
+    public ResponseEntity<Map<String, Object>> borrowBookApi(
+            @RequestParam String userId,
+            @RequestParam String bookId) {
+        Map<String, Object> result = borrowBook(userId, bookId);
+        return ResponseEntity.ok(result);
+    }
+
     public Map<String, Object> borrowBook(String userId, String bookId) {
         BorrowRecord record = borrowRecordService.borrowBook(userId, bookId);
 
@@ -72,6 +90,13 @@ public class LibraryController {
     /**
      * 3. 归还图书 - 服务端函数
      */
+
+    @PostMapping("/return")
+    public ResponseEntity<Map<String, Object>> returnBookApi(@RequestParam String recordId) {
+        Map<String, Object> result = returnBook(recordId);
+        return ResponseEntity.ok(result);
+    }
+
     public Map<String, Object> returnBook(String recordId) {
         try {
             borrowRecordService.returnBook(recordId);
@@ -90,6 +115,12 @@ public class LibraryController {
     /**
      * 4. 续借图书 - 服务端函数
      */
+    @PostMapping("/renew")
+    public ResponseEntity<Map<String, Object>> renewBookApi(@RequestParam String recordId) {
+        Map<String, Object> result = renewBook(recordId);
+        return ResponseEntity.ok(result);
+    }
+
     public Map<String, Object> renewBook(String recordId) {
         boolean success = borrowRecordService.renewBook(recordId);
 
@@ -112,6 +143,13 @@ public class LibraryController {
     /**
      * 5. 获取借阅记录 - 服务端函数
      */
+    @GetMapping("/borrow-records")
+    public ResponseEntity<List<BorrowRecord>> queryBorrowRecordsApi(
+            @RequestParam Map<String, String> queryParams) {
+        List<BorrowRecord> records = queryBorrowRecords(queryParams);
+        return ResponseEntity.ok(records);
+    }
+
     public List<BorrowRecord> queryBorrowRecords(Map<String, String> queryParams) {
         String userId = queryParams.get("userId");
         String bookId = queryParams.get("bookId");
@@ -139,6 +177,15 @@ public class LibraryController {
     /**
      * 6. 管理图书 - 服务端函数
      */
+    @PostMapping("/books/manage")
+    public ResponseEntity<String> manageBooksApi(
+            @RequestBody Book book,
+            @RequestParam String action) {
+        String result = manageBooks(book, action);
+        return ResponseEntity.ok(result);
+    }
+
+
     public String manageBooks(Book book, String action) {
         try {
             if ("add".equals(action)) {
@@ -161,6 +208,14 @@ public class LibraryController {
     /**
      * 7. 预约图书 - 服务端函数
      */
+    @PostMapping("/reserve")
+    public ResponseEntity<Map<String, Object>> reserveBookApi(
+            @RequestParam String userId,
+            @RequestParam String bookId) {
+        Map<String, Object> result = reserveBook(userId, bookId);
+        return ResponseEntity.ok(result);
+    }
+
     public Map<String, Object> reserveBook(String userId, String bookId) {
         try {
             ReservationRecord record = reservationRecordService.reserveBook(userId, bookId);
@@ -181,6 +236,12 @@ public class LibraryController {
     /**
      * 8. 取消预约 - 服务端函数
      */
+    @PostMapping("/reserve/cancel")
+    public ResponseEntity<Map<String, Object>> cancelReservationApi(@RequestParam String reservationId) {
+        Map<String, Object> result = cancelReservation(reservationId);
+        return ResponseEntity.ok(result);
+    }
+
     public Map<String, Object> cancelReservation(String reservationId) {
         try {
             reservationRecordService.cancelReservation(reservationId);
@@ -199,6 +260,14 @@ public class LibraryController {
     /**
      * 9. 查询预约记录 - 服务端函数
      */
+    @GetMapping("/reserve-records")
+    public ResponseEntity<List<ReservationRecord>> queryReservationRecordsApi(
+            @RequestParam Map<String, String> queryParams) {
+        List<ReservationRecord> records = queryReservationRecords(queryParams);
+        return ResponseEntity.ok(records);
+    }
+
+
     public List<ReservationRecord> queryReservationRecords(Map<String, String> queryParams) {
         String userId = queryParams.get("userId");
         String bookId = queryParams.get("bookId");

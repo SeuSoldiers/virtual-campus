@@ -24,4 +24,29 @@ public interface TransactionMapper {
     List<Transaction> selectByAccountNumberAndTimeRange(@Param("accountNumber") String accountNumber,
                                                         @Param("start") LocalDateTime start,
                                                         @Param("end") LocalDateTime end);
+
+    // 根据交易ID查询交易记录
+    @Select("SELECT * FROM banktransaction WHERE transactionId = #{transactionId}")
+    Transaction selectByTransactionId(String transactionId);
+
+    // 更新交易类型和备注
+    @Update("UPDATE banktransaction SET transactionType = #{transactionType}, remark = #{remark} WHERE transactionId = #{transactionId}")
+    int updateTransactionTypeAndRemark_fc(Transaction transaction);
+
+    // 更新交易类型和备注
+    @Update("UPDATE banktransaction SET status = #{status}, remark = #{remark} WHERE transactionId = #{transactionId}")
+    int updateTransactionStatusAndRemark(@Param("transactionId") String transactionId,
+                                         @Param("status") String status,
+                                         @Param("remark") String remark);
+
+    // 所有交易记录
+    @Select("SELECT * FROM banktransaction ORDER BY transactionTime DESC")
+    List<Transaction> selectAllTransactions();
+
+    // 所有交易记录按时间范围查询
+    @Select("SELECT * FROM banktransaction WHERE transactionTime BETWEEN #{start} AND #{end} ORDER BY transactionTime DESC")
+    List<Transaction> selectAllTransactionsByTimeRange(@Param("start") LocalDateTime start,
+                                                       @Param("end") LocalDateTime end);
+
+
 }

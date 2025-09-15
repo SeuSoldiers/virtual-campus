@@ -12,7 +12,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
-import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -41,10 +40,24 @@ public class DashboardController {
             Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon.png");
             registrarBtn.setOnAction(e -> openRegistrarUI());
             entryBox.add(registrarBtn, col, row);
-        } else {
-            Button defaultBtn = createButtonWithIcon("默认功能", "/seu/virtualcampus/ui/icon.png");
-            entryBox.add(defaultBtn, col, row);
+        } else if ("ShopMgr".equalsIgnoreCase(userRole)) {
+            Button adminProductsBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon.png");
+            adminProductsBtn.setOnAction(e -> openAdminProductsUI());
+            entryBox.add(adminProductsBtn, col, row);
+
+            Button adminShopBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon.png");
+            adminShopBtn.setOnAction(e -> openAdminShopUI());
+            entryBox.add(adminShopBtn, col, row);
         }
+        Button productBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon.png");
+        productBtn.setOnAction(e -> openProductListUI());
+        entryBox.add(productBtn, col, row);
+        Button cartBtn = createButtonWithIcon("我的购物车", "/seu/virtualcampus/ui/icon.png");
+        cartBtn.setOnAction(e -> openCartUI());
+        entryBox.add(cartBtn, col, row);
+        Button ordersBtn = createButtonWithIcon("我的订单", "/seu/virtualcampus/ui/icon.png");
+        ordersBtn.setOnAction(e -> openOrderListUI());
+        entryBox.add(ordersBtn, col, row);
     }
 
     private Button createButtonWithIcon(String text, String iconPath) {
@@ -91,6 +104,59 @@ public class DashboardController {
         return button;
     }
 
+    /**
+     * 打开管理商品界面
+     */
+    private void openAdminProductsUI() {
+        try {
+            System.out.println("DEBUG: 开始打开管理商品界面");
+            System.out.println("DEBUG: 当前用户角色: " + seu.virtualcampus.ui.MainApp.role);
+
+            // 检查FXML文件是否存在
+            java.net.URL fxmlUrl = getClass().getResource("/seu/virtualcampus/ui/admin_products.fxml");
+            if (fxmlUrl == null) {
+                System.out.println("ERROR: FXML文件不存在: /seu/virtualcampus/ui/admin_products.fxml");
+                showErrorAlert("文件错误", "找不到管理商品界面文件。");
+                return;
+            }
+            System.out.println("DEBUG: FXML文件找到: " + fxmlUrl.toString());
+
+            System.out.println("DEBUG: 开始加载FXML文件");
+            System.out.println("DEBUG: 导航到管理商品界面");
+            MainApp.navigateTo("/seu/virtualcampus/ui/admin_products.fxml", entryBox);
+            System.out.println("DEBUG: 管理商品界面打开成功");
+
+        } catch (Exception e) {
+            System.out.println("ERROR: 打开管理商品界面异常: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+            e.printStackTrace();
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到管理商品UI时发生异常", e);
+            showErrorAlert("切换失败", "无法打开管理商品界面，请检查系统状态。详细错误：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 打开发货管理界面
+     */
+    private void openAdminShopUI() {
+        try {
+            MainApp.navigateTo("/seu/virtualcampus/ui/admin_ship.fxml", entryBox);
+        } catch (Exception e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到发货管理UI时发生异常", e);
+            showErrorAlert("切换失败", "无法打开发货管理界面，请检查系统状态。");
+        }
+    }
+
+    /**
+     * 显示错误提示
+     */
+    private void showErrorAlert(String title, String message) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
     private void openStudentUI() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/student.fxml"));
@@ -110,6 +176,36 @@ public class DashboardController {
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到教务UI时发生异常", e);
+        }
+    }
+
+    private void openProductListUI() {
+        try {
+            MainApp.navigateTo("/seu/virtualcampus/ui/product_list.fxml", entryBox);
+        } catch (Exception e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到商品列表UI时发生异常", e);
+        }
+    }
+
+    private void openCartUI() {
+        try {
+            System.out.println("开始加载购物车界面...");
+            MainApp.navigateTo("/seu/virtualcampus/ui/cart.fxml", entryBox);
+            System.out.println("购物车界面切换成功");
+        } catch (Exception e) {
+            System.err.println("购物车界面加载详细错误信息:");
+            e.printStackTrace();
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到购物车UI时发生异常", e);
+            showErrorAlert("切换失败", "无法打开购物车界面: " + e.getMessage());
+        }
+    }
+
+    private void openOrderListUI() {
+        try {
+            MainApp.navigateTo("/seu/virtualcampus/ui/order_list.fxml", entryBox);
+        } catch (Exception e) {
+            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "切换到订单列表UI时发生异常", e);
+            showErrorAlert("切换失败", "无法打开订单列表界面，请检查系统状态。");
         }
     }
 

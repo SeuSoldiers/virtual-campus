@@ -1,9 +1,0 @@
-*.db
-
-.vscode/
-
-.idea/
-
-*.class
-
-doc/
