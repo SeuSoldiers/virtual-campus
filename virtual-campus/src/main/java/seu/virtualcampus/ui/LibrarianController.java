@@ -147,6 +147,11 @@ public class LibrarianController {
     }
 
     @FXML
+    private void onBack() {
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", bookSearchField);
+    }
+
+    @FXML
     private void onAddBook() {
         openBookEditDialog(null);
     }

@@ -11,15 +11,19 @@ import javafx.stage.Stage;
 
 public class StudentLibraryController {
 
-    @FXML private TextField searchField;
+    @FXML
+    private TextField searchField;
 
     private String currentUserId;
+
     public void init() {
         // 直接从 MainApp 取 userId
         this.currentUserId = MainApp.username;
     }
 
-    /** 点击“搜索” */
+    /**
+     * 点击“搜索”
+     */
     @FXML
     private void onSearch(ActionEvent event) {
         try {
@@ -50,13 +54,17 @@ public class StudentLibraryController {
         }
     }
 
-    /** 点击“当前借阅” */
+    /**
+     * 点击“当前借阅”
+     */
     @FXML
     private void onQueryCurrentBorrow(ActionEvent e) {
         openBorrowView("current");
     }
 
-    /** 点击“全部图书” */
+    /**
+     * 点击“全部图书”
+     */
     @FXML
     private void onAllBooks(ActionEvent e) {
         try {
@@ -85,18 +93,25 @@ public class StudentLibraryController {
         }
     }
 
-    /** 点击“借阅历史” */
+    /**
+     * 点击“借阅历史”
+     */
     @FXML
     private void onQueryHistoryBorrow(ActionEvent e) {
         openBorrowView("history");
     }
 
-    /** 点击“预约记录” */
+    /**
+     * 点击“预约记录”
+     */
     @FXML
     private void onQueryReservation(ActionEvent e) {
         openBorrowView("reservation");
     }
-    /** 打开 BorrowView.fxml，并切换到指定 tab */
+
+    /**
+     * 打开 BorrowView.fxml，并切换到指定 tab
+     */
     private void openBorrowView(String tab) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/BorrowView.fxml"));
@@ -118,7 +133,17 @@ public class StudentLibraryController {
         }
     }
 
-    /** 错误弹窗 */
+    /**
+     * 点击"返回"
+     */
+    @FXML
+    private void onBack(ActionEvent event) {
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", searchField);
+    }
+
+    /**
+     * 错误弹窗
+     */
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("错误");

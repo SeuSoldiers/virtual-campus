@@ -2,9 +2,8 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml/1"
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx"
             fx:controller="seu.virtualcampus.ui.LibrarianController"
             style="-fx-font-family: 'Microsoft YaHei';
                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
@@ -61,6 +60,10 @@
 
                             <!-- 操作按钮 -->
                             <HBox spacing="12" alignment="CENTER">
+                                <Button fx:id="btnBack" text="返回首页" onAction="#onBack"
+                                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 8 24;"/>
+
                                 <Button fx:id="btnAddBook" text="增加图书" onAction="#onAddBook"
                                         style="-fx-background-color: #42a5f5; -fx-text-fill: white;
                                                -fx-background-radius: 8; -fx-padding: 8 24;"/>

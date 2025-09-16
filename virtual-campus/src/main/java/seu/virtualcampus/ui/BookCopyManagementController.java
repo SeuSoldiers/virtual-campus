@@ -125,11 +125,8 @@ public class BookCopyManagementController {
     @FXML
     private void onBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/librarian.fxml"));
-            Parent root = loader.load();
             Stage stage = (Stage) tableViewCopies.getScene().getWindow();
-            stage.setScene(new Scene(root));
-            stage.show();
+            stage.close();
         } catch (Exception e) {
             error("返回失败：" + e.getMessage());
         }
