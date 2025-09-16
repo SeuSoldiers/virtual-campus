@@ -1,5 +1,5 @@
 // CourseDialog.java (新增课程编辑对话框)
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.course;
 
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;

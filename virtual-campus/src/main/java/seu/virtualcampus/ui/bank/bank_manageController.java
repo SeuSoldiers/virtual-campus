@@ -12,12 +12,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 
 public class bank_manageController {
@@ -192,8 +194,7 @@ public class bank_manageController {
 
     @FXML
     void manage_back(ActionEvent event) {
-        Stage currentStage = (Stage) backbtn.getScene().getWindow();
-        currentStage.close();
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", backbtn);
     }
 
     @FXML
@@ -218,8 +219,7 @@ public class bank_manageController {
             currentStage.setTitle("银行修改用户状态功能");
 
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载银行修改用户状态界面: " + "请检查当前用户状态/网络状况！");
+            Logger.getLogger(this.getClass().getName()).severe("无法加载银行修改用户状态界面: " + e.getMessage());
         }
     }
 

@@ -2,12 +2,10 @@ package seu.virtualcampus.ui.bank;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.math.BigDecimal;
@@ -15,6 +13,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static javafx.scene.control.Alert.AlertType.*;
+import static seu.virtualcampus.ui.DashboardController.showAlert;
 
 public class bank_withdrawalController {
 
@@ -32,8 +35,7 @@ public class bank_withdrawalController {
 
     @FXML
     void withdrawal_no(ActionEvent event) {
-        Stage currentStage = (Stage) nobtn.getScene().getWindow();
-        currentStage.close();
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", nobtn);
     }
 
     @FXML
@@ -42,7 +44,7 @@ public class bank_withdrawalController {
             // 获取输入的取款金额
             String amountStr = amounttext.getText();
             if (amountStr == null || amountStr.trim().isEmpty()) {
-                showAlert(AlertType.WARNING, "输入错误", "请输入取款金额！");
+                showAlert("输入错误", "请输入取款金额！", null, WARNING);
                 return;
             }
 
@@ -51,25 +53,25 @@ public class bank_withdrawalController {
             try {
                 amount = new BigDecimal(amountStr);
                 if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                    showAlert(AlertType.WARNING, "输入错误", "取款金额必须大于0！");
+                    showAlert("输入错误", "取款金额必须大于0！", null, WARNING);
                     return;
                 }
             } catch (NumberFormatException e) {
-                showAlert(AlertType.ERROR, "输入错误", "请输入有效的金额格式！");
+                showAlert("输入错误", "请输入有效的金额格式！", null, ERROR);
                 return;
             }
 
             // 获取密码
             String password = passwordtext.getText();
             if (password == null || password.isEmpty()) {
-                showAlert(AlertType.WARNING, "输入错误", "请输入账户密码！");
+                showAlert("输入错误", "请输入账户密码！", null, WARNING);
                 return;
             }
 
             // 获取当前选中的账户
             String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
-                showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
+                showAlert("系统错误", "无法获取当前账户信息！", null, ERROR);
                 return;
             }
 
@@ -95,7 +97,7 @@ public class bank_withdrawalController {
             // 处理响应
             if (response.statusCode() == 200) {
                 // 取款成功后的处理
-                showAlert(AlertType.INFORMATION, "取款成功", "取款操作已完成！");
+                showAlert("取款成功", "取款操作已完成！", null, INFORMATION);
                 // 清除输入框中的内容
                 amounttext.clear();
                 passwordtext.clear();
@@ -103,14 +105,14 @@ public class bank_withdrawalController {
                 // 处理具体的业务错误
                 String responseBody = response.body();
                 String userMessage = parseErrorMessage(responseBody);
-                showAlert(AlertType.ERROR, "取款失败", userMessage);
+                showAlert("取款失败", userMessage, null, ERROR);
             } else {
-                showAlert(AlertType.ERROR, "取款失败", "系统错误，请稍后重试！错误码: " + response.statusCode());
+                showAlert("取款失败", "系统错误，请稍后重试！错误码: " + response.statusCode(), null, ERROR);
             }
         } catch (Exception e) {
             // 处理异常情况，如网络问题
-            showAlert(AlertType.ERROR, "操作异常", "网络连接失败，请检查网络状况！");
-            e.printStackTrace();
+            showAlert("操作异常", "网络连接失败，请检查网络状况！", null, ERROR);
+            Logger.getLogger(this.getClass().getName()).log(Level.SEVERE, null, e);
         }
     }
 
@@ -133,14 +135,6 @@ public class bank_withdrawalController {
             // 返回原始错误信息
             return responseBody.length() > 100 ? "操作失败，请重试" : responseBody;
         }
-    }
-
-    private void showAlert(AlertType alertType, String title, String content) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
 }

@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.course;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,6 +18,8 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import seu.virtualcampus.domain.Course;
+import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -640,7 +642,7 @@ public class CourseSelectionController {
     @FXML
     private void handleTimetable() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/timetable.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/course/timetable.fxml"));
             Parent root = loader.load();
             TimetableController controller = loader.getController();
             controller.setStudentId(studentId);

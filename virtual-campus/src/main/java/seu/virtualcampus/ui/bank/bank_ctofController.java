@@ -18,32 +18,27 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class bank_ctofController {
 
+    private final Logger logger = Logger.getLogger(bank_ctofController.class.getName());
     @FXML
     private TextField amounttext;
-
     @FXML
     private Button nobtn;
-
     @FXML
     private PasswordField passwordtext;
-
     @FXML
     private RadioButton term1;
-
     @FXML
     private RadioButton term3;
-
     @FXML
     private RadioButton term5;
-
     @FXML
     private Button yesbtn;
-
     private ToggleGroup termToggleGroup;
-
     // 添加HTTP客户端
     private OkHttpClient client = new OkHttpClient();
 
@@ -80,8 +75,7 @@ public class bank_ctofController {
             currentStage.setTitle("银行定活互转功能");
 
         } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载银行定活互转页面: " + e.getMessage());
+            logger.log(Level.SEVERE, "无法加载银行定活互转页面: " + e.getMessage(), e);
         }
 
     }
@@ -105,7 +99,6 @@ public class bank_ctofController {
         String amountStr = amounttext.getText();
 
         if (password == null || password.isEmpty()) {
-            System.out.println("请输入密码");
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("温馨提示");
             warningAlert.setHeaderText(null);
@@ -115,7 +108,6 @@ public class bank_ctofController {
         }
 
         if (amountStr == null || amountStr.isEmpty()) {
-            System.out.println("请输入金额");
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("温馨提示");
             warningAlert.setHeaderText(null);
@@ -127,7 +119,6 @@ public class bank_ctofController {
         try {
             BigDecimal amount = new BigDecimal(amountStr);
             if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-                System.out.println("金额必须大于0");
                 Alert warningAlert = new Alert(AlertType.WARNING);
                 warningAlert.setTitle("温馨提示");
                 warningAlert.setHeaderText(null);
@@ -136,7 +127,6 @@ public class bank_ctofController {
                 return false;
             }
         } catch (NumberFormatException e) {
-            System.out.println("请输入有效的金额");
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("温馨提示");
             warningAlert.setHeaderText(null);
@@ -190,7 +180,7 @@ public class bank_ctofController {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     Platform.runLater(() -> {
-                        System.out.println("活期转定期操作失败: " + e.getMessage());
+                        logger.log(Level.SEVERE, "活期转定期请求失败", e);
                         // 错误提示
                         Alert errorAlert = new Alert(AlertType.ERROR);
                         errorAlert.setTitle("错误");
@@ -210,7 +200,7 @@ public class bank_ctofController {
 
                             if (success) {
                                 Platform.runLater(() -> {
-                                    System.out.println("活期转定期操作成功");
+                                    logger.log(Level.INFO, "活期转定期操作成功");
                                     Alert infoAlert = new Alert(AlertType.INFORMATION);
                                     infoAlert.setTitle("信息");
                                     infoAlert.setContentText("活期转定期操作成功！");
@@ -222,7 +212,7 @@ public class bank_ctofController {
                             } else {
                                 String message = (String) result.get("message");
                                 Platform.runLater(() -> {
-                                    System.out.println("活期转定期操作失败: " + message);
+                                    logger.log(Level.WARNING, "活期转定期操作失败: " + message);
                                     // 错误提示
                                     Alert errorAlert = new Alert(AlertType.ERROR);
                                     errorAlert.setTitle("错误");
@@ -233,7 +223,7 @@ public class bank_ctofController {
                             }
                         } catch (Exception e) {
                             Platform.runLater(() -> {
-                                System.out.println("解析响应失败: " + e.getMessage());
+                                logger.log(Level.SEVERE, "解析响应失败", e);
                                 // 错误提示
                                 Alert errorAlert = new Alert(AlertType.ERROR);
                                 errorAlert.setTitle("错误");
@@ -244,7 +234,7 @@ public class bank_ctofController {
                         }
                     } else {
                         Platform.runLater(() -> {
-                            System.out.println("活期转定期操作失败，状态码: " + response.code());
+                            logger.log(Level.WARNING, "活期转定期操作失败，状态码: " + response.code());
                             // 错误提示
                             Alert errorAlert = new Alert(AlertType.ERROR);
                             errorAlert.setTitle("错误");
@@ -253,23 +243,22 @@ public class bank_ctofController {
 
                             try {
                                 if (response.body() != null) {
-                                    System.out.println("错误信息: " + response.body().string());
+                                    logger.log(Level.WARNING, "错误信息: " + response.body().string());
                                 }
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.log(Level.SEVERE, "读取错误响应体失败", e);
                             }
                         });
                     }
                 }
             });
         } catch (Exception e) {
-            System.out.println("发送请求时出错: " + e.getMessage());
+            logger.log(Level.SEVERE, "发送请求时出错", e);
             // 错误提示
             Alert errorAlert = new Alert(AlertType.ERROR);
             errorAlert.setTitle("错误");
             errorAlert.setContentText("操作失败，请重试！");
             errorAlert.showAndWait();
-            e.printStackTrace();
         }
     }
 

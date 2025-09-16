@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.course;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -12,6 +12,8 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.Course;
+import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;

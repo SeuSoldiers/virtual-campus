@@ -169,7 +169,7 @@ public class ProductDetailController {
                 .addQueryParameter("productId", currentProduct.getProductId())
                 .addQueryParameter("quantity", String.valueOf(quantity))
                 .build();
-        System.out.println("[UI] Add-to-cart URL: " + url);
+        logger.info("[UI] Add-to-cart URL: " + url);
 
         Request request = new Request.Builder()
                 .url(url)
@@ -204,10 +204,10 @@ public class ProductDetailController {
                             if (response.body() != null) {
                                 errorMsg = response.body().string();
                             }
-                            System.err.println("[UI] Add-to-cart failed. code=" + response.code() + ", body=" + errorMsg);
+                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code() + ", body=" + errorMsg);
                             showMessage("添加失败: " + errorMsg, true);
                         } catch (IOException e) {
-                            System.err.println("[UI] Add-to-cart failed. code=" + response.code() + ", no body");
+                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code() + ", no body");
                             showMessage("添加失败，状态码: " + response.code(), true);
                         }
                     }

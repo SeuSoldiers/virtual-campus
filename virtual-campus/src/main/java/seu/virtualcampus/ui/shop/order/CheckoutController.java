@@ -23,8 +23,11 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class CheckoutController implements Initializable {
+    private static final Logger logger = Logger.getLogger(CheckoutController.class.getName());
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl = "http://" + MainApp.host;
@@ -105,7 +108,7 @@ public class CheckoutController implements Initializable {
     @FXML
     private void handlePreview() {
         String previewUrl = baseUrl + "/api/orders/preview?userId=" + currentUserId;
-        System.out.println("[Checkout] handlePreview: URL=" + previewUrl + ", userId=" + currentUserId);
+        logger.info("[Checkout] handlePreview: URL=" + previewUrl + ", userId=" + currentUserId);
         Request request = new Request.Builder()
                 .url(previewUrl)
                 .post(RequestBody.create("", MediaType.get("application/json")))
@@ -113,14 +116,14 @@ public class CheckoutController implements Initializable {
         httpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                System.out.println("[Checkout] handlePreview: request failed -> " + e.getMessage());
+                logger.log(Level.SEVERE, "[Checkout] handlePreview: request failed -> " + e.getMessage());
                 Platform.runLater(() -> showMsg("网络请求失败: " + e.getMessage(), true));
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String body = response.body() != null ? response.body().string() : "";
-                System.out.println("[Checkout] handlePreview: response code=" + response.code() + ", body=" + body);
+                logger.info("[Checkout] handlePreview: response code=" + response.code() + ", body=" + body);
                 Platform.runLater(() -> {
                     try {
                         if (!response.isSuccessful()) {
@@ -155,10 +158,10 @@ public class CheckoutController implements Initializable {
                         discountRow.setVisible(hasDiscount);
                         discountLabel.setText(String.format("-%.0f%%", (1 - rate) * 100));
                         showMsg("订单预览已更新", false);
-                        System.out.println("[Checkout] handlePreview: render done, items=" + items.size() +
+                        logger.info("[Checkout] handlePreview: render done, items=" + items.size() +
                                 ", original=" + original + ", final=" + finalAmt);
                     } catch (Exception ex) {
-                        System.out.println("[Checkout] handlePreview: parse error -> " + ex.getMessage());
+                        logger.log(Level.SEVERE, "[Checkout] handlePreview: parse error -> " + ex.getMessage());
                         showMsg("解析订单预览失败: " + ex.getMessage(), true);
                     }
                 });
@@ -206,7 +209,7 @@ public class CheckoutController implements Initializable {
     @FXML
     private void handlePayOrder() {
         if (currentOrderId == null || currentOrderId.isEmpty()) {
-            System.out.println("[Checkout] pay: no currentOrderId");
+            logger.warning("[Checkout] pay: no currentOrderId");
             showMsg("请先创建订单", true);
             return;
         }
@@ -214,7 +217,7 @@ public class CheckoutController implements Initializable {
         String fromAccount = accountNumberField.getText().trim();
         String password = accountPasswordField.getText().trim(); // 直接获取文本而不是 getPassword()
         String toAccount = "AC1757654040349D143E9"; // 默认商家账户（要根据数据库里规定的那个商家的银行账户账号来更改）
-        System.out.println("[Checkout] pay: orderId=" + currentOrderId + ", userId=" + currentUserId + ", method=" + paymentMethod + ", fromAccount=" + fromAccount);
+        logger.info("[Checkout] pay: orderId=" + currentOrderId + ", userId=" + currentUserId + ", method=" + paymentMethod + ", fromAccount=" + fromAccount);
 
         // 验证输入
         if (fromAccount.isEmpty() || password.isEmpty()) {
@@ -243,20 +246,20 @@ public class CheckoutController implements Initializable {
                     .url(url)
                     .post(RequestBody.create("", MediaType.get("application/json")))
                     .build();
-            System.out.println("[Checkout] pay: POST " + url);
+            logger.info("[Checkout] pay: POST " + url);
 
             // 发送请求
             httpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    System.out.println("[Checkout] pay: network error -> " + e.getMessage());
+                    logger.log(Level.SEVERE, "[Checkout] pay: network error -> " + e.getMessage());
                     Platform.runLater(() -> showMsg("支付过程中发生网络错误: " + e.getMessage(), true));
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
                     String body = response.body() != null ? response.body().string() : "";
-                    System.out.println("[Checkout] pay: response code=" + response.code() + ", body=" + body);
+                    logger.info("[Checkout] pay: response code=" + response.code() + ", body=" + body);
                     Platform.runLater(() -> {
                         try {
                             JsonNode root = objectMapper.readTree(body.isEmpty() ? "{}" : body);
@@ -271,7 +274,7 @@ public class CheckoutController implements Initializable {
                                 accountPasswordField.clear();
 
                                 // 重新加载预览以更新购物车状态
-                                System.out.println("[Checkout] pay: 调用 handlePreview 刷新");
+                                logger.info("[Checkout] pay: 调用 handlePreview 刷新");
                                 handlePreview();
                                 // 确保“查看订单”按钮可用
                                 if (viewOrderButton != null) {
@@ -282,18 +285,18 @@ public class CheckoutController implements Initializable {
                                 if (errorMessage == null || errorMessage.isEmpty()) {
                                     errorMessage = body.isEmpty() ? ("HTTP " + response.code()) : body;
                                 }
-                                System.out.println("[Checkout] pay: 业务失败 -> " + errorMessage);
+                                logger.log(Level.SEVERE, "[Checkout] pay: 业务失败 -> " + errorMessage);
                                 showMsg(errorMessage, true);
                             }
                         } catch (Exception ex) {
-                            System.out.println("[Checkout] pay: handle response error -> " + ex.getMessage());
+                            logger.log(Level.SEVERE, "[Checkout] pay: handle response error -> " + ex.getMessage());
                             showMsg("处理支付响应时发生错误: " + ex.getMessage(), true);
                         }
                     });
                 }
             });
         } catch (Exception ex) {
-            System.out.println("[Checkout] pay: exception -> " + ex.getMessage());
+            logger.log(Level.SEVERE, "[Checkout] pay: exception -> " + ex.getMessage());
             showMsg("支付过程中发生错误: " + ex.getMessage(), true);
         }
     }

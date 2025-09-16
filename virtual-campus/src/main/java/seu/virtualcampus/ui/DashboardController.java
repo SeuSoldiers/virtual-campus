@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
+import seu.virtualcampus.ui.course.CourseSelectionController;
 
 import java.util.Objects;
 import java.util.logging.Level;
@@ -78,18 +79,18 @@ public class DashboardController {
         int col = 0, row = 0;
         if ("student".equalsIgnoreCase(userRole)) {
             Button studentBtn = createButtonWithIcon("学生个人信息维护", "/seu/virtualcampus/ui/icon.png");
-            studentBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student.fxml", entryBox));
+            studentBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student/student.fxml", entryBox));
             entryBox.add(studentBtn, col++, row);
             Button courseBtn = createButtonWithIcon("选课", "/seu/virtualcampus/ui/icon.png");
             courseBtn.setOnAction(e -> openCourseSelectionUI());
             entryBox.add(courseBtn, col++, row);
         } else if ("CourseMgr".equalsIgnoreCase(userRole)) {
             Button courseMgrBtn = createButtonWithIcon("课程管理", "/seu/virtualcampus/ui/icon.png");
-            courseMgrBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/course_management.fxml", entryBox));
+            courseMgrBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/course/course_management.fxml", entryBox));
             entryBox.add(courseMgrBtn, col++, row);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
             Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon.png");
-            registrarBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/registrar.fxml", entryBox));
+            registrarBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student/registrar.fxml", entryBox));
             entryBox.add(registrarBtn, col++, row);
         } else if ("ShopMgr".equalsIgnoreCase(userRole)) {
             Button adminProductsBtn = createButtonWithIcon("商品管理", "/seu/virtualcampus/ui/icon.png");
@@ -166,7 +167,7 @@ public class DashboardController {
     private void openCourseSelectionUI() {
         try {
             logger.info("学生 " + this.username + " 尝试打开选课系统");
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/course_selection.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/course/course_selection.fxml"));
             Parent root = loader.load();
 
             // 获取控制器并设置学生ID

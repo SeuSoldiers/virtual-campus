@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.student;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,6 +8,8 @@ import javafx.scene.control.*;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.StudentInfo;
+import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.util.logging.Level;

@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.student;
 
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +10,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.util.ArrayList;

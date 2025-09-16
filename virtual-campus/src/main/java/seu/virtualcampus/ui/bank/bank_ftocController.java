@@ -5,16 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.Transaction;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -26,8 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class bank_ftocController implements Initializable {
+    private static final Logger logger = Logger.getLogger(bank_ftocController.class.getName());
 
     @FXML
     private TableColumn<Transaction, BigDecimal> amountColumn;
@@ -79,23 +79,7 @@ public class bank_ftocController implements Initializable {
 
     @FXML
     void ftoc_back(ActionEvent event) {
-        try {
-            // 加载开户界面的FXML文件
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("bank_fc.fxml"));
-            Parent openAccountRoot = loader.load();
-
-            // 获取当前舞台（Stage）
-            Stage currentStage = (Stage) backbtn.getScene().getWindow();
-
-            // 创建新场景并设置到舞台
-            Scene fcScene = new Scene(openAccountRoot);
-            currentStage.setScene(fcScene);
-            currentStage.setTitle("银行定活互转功能");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法加载银行定活互转页面: " + e.getMessage());
-        }
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_fc.fxml", backbtn);
     }
 
     @FXML
@@ -113,7 +97,7 @@ public class bank_ftocController implements Initializable {
         Transaction selectedTransaction = ftocTableView.getSelectionModel().getSelectedItem();
 
         if (selectedTransaction == null) {
-            System.out.println("请先选择一条定期存款记录");
+            logger.warning("请先选择一条定期存款记录");
             // 警告提示
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("提示");
@@ -125,7 +109,7 @@ public class bank_ftocController implements Initializable {
         // 检查是否到期
         boolean isMatured = isDepositMatured(selectedTransaction.getTransactionTime(), selectedTransaction.getTransactionType());
         if (!isMatured) {
-            System.out.println("该定期存款尚未到期，无法转为活期");
+            logger.warning("该定期存款尚未到期，无法转为活期");
             // 警告提示
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("提示");
@@ -138,7 +122,7 @@ public class bank_ftocController implements Initializable {
         // 获取密码
         String password = passwordtext.getText();
         if (password == null || password.isEmpty()) {
-            System.out.println("请输入密码");
+            logger.warning("请输入密码");
             // 警告提示
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("提示");
@@ -177,7 +161,7 @@ public class bank_ftocController implements Initializable {
                 @Override
                 public void onFailure(Call call, IOException e) {
                     Platform.runLater(() -> {
-                        System.out.println("定期转活期操作失败: " + e.getMessage());
+                        logger.log(Level.SEVERE, "定期转活期操作失败: " + e.getMessage());
                         // 错误提示
                         Alert errorAlert = new Alert(AlertType.ERROR);
                         errorAlert.setTitle("错误");
@@ -190,7 +174,7 @@ public class bank_ftocController implements Initializable {
                 public void onResponse(Call call, Response response) throws IOException {
                     if (response.isSuccessful()) {
                         Platform.runLater(() -> {
-                            System.out.println("定期转活期操作成功");
+                            logger.info("定期转活期操作成功");
                             // 信息提示
                             Alert infoAlert = new Alert(AlertType.INFORMATION);
                             infoAlert.setTitle("信息");
@@ -203,29 +187,28 @@ public class bank_ftocController implements Initializable {
                         });
                     } else {
                         Platform.runLater(() -> {
-                            System.out.println("定期转活期操作失败，状态码: " + response.code());
+                            logger.log(Level.SEVERE, "定期转活期操作失败，状态码: " + response.code());
                             Alert errorAlert = new Alert(AlertType.ERROR);
                             errorAlert.setTitle("错误");
                             errorAlert.setContentText("定期转活期操作失败，请重试！");
                             errorAlert.showAndWait();
                             try {
                                 if (response.body() != null) {
-                                    System.out.println("错误信息: " + response.body().string());
+                                    logger.log(Level.SEVERE, "错误信息: " + response.body().string());
                                 }
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                logger.log(Level.SEVERE, "读取错误响应失败", e);
                             }
                         });
                     }
                 }
             });
         } catch (Exception e) {
-            System.out.println("发送请求时出错: " + e.getMessage());
+            logger.log(Level.SEVERE, "发送请求时出错: " + e.getMessage(), e);
             Alert errorAlert = new Alert(AlertType.ERROR);
             errorAlert.setTitle("错误");
             errorAlert.setContentText("操作失败，请重试！");
             errorAlert.showAndWait();
-            e.printStackTrace();
         }
     }
 
@@ -300,7 +283,7 @@ public class bank_ftocController implements Initializable {
 
     private void loadFixedDepositRecords() {
         if (accountNumber == null || accountNumber.isEmpty()) {
-            System.out.println("账户号码为空");
+            logger.warning("账户号码为空");
             Alert warningAlert = new Alert(AlertType.WARNING);
             warningAlert.setTitle("警告");
             warningAlert.setContentText("账户号码为空！");
@@ -319,7 +302,7 @@ public class bank_ftocController implements Initializable {
             @Override
             public void onFailure(Call call, IOException e) {
                 Platform.runLater(() -> {
-                    System.out.println("获取定期存款记录失败: " + e.getMessage());
+                    logger.log(Level.SEVERE, "获取定期存款记录失败: " + e.getMessage(), e);
                     Alert errorAlert = new Alert(AlertType.ERROR);
                     errorAlert.setTitle("错误");
                     errorAlert.setContentText("获取定期存款记录失败，请重试！");
@@ -344,7 +327,7 @@ public class bank_ftocController implements Initializable {
                         });
                     } catch (Exception e) {
                         Platform.runLater(() -> {
-                            System.out.println("解析定期存款记录失败: " + e.getMessage());
+                            logger.log(Level.SEVERE, "解析定期存款记录失败: " + e.getMessage(), e);
                             Alert errorAlert = new Alert(AlertType.ERROR);
                             errorAlert.setTitle("错误");
                             errorAlert.setContentText("操作失败，请重试！");
@@ -353,7 +336,7 @@ public class bank_ftocController implements Initializable {
                     }
                 } else {
                     Platform.runLater(() -> {
-                        System.out.println("获取定期存款记录失败，状态码: " + response.code());
+                        logger.log(Level.SEVERE, "获取定期存款记录失败，状态码: " + response.code());
                         Alert errorAlert = new Alert(AlertType.ERROR);
                         errorAlert.setTitle("错误");
                         errorAlert.setContentText("操作失败，请重试！");

@@ -15,12 +15,14 @@ import seu.virtualcampus.ui.MainApp;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 /**
  * 管理员发货控制器
  */
 public class AdminShipController implements Initializable {
 
+    private static final Logger logger = Logger.getLogger(AdminShipController.class.getName());
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl = "http://" + MainApp.host;
@@ -99,7 +101,7 @@ public class AdminShipController implements Initializable {
         // 构建请求
         String adminId = MainApp.username != null ? MainApp.username : "admin";
         String deliverUrl = baseUrl + "/api/orders/" + orderId + "/deliver?adminId=" + adminId;
-        System.out.println("[AdminShip] 发货请求URL: " + deliverUrl + ", role=" + MainApp.role + ", tokenPresent=" + (MainApp.token != null));
+        logger.info("[AdminShip] 发货请求URL: " + deliverUrl + ", role=" + MainApp.role + ", tokenPresent=" + (MainApp.token != null));
 
         Request.Builder requestBuilder = new Request.Builder()
                 .url(deliverUrl)
@@ -125,7 +127,7 @@ public class AdminShipController implements Initializable {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 String responseBody = response.body().string();
-                System.out.println("[AdminShip] 发货响应: code=" + response.code() + ", body=" + responseBody);
+                logger.info("[AdminShip] 发货响应: code=" + response.code() + ", body=" + responseBody);
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         showResult("订单 " + orderId + " 发货成功！", true);

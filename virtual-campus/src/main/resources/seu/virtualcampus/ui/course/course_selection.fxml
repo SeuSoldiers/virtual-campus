@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1"
-            fx:controller="seu.virtualcampus.ui.CourseSelectionController">
+            fx:controller="seu.virtualcampus.ui.course.CourseSelectionController">
     <top>
         <HBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
             <Label text="选课系统" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>

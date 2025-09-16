@@ -67,7 +67,6 @@ public class bank_changestatusController {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "无法加载银行账户管理页面", e);
-            System.out.println("无法加载银行账户管理页面: " + e.getMessage());
         }
     }
 
@@ -143,7 +142,6 @@ public class bank_changestatusController {
                 // 如果是销户操作，直接关闭当前窗口并打开登录窗口
                 if ("CLOSED".equals(newStatus)) {
                     DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", closebtn);
-//                    openLoginWindowAndCloseCurrent();
                 } else {
                     statustext.setText(newStatus);
                     setStatusStyle(newStatus); // 设置状态文本的样式
@@ -189,7 +187,6 @@ public class bank_changestatusController {
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "无法加载银行登录页面", e);
-            System.out.println("无法加载银行登录页面: " + e.getMessage());
         }
     }
 

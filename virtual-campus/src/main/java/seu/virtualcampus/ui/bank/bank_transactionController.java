@@ -7,9 +7,9 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.Transaction;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -62,8 +62,7 @@ public class bank_transactionController {
 
     @FXML
     void transaction_back(ActionEvent event) {
-        Stage currentStage = (Stage) backbtn.getScene().getWindow();
-        currentStage.close();
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", backbtn);
     }
 
     @FXML

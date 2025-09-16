@@ -6,7 +6,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
-import javafx.stage.Stage;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.math.BigDecimal;
@@ -28,8 +28,7 @@ public class bank_depositController {
 
     @FXML
     void deposit_no(ActionEvent event) {
-        Stage currentStage = (Stage) nobtn.getScene().getWindow();
-        currentStage.close();
+        DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", nobtn);
     }
 
     @FXML

@@ -2,7 +2,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <HBox xmlns:fx="http://javafx.com/fxml" spacing="80" alignment="CENTER"
-      fx:controller="seu.virtualcampus.ui.StudentController"
+      fx:controller="seu.virtualcampus.ui.student.StudentController"
       prefWidth="1200" prefHeight="700"
       style="-fx-font-family: 'Microsoft YaHei'; -fx-background-color: linear-gradient(to bottom, #f8fafc, #e0e7ef); -fx-padding: 48 64; -fx-background-radius: 18; -fx-effect: dropshadow(gaussian, #b0b8c1, 16, 0.2, 0, 4);">
 

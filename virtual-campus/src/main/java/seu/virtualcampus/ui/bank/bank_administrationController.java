@@ -6,14 +6,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.BankAccount;
 import seu.virtualcampus.domain.Transaction;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -619,30 +616,9 @@ public class bank_administrationController {
         Optional<ButtonType> result = alert.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // 用户确认退出，关闭当前窗口
-            Stage currentStage = (Stage) exitbtn.getScene().getWindow();
-            currentStage.close();
-
-            // 可以选择重新打开登录窗口
-            reopenLoginWindow();
+            DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", exitbtn);
         }
         // 如果用户取消，什么都不做，窗口保持打开
-    }
-
-    // 重新打开登录窗口的方法
-    private void reopenLoginWindow() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/bank/bank_login.fxml"));
-            Parent root = loader.load();
-
-            Stage loginStage = new Stage();
-            loginStage.setScene(new Scene(root));
-            loginStage.show();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println("无法重新打开登录窗口");
-        }
     }
 
 
@@ -1135,11 +1111,6 @@ public class bank_administrationController {
 
     // 显示警告对话框
     private void showAlert(String title, String content) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
+        DashboardController.showAlert(title, content, null, Alert.AlertType.WARNING);
     }
-
 }
