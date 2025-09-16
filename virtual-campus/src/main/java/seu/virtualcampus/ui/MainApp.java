@@ -45,7 +45,7 @@ public class MainApp extends Application {
         Scene scene = new Scene(loader.load());
 
         // 设置应用程序图标
-        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon.png"))));
+        stage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/seu/virtualcampus/ui/icon/icon.png"))));
 
         stage.setTitle("虚拟校园");
         stage.setScene(scene);

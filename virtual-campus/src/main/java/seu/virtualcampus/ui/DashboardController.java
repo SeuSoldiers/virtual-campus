@@ -76,44 +76,54 @@ public class DashboardController {
 
     private void setupEntries() {
         entryBox.getChildren().clear();
-        int col = 0, row = 0;
+        int cnt = 0;
         if ("student".equalsIgnoreCase(userRole)) {
-            Button studentBtn = createButtonWithIcon("学生个人信息维护", "/seu/virtualcampus/ui/icon.png");
+            Button studentBtn = createButtonWithIcon("学生个人信息维护", "/seu/virtualcampus/ui/icon/student.png");
             studentBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student/student.fxml", entryBox));
-            entryBox.add(studentBtn, col++, row);
-            Button courseBtn = createButtonWithIcon("选课", "/seu/virtualcampus/ui/icon.png");
+            entryBox.add(studentBtn, cnt % 4, cnt / 4);
+            cnt++;
+            Button courseBtn = createButtonWithIcon("选课", "/seu/virtualcampus/ui/icon/course.png");
             courseBtn.setOnAction(e -> openCourseSelectionUI());
-            entryBox.add(courseBtn, col++, row);
+            entryBox.add(courseBtn, cnt % 4, cnt / 4);
+            cnt++;
         } else if ("CourseMgr".equalsIgnoreCase(userRole)) {
-            Button courseMgrBtn = createButtonWithIcon("课程管理", "/seu/virtualcampus/ui/icon.png");
+            Button courseMgrBtn = createButtonWithIcon("课程管理", "/seu/virtualcampus/ui/icon/course.png");
             courseMgrBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/course/course_management.fxml", entryBox));
-            entryBox.add(courseMgrBtn, col++, row);
+            entryBox.add(courseMgrBtn, cnt % 4, cnt / 4);
+            cnt++;
         } else if ("registrar".equalsIgnoreCase(userRole)) {
-            Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon.png");
+            Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon/student.png");
             registrarBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student/registrar.fxml", entryBox));
-            entryBox.add(registrarBtn, col++, row);
+            entryBox.add(registrarBtn, cnt % 4, cnt / 4);
+            cnt++;
         } else if ("ShopMgr".equalsIgnoreCase(userRole)) {
-            Button adminProductsBtn = createButtonWithIcon("商品管理", "/seu/virtualcampus/ui/icon.png");
+            Button adminProductsBtn = createButtonWithIcon("商品管理", "/seu/virtualcampus/ui/icon/shop.png");
             adminProductsBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/admin_products.fxml", entryBox));
-            entryBox.add(adminProductsBtn, col++, row);
+            entryBox.add(adminProductsBtn, cnt % 4, cnt / 4);
+            cnt++;
 
-            Button adminShopBtn = createButtonWithIcon("发货管理", "/seu/virtualcampus/ui/icon.png");
+            Button adminShopBtn = createButtonWithIcon("发货管理", "/seu/virtualcampus/ui/icon/cart.png");
             adminShopBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/admin_shop.fxml", entryBox));
-            entryBox.add(adminShopBtn, col++, row);
+            entryBox.add(adminShopBtn, cnt % 4, cnt / 4);
+            cnt++;
         }
-        Button productBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon.png");
+        Button productBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon/shop.png");
         productBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/product_list.fxml", entryBox));
-        entryBox.add(productBtn, col++, row);
-        Button cartBtn = createButtonWithIcon("我的购物车", "/seu/virtualcampus/ui/icon.png");
+        entryBox.add(productBtn, cnt % 4, cnt / 4);
+        cnt++;
+        Button cartBtn = createButtonWithIcon("我的购物车", "/seu/virtualcampus/ui/icon/shopcar.png");
         cartBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/cart.fxml", entryBox));
-        entryBox.add(cartBtn, col++, row);
-        Button ordersBtn = createButtonWithIcon("我的订单", "/seu/virtualcampus/ui/icon.png");
+        entryBox.add(cartBtn, cnt % 4, cnt / 4);
+        cnt++;
+        Button ordersBtn = createButtonWithIcon("我的订单", "/seu/virtualcampus/ui/icon/cart.png");
         ordersBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/order_list.fxml", entryBox));
-        entryBox.add(ordersBtn, col++, row);
+        entryBox.add(ordersBtn, cnt % 4, cnt / 4);
+        cnt++;
 
-        Button bankLoginBtn = createButtonWithIcon("银行登录", "/seu/virtualcampus/ui/icon.png");
+        Button bankLoginBtn = createButtonWithIcon("银行登录", "/seu/virtualcampus/ui/icon/bank.png");
         bankLoginBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", entryBox));
-        entryBox.add(bankLoginBtn, col++, row);
+        entryBox.add(bankLoginBtn, cnt % 4, cnt / 4);
+        cnt++;
     }
 
     private Button createButtonWithIcon(String text, String iconPath) {
@@ -124,18 +134,18 @@ public class DashboardController {
         try {
             Image iconImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream(iconPath), "资源路径无效: " + iconPath));
             ImageView icon = new ImageView(iconImage);
-            icon.setFitWidth(28); // 图标略缩小
-            icon.setFitHeight(28);
+            icon.setFitWidth(40); // 图标略缩小
+            icon.setFitHeight(40);
             button.setGraphic(icon);
         } catch (NullPointerException | IllegalArgumentException e) {
             logger.log(Level.SEVERE, "图标加载失败: " + iconPath, e);
         }
         // 统一按钮大小（宽高），缩小内边距和字体
-        button.setPrefWidth(140);
+        button.setPrefWidth(170);
         button.setPrefHeight(60);
-        button.setMinWidth(140);
+        button.setMinWidth(170);
         button.setMinHeight(60);
-        button.setMaxWidth(140);
+        button.setMaxWidth(170);
         button.setMaxHeight(60);
         button.setStyle(
                 "-fx-font-size: 13px;" +
