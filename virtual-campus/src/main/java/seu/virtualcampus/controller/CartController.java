@@ -21,11 +21,15 @@ public class CartController {
 
     @PostMapping("/add")
     public ResponseEntity<String> addCartItem(@RequestBody Cart cart) {
-        int result = cartService.addCartItem(cart);
-        if (result > 0) {
-            return ResponseEntity.ok("Cart item added successfully");
-        } else {
-            return ResponseEntity.badRequest().body("Failed to add cart item");
+        try {
+            int result = cartService.addCartItem(cart);
+            if (result > 0) {
+                return ResponseEntity.ok("Cart item added successfully");
+            } else {
+                return ResponseEntity.badRequest().body("Failed to add cart item");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
