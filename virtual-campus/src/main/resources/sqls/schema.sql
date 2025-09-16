@@ -182,3 +182,18 @@ CREATE INDEX IF NOT EXISTS idx_borrow_records_status ON borrow_records (status);
 CREATE INDEX IF NOT EXISTS idx_reservation_records_userId ON reservation_records (userId);
 CREATE INDEX IF NOT EXISTS idx_reservation_records_bookId ON reservation_records (bookId);
 CREATE INDEX IF NOT EXISTS idx_reservation_records_status ON reservation_records (status);
+
+-- 选课关系表
+CREATE TABLE IF NOT EXISTS course_selection
+(
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
+    studentId     TEXT NOT NULL,
+    courseId      TEXT NOT NULL,
+    selectionTime DATETIME DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (studentId, courseId),
+    FOREIGN KEY (courseId) REFERENCES course (courseId) ON DELETE CASCADE
+);
+
+-- 为选课表添加索引
+CREATE INDEX IF NOT EXISTS idx_course_selection_studentId ON course_selection (studentId);
+CREATE INDEX IF NOT EXISTS idx_course_selection_courseId ON course_selection (courseId);

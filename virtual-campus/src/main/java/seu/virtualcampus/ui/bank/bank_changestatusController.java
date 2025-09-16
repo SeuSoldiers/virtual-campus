@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -23,30 +24,29 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import static javafx.scene.control.Alert.AlertType.*;
+import static seu.virtualcampus.ui.DashboardController.showAlert;
 
 public class bank_changestatusController {
 
+    private final Logger logger = Logger.getLogger(bank_changestatusController.class.getName());
     @FXML
     private TextField oldpassword_text;
-
     @FXML
     private TextField newpassword_text;
-
     @FXML
     private Button backbtn;
-
     @FXML
     private Button closebtn;
-
     @FXML
     private Button lostbtn;
-
     @FXML
     private Button nolostbtn;
-
     @FXML
     private Label statustext;
-
     @FXML
     private Button changepassword_btn;
 
@@ -66,7 +66,7 @@ public class bank_changestatusController {
             currentStage.setTitle("银行账户管理");
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "无法加载银行账户管理页面", e);
             System.out.println("无法加载银行账户管理页面: " + e.getMessage());
         }
     }
@@ -79,8 +79,8 @@ public class bank_changestatusController {
     @FXML
     void changestatus_lost(ActionEvent event) {
         String currentStatus = getCurrentAccountStatus();
-        if (currentStatus != null && "LOST".equals(currentStatus)) {
-            showAlert(AlertType.WARNING, "操作提示", "账户已经是挂失状态，无需重复操作！");
+        if ("LOST".equals(currentStatus)) {
+            showAlert("操作提示", "账户已经是挂失状态，无需重复操作！", null, WARNING);
             return;
         }
         showConfirmationAlert("确认挂失", "您确定要挂失账户吗？", "LOST");
@@ -89,8 +89,8 @@ public class bank_changestatusController {
     @FXML
     void changestatus_nolost(ActionEvent event) {
         String currentStatus = getCurrentAccountStatus();
-        if (currentStatus != null && "ACTIVE".equals(currentStatus)) {
-            showAlert(AlertType.WARNING, "操作提示", "账户已经是正常状态，无需取消挂失！");
+        if ("ACTIVE".equals(currentStatus)) {
+            showAlert("操作提示", "账户已经是正常状态，无需取消挂失！", null, WARNING);
             return;
         }
         showConfirmationAlert("确认取消挂失", "您确定要取消挂失吗？", "ACTIVE");
@@ -106,7 +106,7 @@ public class bank_changestatusController {
             }
             return callGetAccountInfoAPI(accountNumber);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "获取账户状态失败", e);
             return null;
         }
     }
@@ -131,7 +131,7 @@ public class bank_changestatusController {
         try {
             String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
-                showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
+                showAlert("系统错误", "无法获取当前账户信息！", null, ERROR);
                 return;
             }
 
@@ -139,20 +139,21 @@ public class bank_changestatusController {
             boolean success = callUpdateStatusAPI(accountNumber, newStatus);
 
             if (success) {
-                showAlert(AlertType.INFORMATION, "操作成功", "账户状态已更新！");
+                showAlert("操作成功", "账户状态已更新！", null, INFORMATION);
                 // 如果是销户操作，直接关闭当前窗口并打开登录窗口
                 if ("CLOSED".equals(newStatus)) {
-                    openLoginWindowAndCloseCurrent();
+                    DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", closebtn);
+//                    openLoginWindowAndCloseCurrent();
                 } else {
                     statustext.setText(newStatus);
                     setStatusStyle(newStatus); // 设置状态文本的样式
                 }
             } else {
-                showAlert(AlertType.ERROR, "操作失败", "状态更新失败，请稍后重试！");
+                showAlert("操作失败", "状态更新失败，请稍后重试！", null, ERROR);
             }
         } catch (Exception e) {
-            showAlert(AlertType.ERROR, "操作异常", "发生异常: " + "请检查当前账号状态/网络状况！");
-            e.printStackTrace();
+            showAlert("操作异常", "发生异常: " + "请检查当前账号状态/网络状况！", null, ERROR);
+            logger.log(Level.SEVERE, "更新账户状态失败", e);
         }
     }
 
@@ -187,7 +188,7 @@ public class bank_changestatusController {
             loginStage.show();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "无法加载银行登录页面", e);
             System.out.println("无法加载银行登录页面: " + e.getMessage());
         }
     }
@@ -198,7 +199,7 @@ public class bank_changestatusController {
         try {
             String baseUrl = "http://" + MainApp.host + "/api/accounts";
             String url = String.format("%s/%s/status?newStatus=%s",
-                    baseUrl, accountNumber, URLEncoder.encode(newStatus, StandardCharsets.UTF_8.toString()));
+                    baseUrl, accountNumber, URLEncoder.encode(newStatus, StandardCharsets.UTF_8));
 
             HttpClient client = HttpClient.newHttpClient();
 
@@ -213,7 +214,7 @@ public class bank_changestatusController {
 
             return response.statusCode() == 200;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "调用更新状态API失败", e);
             return false;
         }
     }
@@ -250,7 +251,7 @@ public class bank_changestatusController {
             }
             return "UNKNOWN";
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "调用获取账户信息API失败", e);
             return "ERROR";
         }
     }
@@ -288,16 +289,8 @@ public class bank_changestatusController {
             }
         } catch (Exception e) {
             statustext.setText("加载状态失败");
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "初始化账户状态失败", e);
         }
-    }
-
-    private void showAlert(AlertType alertType, String title, String content) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(content);
-        alert.showAndWait();
     }
 
     @FXML
@@ -305,7 +298,7 @@ public class bank_changestatusController {
         try {
             String accountNumber = bank_utils.getCurrentAccountNumber();
             if (accountNumber == null || accountNumber.isEmpty()) {
-                showAlert(AlertType.ERROR, "系统错误", "无法获取当前账户信息！");
+                showAlert("系统错误", "无法获取当前账户信息！", null, ERROR);
                 return;
             }
 
@@ -315,22 +308,22 @@ public class bank_changestatusController {
 
             // 验证输入
             if (oldPassword == null || oldPassword.isEmpty()) {
-                showAlert(AlertType.WARNING, "输入错误", "请输入旧密码！");
+                showAlert("输入错误", "请输入旧密码！", null, WARNING);
                 return;
             }
 
             if (newPassword == null || newPassword.isEmpty()) {
-                showAlert(AlertType.WARNING, "输入错误", "请输入新密码！");
+                showAlert("输入错误", "请输入新密码！", null, WARNING);
                 return;
             }
 
             if (newPassword.length() < 6) {
-                showAlert(AlertType.WARNING, "输入错误", "新密码长度不能少于6位！");
+                showAlert("输入错误", "新密码长度不能少于6位！", null, WARNING);
                 return;
             }
 
             if (oldPassword.equals(newPassword)) {
-                showAlert(AlertType.WARNING, "输入错误", "新密码不能与旧密码相同！");
+                showAlert("输入错误", "新密码不能与旧密码相同！", null, WARNING);
                 return;
             }
 
@@ -338,16 +331,16 @@ public class bank_changestatusController {
             boolean success = callUpdatePasswordAPI(accountNumber, oldPassword, newPassword);
 
             if (success) {
-                showAlert(AlertType.INFORMATION, "操作成功", "密码已更新！");
+                showAlert("操作成功", "密码已更新！", null, INFORMATION);
                 // 清空输入框
                 oldpassword_text.clear();
                 newpassword_text.clear();
             } else {
-                showAlert(AlertType.ERROR, "操作失败", "密码更新失败，请检查旧密码是否正确！");
+                showAlert("操作失败", "密码更新失败，请检查旧密码是否正确！", null, ERROR);
             }
         } catch (Exception e) {
-            showAlert(AlertType.ERROR, "操作异常", "发生异常: ");
-            e.printStackTrace();
+            showAlert("操作异常", "发生异常: 请检查网络状况！", null, ERROR);
+            logger.log(Level.SEVERE, "更新密码失败", e);
         }
     }
 
@@ -361,8 +354,8 @@ public class bank_changestatusController {
 
             // 构造表单数据
             String formData = String.format("oldPassword=%s&newPassword=%s",
-                    URLEncoder.encode(oldPassword, StandardCharsets.UTF_8.toString()),
-                    URLEncoder.encode(newPassword, StandardCharsets.UTF_8.toString()));
+                    URLEncoder.encode(oldPassword, StandardCharsets.UTF_8),
+                    URLEncoder.encode(newPassword, StandardCharsets.UTF_8));
 
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(url))
@@ -381,7 +374,7 @@ public class bank_changestatusController {
 
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.log(Level.SEVERE, "调用更新密码API失败", e);
             return false;
         }
     }

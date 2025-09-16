@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="seu.virtualcampus.ui.TimetableController">
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="我的课程表" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Button fx:id="backButton" text="返回" onAction="#handleBack"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+    <center>
+        <ScrollPane fx:id="scrollPane" fitToWidth="true">
+            <VBox fx:id="timetableContainer" spacing="10" style="-fx-padding: 15;">
+                <Label text="加载中..." fx:id="loadingLabel"/>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

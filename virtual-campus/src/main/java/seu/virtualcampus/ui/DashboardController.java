@@ -5,6 +5,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -18,12 +19,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DashboardController {
+    private final Logger logger = Logger.getLogger(DashboardController.class.getName());
     @FXML
     private Label welcomeLabel;
     @FXML
     private GridPane entryBox;
-
     private String userRole;
+    private String username;
 
     /**
      * 统一页面跳转方法，根据 FXML 路径切换 Scene
@@ -36,17 +38,17 @@ public class DashboardController {
             stage.setScene(new Scene(root));
         } catch (Exception e) {
             Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "页面跳转异常: " + fxmlPath, e);
-            showErrorAlert("切换失败", "无法打开页面: " + fxmlPath + "\n详细错误: " + e.getMessage());
+            showAlert("切换失败", "无法打开页面: " + fxmlPath + "\n详细错误: " + e.getMessage(), null, Alert.AlertType.ERROR);
         }
     }
 
     /**
      * 显示错误提示
      */
-    private static void showErrorAlert(String title, String message) {
-        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+    public static void showAlert(String title, String message, String header, Alert.AlertType type) {
+        Alert alert = new Alert(type != null ? type : Alert.AlertType.ERROR);
         alert.setTitle(title);
-        alert.setHeaderText(null);
+        alert.setHeaderText(header);
         alert.setContentText(message);
         alert.showAndWait();
     }
@@ -66,6 +68,7 @@ public class DashboardController {
 
     public void setUserInfo(String username, String role) {
         this.userRole = role;
+        this.username = username;
         welcomeLabel.setText(String.format("欢迎，%s(%s)！", username, role));
         setupEntries();
     }
@@ -77,6 +80,13 @@ public class DashboardController {
             Button studentBtn = createButtonWithIcon("学生个人信息维护", "/seu/virtualcampus/ui/icon.png");
             studentBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student.fxml", entryBox));
             entryBox.add(studentBtn, col++, row);
+            Button courseBtn = createButtonWithIcon("选课", "/seu/virtualcampus/ui/icon.png");
+            courseBtn.setOnAction(e -> openCourseSelectionUI());
+            entryBox.add(courseBtn, col++, row);
+        } else if ("CourseMgr".equalsIgnoreCase(userRole)) {
+            Button courseMgrBtn = createButtonWithIcon("课程管理", "/seu/virtualcampus/ui/icon.png");
+            courseMgrBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/course_management.fxml", entryBox));
+            entryBox.add(courseMgrBtn, col++, row);
         } else if ("registrar".equalsIgnoreCase(userRole)) {
             Button registrarBtn = createButtonWithIcon("学生信息审核", "/seu/virtualcampus/ui/icon.png");
             registrarBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/registrar.fxml", entryBox));
@@ -117,7 +127,7 @@ public class DashboardController {
             icon.setFitHeight(28);
             button.setGraphic(icon);
         } catch (NullPointerException | IllegalArgumentException e) {
-            Logger.getLogger(DashboardController.class.getName()).log(Level.SEVERE, "图标加载失败: " + iconPath, e);
+            logger.log(Level.SEVERE, "图标加载失败: " + iconPath, e);
         }
         // 统一按钮大小（宽高），缩小内边距和字体
         button.setPrefWidth(140);
@@ -151,6 +161,33 @@ public class DashboardController {
                         "-fx-effect: dropshadow(gaussian, #b0b8c1, 4, 0.15, 0, 1);"
         ));
         return button;
+    }
+
+    private void openCourseSelectionUI() {
+        try {
+            logger.info("学生 " + this.username + " 尝试打开选课系统");
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/course_selection.fxml"));
+            Parent root = loader.load();
+
+            // 获取控制器并设置学生ID
+            CourseSelectionController controller = loader.getController();
+            controller.setStudentId(this.username); // 使用保存的用户名
+
+            Stage stage = (Stage) entryBox.getScene().getWindow();
+            stage.setScene(new Scene(root));
+            logger.info("学生 " + this.username + " 成功打开选课系统");
+        } catch (Exception e) {
+            logger.log(Level.SEVERE, "切换到选课系统页面时发生异常", e);
+
+            // 显示错误消息
+            javafx.application.Platform.runLater(() -> {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("错误");
+                alert.setHeaderText("无法打开选课系统");
+                alert.setContentText("错误详情: " + e.getMessage());
+                alert.showAndWait();
+            });
+        }
     }
 
     @FXML

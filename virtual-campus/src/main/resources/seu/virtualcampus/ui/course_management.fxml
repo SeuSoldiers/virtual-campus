@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="seu.virtualcampus.ui.CourseManagementController">
+    <top>
+        <HBox spacing="10" style="-fx-background-color: #2c3e50; -fx-padding: 15;">
+            <Label text="课程管理系统" style="-fx-text-fill: white; -fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Button fx:id="backButton" text="返回" style="-fx-background-color: #e74c3c; -fx-text-fill: white;"/>
+        </HBox>
+    </top>
+    <center>
+        <VBox spacing="10" style="-fx-padding: 15;">
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Button fx:id="addButton" text="添加课程" style="-fx-background-color: #27ae60; -fx-text-fill: white;"/>
+            </HBox>
+            <TableView fx:id="courseTable" style="-fx-padding: 10;">
+                <columns>
+                    <TableColumn text="课程ID" fx:id="courseIdColumn"/>
+                    <TableColumn text="课程名称" fx:id="courseNameColumn"/>
+                    <TableColumn text="授课教师" fx:id="teacherColumn"/>
+                    <TableColumn text="学分" fx:id="creditColumn"/>
+                    <TableColumn text="容量" fx:id="capacityColumn"/>
+                    <TableColumn text="已选人数" fx:id="enrollmentColumn"/>
+                    <TableColumn text="上课时间" fx:id="timeColumn"/>
+                    <TableColumn text="上课地点" fx:id="locationColumn"/>
+                    <TableColumn text="操作" fx:id="actionColumn"/>
+                </columns>
+            </TableView>
+            <!-- 添加分页控件 -->
+            <HBox fx:id="paginationContainer" alignment="CENTER" spacing="10" style="-fx-padding: 10;">
+                <Button fx:id="prevPageButton" text="上一页"/>
+                <Label fx:id="pageInfoLabel"/>
+                <Button fx:id="nextPageButton" text="下一页"/>
+            </HBox>
+            <Label fx:id="loadingLabel" text="加载中..."/>
+        </VBox>
+    </center>
+</BorderPane>
