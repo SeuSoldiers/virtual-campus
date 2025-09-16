@@ -106,6 +106,11 @@ public class DashboardController {
             adminShopBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/admin_shop.fxml", entryBox));
             entryBox.add(adminShopBtn, cnt % 4, cnt / 4);
             cnt++;
+        } else if ("LibraryMgr".equalsIgnoreCase(userRole)) {
+            Button libraryBtn = createButtonWithIcon("图书管理", "/seu/virtualcampus/ui/icon/lib.png");
+            libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/librarian.fxml", entryBox));
+            entryBox.add(libraryBtn, cnt % 4, cnt / 4);
+            cnt++;
         }
         Button productBtn = createButtonWithIcon("商品浏览", "/seu/virtualcampus/ui/icon/shop.png");
         productBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/shop/product_list.fxml", entryBox));
@@ -124,6 +129,10 @@ public class DashboardController {
         bankLoginBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", entryBox));
         entryBox.add(bankLoginBtn, cnt % 4, cnt / 4);
         cnt++;
+
+        Button libraryBtn = createButtonWithIcon("图书馆", "/seu/virtualcampus/ui/icon/lib.png");
+        libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student_library.fxml", entryBox));
+        entryBox.add(libraryBtn, cnt % 4, cnt / 4);
     }
 
     private Button createButtonWithIcon(String text, String iconPath) {

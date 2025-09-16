@@ -8,41 +8,52 @@ import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.BookCopy;
 import seu.virtualcampus.domain.BookInfo;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class BookDetailController {
 
-    // ====== FXML ======
-    @FXML private Label lblTitle, lblAuthor, lblIsbn, lblPub, lblCategory, lblCounts, lblMessage;
-    @FXML private TableView<BookCopy> tableCopies;
-    @FXML private TableColumn<BookCopy, String> colBookId, colStatus, colLocation;
-    @FXML private Button btnBorrow, btnReturn, btnReserve, btnCancelReserve;
-
+    private static final String BASE = "http://" + MainApp.host + "/api/library";
     // ====== 网络/JSON ======
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    private static final String BASE = "http://localhost:8080/api/library";
-
+    // ====== FXML ======
+    @FXML
+    private Label lblTitle, lblAuthor, lblIsbn, lblPub, lblCategory, lblCounts, lblMessage;
+    @FXML
+    private TableView<BookCopy> tableCopies;
+    @FXML
+    private TableColumn<BookCopy, String> colBookId, colStatus, colLocation;
+    @FXML
+    private Button btnBorrow, btnReturn, btnReserve, btnCancelReserve;
     // ====== 上下文 ======
     private String isbn;
     private String bookTitle;
     private String currentUserId;
+
+    private static String url(String s) {
+        return java.net.URLEncoder.encode(String.valueOf(s), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
+    private static String nvl(String s) {
+        return s == null ? "" : s;
+    }
+
+    private static int i(Integer v) {
+        return v == null ? 0 : v;
+    }
 
     // ====== 初始化 ======
     public void init(String isbn, String title) {
@@ -70,7 +81,8 @@ public class BookDetailController {
                         .get()).build();
                 try (Response resp = client.newCall(req).execute()) {
                     if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
-                    List<BookInfo> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfo>>() {});
+                    List<BookInfo> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfo>>() {
+                    });
                     BookInfo info = (list == null || list.isEmpty()) ? null : list.get(0);
                     if (info != null) {
                         Platform.runLater(() -> {
@@ -100,7 +112,8 @@ public class BookDetailController {
                         .get()).build();
                 try (Response resp = client.newCall(req).execute()) {
                     if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
-                    List<BookCopy> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookCopy>>() {});
+                    List<BookCopy> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookCopy>>() {
+                    });
                     Platform.runLater(() -> {
                         tableCopies.setItems(FXCollections.observableArrayList(list == null ? List.of() : list));
                         refreshButtons();
@@ -112,7 +125,9 @@ public class BookDetailController {
         }).start();
     }
 
-    /** 根据当前数据刷新按钮可用性 */
+    /**
+     * 根据当前数据刷新按钮可用性
+     */
     private void refreshButtons() {
         boolean hasAvailable = tableCopies.getItems().stream().anyMatch(c -> "IN_LIBRARY".equalsIgnoreCase(nvl(c.getStatus())));
         btnBorrow.setDisable(!hasAvailable);      // 有可借副本时才能“借阅”
@@ -129,7 +144,8 @@ public class BookDetailController {
                 Set<String> myBorrowedBookIds = cur.stream().map(b -> b.bookId).collect(Collectors.toSet());
                 boolean canReturn = tableCopies.getItems().stream().anyMatch(c -> myBorrowedBookIds.contains(c.getBookId()));
                 Platform.runLater(() -> btnReturn.setDisable(!canReturn));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }).start();
 
         // 2) 当前用户是否对该 ISBN 有预约（ACTIVE/NOTIFIED）
@@ -138,15 +154,23 @@ public class BookDetailController {
                 ReservationLite r = getMyReservation(currentUserId, isbn);
                 boolean hasMyReservation = (r != null && r.reservationId != null && !"CANCELLED".equalsIgnoreCase(nvl(r.status)));
                 Platform.runLater(() -> btnCancelReserve.setDisable(!hasMyReservation));
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }).start();
     }
 
     // ====== 交互 ======
-    @FXML private void onBorrow() {
+    @FXML
+    private void onBorrow() {
         BookCopy sel = tableCopies.getSelectionModel().getSelectedItem();
-        if (sel == null) { setMsg("请先选择一个副本", false); return; }
-        if (!"IN_LIBRARY".equalsIgnoreCase(nvl(sel.getStatus()))) { setMsg("该副本不可借", false); return; }
+        if (sel == null) {
+            setMsg("请先选择一个副本", false);
+            return;
+        }
+        if (!"IN_LIBRARY".equalsIgnoreCase(nvl(sel.getStatus()))) {
+            setMsg("该副本不可借", false);
+            return;
+        }
         if (!confirm("确认借阅《" + bookTitle + "》（副本：" + sel.getBookId() + "）？")) return;
 
         HttpUrl url = Objects.requireNonNull(HttpUrl.parse(BASE + "/borrow"))
@@ -170,7 +194,10 @@ public class BookDetailController {
     @FXML
     private void onReturn() {
         BookCopy sel = tableCopies.getSelectionModel().getSelectedItem();
-        if (sel == null) { setMsg("请先选择一个副本", false); return; }
+        if (sel == null) {
+            setMsg("请先选择一个副本", false);
+            return;
+        }
 
         // 先在 FX 线程做确认
         boolean confirmed = confirm("确认归还所选副本（" + sel.getBookId() + "）吗？");
@@ -217,10 +244,17 @@ public class BookDetailController {
         }).start();
     }
 
-    @FXML private void onReserve() {
+
+    // ====== 调用后端的小工具 ======
+
+    @FXML
+    private void onReserve() {
         // 有可借副本就不允许预约
         boolean hasAvailable = tableCopies.getItems().stream().anyMatch(c -> "IN_LIBRARY".equalsIgnoreCase(nvl(c.getStatus())));
-        if (hasAvailable) { setMsg("当前有可借副本，请直接借阅", false); return; }
+        if (hasAvailable) {
+            setMsg("当前有可借副本，请直接借阅", false);
+            return;
+        }
         if (!confirm("确认预约《" + bookTitle + "》（ISBN：" + isbn + "）？")) return;
 
         HttpUrl url = Objects.requireNonNull(HttpUrl.parse(BASE + "/reserve"))
@@ -284,21 +318,23 @@ public class BookDetailController {
         ((Stage) lblTitle.getScene().getWindow()).close();
     }
 
-
-    // ====== 调用后端的小工具 ======
-
-    /** 取我的“进行中借阅” */
+    /**
+     * 取我的“进行中借阅”
+     */
     private List<BorrowItem> getCurrentBorrows(String userId) throws IOException {
         Request req = auth(new Request.Builder()
                 .url(BASE + "/borrows/current?userId=" + url(userId))
                 .get()).build();
         try (Response resp = client.newCall(req).execute()) {
             if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
-            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BorrowItem>>() {});
+            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BorrowItem>>() {
+            });
         }
     }
 
-    /** 取我对某 ISBN 的预约（拿到 reservationId 用于“取消预约”） */
+    /**
+     * 取我对某 ISBN 的预约（拿到 reservationId 用于“取消预约”）
+     */
     private ReservationLite getMyReservation(String userId, String isbn) throws IOException {
         // 需要后端提供一个轻量接口（见下文 3-1）
         Request req = auth(new Request.Builder()
@@ -311,18 +347,22 @@ public class BookDetailController {
         }
     }
 
-    private Request.Builder auth(Request.Builder b){
+    private Request.Builder auth(Request.Builder b) {
         if (MainApp.token != null && !MainApp.token.isEmpty()) {
             b.header("Authorization", "Bearer " + MainApp.token);
         }
         return b;
     }
 
-    private static String url(String s){ return java.net.URLEncoder.encode(String.valueOf(s), java.nio.charset.StandardCharsets.UTF_8); }
-    private static String nvl(String s){ return s==null? "": s; }
-    private static int i(Integer v){ return v==null? 0: v; }
-    private void setMsg(String msg, boolean isErr){ Platform.runLater(() -> { lblMessage.setText(msg); if (isErr) lblMessage.setStyle("-fx-text-fill: #d9534f;"); else lblMessage.setStyle("-fx-text-fill: #444;"); }); }
-    private boolean confirm(String text){
+    private void setMsg(String msg, boolean isErr) {
+        Platform.runLater(() -> {
+            lblMessage.setText(msg);
+            if (isErr) lblMessage.setStyle("-fx-text-fill: #d9534f;");
+            else lblMessage.setStyle("-fx-text-fill: #444;");
+        });
+    }
+
+    private boolean confirm(String text) {
         Alert a = new Alert(Alert.AlertType.CONFIRMATION, text, ButtonType.OK, ButtonType.CANCEL);
         a.setHeaderText(null);
         return a.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
@@ -337,6 +377,7 @@ public class BookDetailController {
         public LocalDate dueDate;
         public String status;
     }
+
     public static class ReservationLite {
         public String reservationId;
         public String userId;

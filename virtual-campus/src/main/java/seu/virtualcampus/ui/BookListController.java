@@ -10,9 +10,13 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -20,16 +24,16 @@ import java.util.List;
 
 public class BookListController {
 
-    @FXML private TableView<BookInfoVM> tableView;
-    @FXML private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
-            colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservationCount;
-
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
-                        .registerModule(new JavaTimeModule())
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-    private final String BASE = "http://localhost:8080/api/library";
-
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final String BASE = "http://" + MainApp.host + "/api/library";
+    @FXML
+    private TableView<BookInfoVM> tableView;
+    @FXML
+    private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
+            colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservationCount;
     private String currentUserId;
 
     public void init(String userId) {
@@ -49,7 +53,9 @@ public class BookListController {
         colReservationCount.setCellValueFactory(c -> new ReadOnlyStringWrapper(String.valueOf(c.getValue().reservationCount)));
     }
 
-    /** 从学生页传来的关键字加载数据 */
+    /**
+     * 从学生页传来的关键字加载数据
+     */
     public void loadBooks(String keyword) {
         try {
             String kw = keyword == null ? "" : keyword.trim();
@@ -75,7 +81,9 @@ public class BookListController {
         }
     }
 
-    /** 把 list 合并进 map（按 ISBN 去重，保持插入顺序即“命中优先级”） */
+    /**
+     * 把 list 合并进 map（按 ISBN 去重，保持插入顺序即“命中优先级”）
+     */
     private void mergeByIsbn(LinkedHashMap<String, BookInfoVM> map, List<BookInfoVM> list) {
         if (list == null) return;
         for (BookInfoVM b : list) {
@@ -84,12 +92,15 @@ public class BookListController {
         }
     }
 
-    /** 拉全部图书（无查询参数） */
+    /**
+     * 拉全部图书（无查询参数）
+     */
     private List<BookInfoVM> doSearchAll() throws IOException {
         Request req = new Request.Builder().url(BASE + "/search").get().build();
         try (Response resp = client.newCall(req).execute()) {
             if (!resp.isSuccessful() || resp.body() == null) return List.of();
-            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {});
+            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {
+            });
         }
     }
 
@@ -100,7 +111,8 @@ public class BookListController {
         Request req = new Request.Builder().url(url).get().build();
         try (Response resp = client.newCall(req).execute()) {
             if (!resp.isSuccessful() || resp.body() == null) return List.of();
-            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {});
+            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {
+            });
         }
     }
 

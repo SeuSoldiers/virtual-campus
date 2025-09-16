@@ -9,6 +9,8 @@ INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1002, '123', 'ShopMgr');
 INSERT OR IGNORE INTO users (username, password, role)
 VALUES (1003, '123', 'CourseMgr');
+INSERT OR IGNORE INTO users (username, password, role)
+VALUES (1004, '123', 'LibraryMgr');
 
 -- 插入银行管理员账户
 INSERT OR IGNORE INTO bank_account (accountNumber, userId, password, accountType, Balance, status, createdDate)
@@ -26,26 +28,16 @@ INSERT OR IGNORE INTO student_info (student_id, name, major, address, phone, eth
 VALUES (220232, '李四', '软件工程', '上海市浦东新区', '13800000002', '汉族', '党员', '女', '上海');
 
 -- 插入图书信息数据（book_info表）
-INSERT OR IGNORE INTO book_info (isbn, title, author, publisher, category, publishDate) VALUES
-                                                                                            ('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', '编程', '2007-06-01'),
-                                                                                            ('9787115447737', 'Spring实战', 'Craig Walls', '人民邮电出版社', '编程', '2016-04-01'),
-                                                                                            ('9787111557975', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', '数据库', '2012-03-01'),
-                                                                                            ('9787115428028', 'Python编程从入门到实践', 'Eric Matthes', '人民邮电出版社', '编程', '2016-07-01'),
-                                                                                            ('9787111407010', '算法导论', 'Thomas H. Cormen', '机械工业出版社', '算法', '2012-12-01');
-
-
--- 插入测试图书数据
-INSERT OR IGNORE INTO books (bookId, title, author, isbn, category, publishDate, publisher, totalCount, availableCount,
-                             location, reservationCount)
-VALUES ('B001', 'Java编程思想', 'Bruce Eckel', '9787111213826', '编程', '2007-06-01', '机械工业出版社', 5, 3, 'A区1排',
-        2),
-       ('B002', 'Spring实战', 'Craig Walls', '9787115447737', '编程', '2016-04-01', '人民邮电出版社', 3, 1, 'A区2排',
-        1),
-       ('B003', '数据库系统概念', 'Abraham Silberschatz', '9787111557975', '数据库', '2012-03-01', '机械工业出版社', 4,
-        4, 'B区1排', 0);
+INSERT OR IGNORE INTO book_info (isbn, title, author, publisher, category, publishDate)
+VALUES ('9787111213826', 'Java编程思想', 'Bruce Eckel', '机械工业出版社', '编程', '2007-06-01'),
+       ('9787115447737', 'Spring实战', 'Craig Walls', '人民邮电出版社', '编程', '2016-04-01'),
+       ('9787111557975', '数据库系统概念', 'Abraham Silberschatz', '机械工业出版社', '数据库', '2012-03-01'),
+       ('9787115428028', 'Python编程从入门到实践', 'Eric Matthes', '人民邮电出版社', '编程', '2016-07-01'),
+       ('9787111407010', '算法导论', 'Thomas H. Cormen', '机械工业出版社', '算法', '2012-12-01');
 
 -- 插入图书副本数据（book_copy表）
-INSERT OR IGNORE INTO book_copy (bookId, isbn, location, status) VALUES
+INSERT OR IGNORE INTO book_copy (bookId, isbn, location, status)
+VALUES
 -- Java编程思想：只借阅场景（留 3 本在馆）
 ('B001_1', '9787111213826', 'A区1排', 'BORROWED'),
 ('B001_2', '9787111213826', 'A区1排', 'BORROWED'),
@@ -72,11 +64,11 @@ INSERT OR IGNORE INTO book_copy (bookId, isbn, location, status) VALUES
 ('B005_3', '9787111407010', 'B区2排', 'BORROWED');
 
 -- 插入借阅记录（bookId 指向具体副本）
-INSERT OR IGNORE INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status) VALUES
-                                                                                                                         ('R001', '220231', 'B001_1', '2025-07-01', '2025-08-01', NULL, 0, 'BORROWED'),
-                                                                                                                         ('R002', '220232', 'B002_1', '2025-07-15', '2025-08-15', NULL, 0, 'BORROWED'),
-                                                                                                                         ('R003', '220233', 'B004_1', '2025-07-20', '2025-08-20', NULL, 0, 'BORROWED'),
-                                                                                                                         ('R004', '220234', 'B005_1', '2025-06-10', '2025-07-10', NULL, 0, 'BORROWED');
+INSERT OR IGNORE INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status)
+VALUES ('R001', '220231', 'B001_1', '2025-07-01', '2025-08-01', NULL, 0, 'BORROWED'),
+       ('R002', '220232', 'B002_1', '2025-07-15', '2025-08-15', NULL, 0, 'BORROWED'),
+       ('R003', '220233', 'B004_1', '2025-07-20', '2025-08-20', NULL, 0, 'BORROWED'),
+       ('R004', '220234', 'B005_1', '2025-06-10', '2025-07-10', NULL, 0, 'BORROWED');
 
 -- 插入预约记录（使用 isbn）
 INSERT OR IGNORE INTO reservation_records (reservationId, userId, isbn, reserveDate, status, queuePosition)

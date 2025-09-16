@@ -2,25 +2,24 @@ package seu.virtualcampus.ui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import okhttp3.*;
 
 public class BookEditController {
 
-    @FXML private TextField tfIsbn, tfTitle, tfAuthor, tfPublisher, tfPublishDate, tfCategory;
-    @FXML private Button btnSave, btnCancel;
-
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper();
-    private final String BASE = "http://localhost:8080/api/library";
-
+    private final String BASE = "http://" + MainApp.host + "/api/library";
+    @FXML
+    private TextField tfIsbn, tfTitle, tfAuthor, tfPublisher, tfPublishDate, tfCategory;
+    @FXML
+    private Button btnSave, btnCancel;
     private boolean editing = false;
     private Runnable onSaved;
-
-    public static class BookInfoDTO {
-        public String isbn, title, author, publisher, publishDate, category;
-    }
 
     public void initForAdd(Runnable onSaved) {
         this.editing = false;
@@ -40,7 +39,8 @@ public class BookEditController {
         tfIsbn.setEditable(false);
     }
 
-    @FXML private void onSave() {
+    @FXML
+    private void onSave() {
         try {
             BookInfoDTO dto = new BookInfoDTO();
             dto.isbn = tfIsbn.getText().trim();
@@ -61,7 +61,7 @@ public class BookEditController {
 
             try (Response resp = client.newCall(req).execute()) {
                 if (!resp.isSuccessful()) {
-                    showErr("保存失败：" + (resp.body()!=null? resp.body().string(): ""));
+                    showErr("保存失败：" + (resp.body() != null ? resp.body().string() : ""));
                     return;
                 }
             }
@@ -72,7 +72,10 @@ public class BookEditController {
         }
     }
 
-    @FXML private void onCancel() { close(); }
+    @FXML
+    private void onCancel() {
+        close();
+    }
 
     private void close() {
         Stage st = (Stage) btnCancel.getScene().getWindow();
@@ -81,5 +84,9 @@ public class BookEditController {
 
     private void showErr(String msg) {
         new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
+    }
+
+    public static class BookInfoDTO {
+        public String isbn, title, author, publisher, publishDate, category;
     }
 }

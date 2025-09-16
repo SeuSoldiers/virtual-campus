@@ -14,9 +14,9 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import okhttp3.*;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
@@ -24,40 +24,51 @@ import java.util.Objects;
 
 public class BorrowViewController {
 
-    @FXML private TabPane tabPane;
-    @FXML private Tab tabCurrentBorrow, tabBorrowHistory, tabReservation;
-
-    // 当前借阅
-    @FXML private TableView<BorrowItemVM> tableViewCurrent;
-    @FXML private TableColumn<BorrowItemVM, String>   col1RecordId, col1BookId, col1Title, col1Status;
-    @FXML private TableColumn<BorrowItemVM, LocalDate> col1BorrowDate, col1DueDate;
-    @FXML private TableColumn<BorrowItemVM, Void> col1Action;
-
-    // 借阅历史
-    @FXML private TableView<BorrowHistoryItemVM> tableViewHistory;
-    @FXML private TableColumn<BorrowHistoryItemVM, String>   col2RecordId, col2BookId, col2Title, col2Status;
-    @FXML private TableColumn<BorrowHistoryItemVM, LocalDate> col2BorrowDate, col2ReturnDate;
-
-    // 预约记录
-    @FXML private TableView<ReservationItemVM> tableViewReservation;
-    @FXML private TableColumn<ReservationItemVM, String>   col3Isbn, col3Title, col3Status;
-    @FXML private TableColumn<ReservationItemVM, LocalDate> col3ReserveDate;
-    @FXML private TableColumn<ReservationItemVM, Number>    col3Queue;
-    @FXML private TableColumn<ReservationItemVM, Void>      col3Action;
-    @FXML private Button btnRefreshReservation;
-
+    private static final String BASE = "http://" + MainApp.host + "/api/library";
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     // 预约页签：每个 ISBN 是否有可借副本（IN_LIBRARY 或 RESERVED）
     private final java.util.Map<String, Boolean> availableByIsbn = new java.util.HashMap<>();
-
-    private static final String BASE = "http://localhost:8080/api/library";
-
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Tab tabCurrentBorrow, tabBorrowHistory, tabReservation;
+    // 当前借阅
+    @FXML
+    private TableView<BorrowItemVM> tableViewCurrent;
+    @FXML
+    private TableColumn<BorrowItemVM, String> col1RecordId, col1BookId, col1Title, col1Status;
+    @FXML
+    private TableColumn<BorrowItemVM, LocalDate> col1BorrowDate, col1DueDate;
+    @FXML
+    private TableColumn<BorrowItemVM, Void> col1Action;
+    // 借阅历史
+    @FXML
+    private TableView<BorrowHistoryItemVM> tableViewHistory;
+    @FXML
+    private TableColumn<BorrowHistoryItemVM, String> col2RecordId, col2BookId, col2Title, col2Status;
+    @FXML
+    private TableColumn<BorrowHistoryItemVM, LocalDate> col2BorrowDate, col2ReturnDate;
+    // 预约记录
+    @FXML
+    private TableView<ReservationItemVM> tableViewReservation;
+    @FXML
+    private TableColumn<ReservationItemVM, String> col3Isbn, col3Title, col3Status;
+    @FXML
+    private TableColumn<ReservationItemVM, LocalDate> col3ReserveDate;
+    @FXML
+    private TableColumn<ReservationItemVM, Number> col3Queue;
+    @FXML
+    private TableColumn<ReservationItemVM, Void> col3Action;
+    @FXML
+    private Button btnRefreshReservation;
     private String currentUserId;
 
-    /** 由 StudentLibraryController 调用 */
+    /**
+     * 由 StudentLibraryController 调用
+     */
     // ============== 初始化 ==============
     public void init(String openTab) {
         this.currentUserId = MainApp.username;
@@ -88,9 +99,9 @@ public class BorrowViewController {
 
         // 根据入参选择默认页签
         switch (openTab == null ? "" : openTab) {
-            case "history"     -> tabPane.getSelectionModel().select(tabBorrowHistory);
+            case "history" -> tabPane.getSelectionModel().select(tabBorrowHistory);
             case "reservation" -> tabPane.getSelectionModel().select(tabReservation);
-            default            -> tabPane.getSelectionModel().select(tabCurrentBorrow);
+            default -> tabPane.getSelectionModel().select(tabCurrentBorrow);
         }
 
         // 切换页签时自动刷新对应列表
@@ -166,7 +177,7 @@ public class BorrowViewController {
         // 操作列：兑现预约 或 取消预约
         col3Action.setCellFactory(col -> new TableCell<>() {
             private final Button btnFulfill = new Button("兑现");
-            private final Button btnCancel  = new Button("取消");
+            private final Button btnCancel = new Button("取消");
             private final javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(8, btnFulfill, btnCancel);
 
             {
@@ -191,11 +202,11 @@ public class BorrowViewController {
                     return;
                 }
                 ReservationItemVM r = getTableView().getItems().get(getIndex());
-                boolean active   = "ACTIVE".equalsIgnoreCase(r.status);
+                boolean active = "ACTIVE".equalsIgnoreCase(r.status);
                 boolean canFulfillNow = availableByIsbn.getOrDefault(r.isbn, false);
 
                 boolean showFulfill = active && canFulfillNow;
-                boolean showCancel  = active;
+                boolean showCancel = active;
 
                 btnFulfill.setVisible(showFulfill);
                 btnCancel.setVisible(showCancel);
@@ -205,7 +216,9 @@ public class BorrowViewController {
         });
     }
 
-    /** 点击刷新按钮 */
+    /**
+     * 点击刷新按钮
+     */
     @FXML
     private void onRefreshReservation() {
         showReservation();
@@ -246,7 +259,9 @@ public class BorrowViewController {
         }
     }
 
-    /** 调用预约兑现接口 */
+    /**
+     * 调用预约兑现接口
+     */
     private void fulfillReservation(ReservationItemVM item) {
         new Thread(() -> {
             try {
@@ -258,7 +273,8 @@ public class BorrowViewController {
                 List<BookCopyVM> copies;
                 try (Response resp = client.newCall(reqCopies).execute()) {
                     if (!resp.isSuccessful()) throw new IOException("获取副本失败：" + resp.code());
-                    copies = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookCopyVM>>() {});
+                    copies = mapper.readValue(resp.body().bytes(), new TypeReference<List<BookCopyVM>>() {
+                    });
                 }
 
                 // 2) 优先选 IN_LIBRARY；没有再选 RESERVED
@@ -325,7 +341,9 @@ public class BorrowViewController {
         }).start();
     }
 
-    /** 调用取消预约接口 */
+    /**
+     * 调用取消预约接口
+     */
     private void cancelReservation(ReservationItemVM item) {
         if (item == null) return;
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
@@ -363,7 +381,8 @@ public class BorrowViewController {
             try (Response resp = client.newCall(req).execute()) {
                 if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
                 List<BorrowItemVM> list = mapper.readValue(resp.body().bytes(),
-                        new TypeReference<List<BorrowItemVM>>() {});
+                        new TypeReference<List<BorrowItemVM>>() {
+                        });
                 tableViewCurrent.setItems(FXCollections.observableArrayList(list));
             }
         } catch (Exception e) {
@@ -379,7 +398,8 @@ public class BorrowViewController {
             try (Response resp = client.newCall(req).execute()) {
                 if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
                 List<BorrowHistoryItemVM> list = mapper.readValue(resp.body().bytes(),
-                        new TypeReference<List<BorrowHistoryItemVM>>() {});
+                        new TypeReference<List<BorrowHistoryItemVM>>() {
+                        });
                 tableViewHistory.setItems(FXCollections.observableArrayList(list));
             }
         } catch (Exception e) {
@@ -396,7 +416,8 @@ public class BorrowViewController {
                 if (!resp.isSuccessful()) throw new IOException("HTTP " + resp.code());
 
                 List<ReservationItemVM> list = mapper.readValue(resp.body().bytes(),
-                        new TypeReference<List<ReservationItemVM>>() {});
+                        new TypeReference<List<ReservationItemVM>>() {
+                        });
 
                 // === 新增：计算每个 ISBN 是否有可兑现副本 ===
                 availableByIsbn.clear();
@@ -413,7 +434,8 @@ public class BorrowViewController {
                     try (Response resp2 = client.newCall(r2).execute()) {
                         if (resp2.isSuccessful() && resp2.body() != null) {
                             List<BookCopyVM> copies = mapper.readValue(resp2.body().bytes(),
-                                    new TypeReference<List<BookCopyVM>>() {});
+                                    new TypeReference<List<BookCopyVM>>() {
+                                    });
                             has = copies.stream().anyMatch(c ->
                                     "IN_LIBRARY".equalsIgnoreCase(c.status)
                                             || "RESERVED".equalsIgnoreCase(c.status));
@@ -451,14 +473,14 @@ public class BorrowViewController {
 
     // ============== 工具 ==============
 
-    private Request.Builder withAuth(Request.Builder b){
+    private Request.Builder withAuth(Request.Builder b) {
         if (MainApp.token != null && !MainApp.token.isEmpty()) {
             b.header("Authorization", "Bearer " + MainApp.token);
         }
         return b;
     }
 
-    private void showError(String msg){
+    private void showError(String msg) {
         Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
         a.setHeaderText(null);
         a.showAndWait();
@@ -480,6 +502,7 @@ public class BorrowViewController {
         public LocalDate dueDate;
         public String status;
     }
+
     public static class BorrowHistoryItemVM {
         public String recordId;
         public String bookId;
@@ -488,6 +511,7 @@ public class BorrowViewController {
         public LocalDate returnDate;
         public String status;
     }
+
     public static class ReservationItemVM {
         public String isbn;
         public String title;

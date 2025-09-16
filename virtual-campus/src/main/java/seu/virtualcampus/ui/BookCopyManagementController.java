@@ -12,39 +12,57 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
 
-/** 管理员端：ISBN 维度的副本管理页 */
+/**
+ * 管理员端：ISBN 维度的副本管理页
+ */
 public class BookCopyManagementController {
 
-    // ====== 与 book_copy_management.fxml 精确对齐的控件 ======
-    @FXML private Label lblTitle;
-    @FXML private Label lblAuthor;
-    @FXML private Label lblIsbn;
-    @FXML private Label lblPub;
-    @FXML private Label lblCategory;
-    @FXML private Label lblCounts;    // 数量统计
-    @FXML private Label lblMessage;
-
-    @FXML private TableView<CopyVM> tableViewCopies;
-    @FXML private TableColumn<CopyVM, String> colBookId;
-    @FXML private TableColumn<CopyVM, String> colStatus;
-    @FXML private TableColumn<CopyVM, String> colLocation;
-
+    private static final String BASE = "http://" + MainApp.host + "/api/library";
     private final OkHttpClient http = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-    private static final String BASE = "http://localhost:8080/api/library";
-
+    // ====== 与 book_copy_management.fxml 精确对齐的控件 ======
+    @FXML
+    private Label lblTitle;
+    @FXML
+    private Label lblAuthor;
+    @FXML
+    private Label lblIsbn;
+    @FXML
+    private Label lblPub;
+    @FXML
+    private Label lblCategory;
+    @FXML
+    private Label lblCounts;    // 数量统计
+    @FXML
+    private Label lblMessage;
+    @FXML
+    private TableView<CopyVM> tableViewCopies;
+    @FXML
+    private TableColumn<CopyVM, String> colBookId;
+    @FXML
+    private TableColumn<CopyVM, String> colStatus;
+    @FXML
+    private TableColumn<CopyVM, String> colLocation;
     private String isbn;
 
-    /** 外部入口：librarian 列表页传入 ISBN */
+    private static String nz(String s) {
+        return (s == null || s.isBlank()) ? "" : s;
+    }
+
+    /**
+     * 外部入口：librarian 列表页传入 ISBN
+     */
     public void init(String isbn) {
         this.isbn = isbn;
         bindColumns();
@@ -61,7 +79,10 @@ public class BookCopyManagementController {
     @FXML
     private void onDeleteBookCopy() {
         CopyVM sel = tableViewCopies.getSelectionModel().getSelectedItem();
-        if (sel == null) { info("请先选择一条副本记录"); return; }
+        if (sel == null) {
+            info("请先选择一条副本记录");
+            return;
+        }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
                 "确定要删除副本 " + sel.bookId + " 吗？", ButtonType.OK, ButtonType.CANCEL);
@@ -75,20 +96,31 @@ public class BookCopyManagementController {
                 .delete()
                 .build();
         try (Response resp = http.newCall(req).execute()) {
-            if (!resp.isSuccessful()) { error("删除失败（HTTP " + resp.code() + "）"); return; }
+            if (!resp.isSuccessful()) {
+                error("删除失败（HTTP " + resp.code() + "）");
+                return;
+            }
             info("删除成功");
             loadCopies(); // 刷新表格与数量
-        } catch (IOException e) { error("删除出错：" + e.getMessage()); }
+        } catch (IOException e) {
+            error("删除出错：" + e.getMessage());
+        }
     }
 
     @FXML
     private void onChangeBookCopy() {
         CopyVM sel = tableViewCopies.getSelectionModel().getSelectedItem();
-        if (sel == null) { info("请先选择一条副本记录"); return; }
+        if (sel == null) {
+            info("请先选择一条副本记录");
+            return;
+        }
         openEditDialog(sel);
     }
 
-    @FXML private void onRefreshCopies() { loadCopies(); }
+    @FXML
+    private void onRefreshCopies() {
+        loadCopies();
+    }
 
     @FXML
     private void onBack() {
@@ -98,7 +130,9 @@ public class BookCopyManagementController {
             Stage stage = (Stage) tableViewCopies.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
-        } catch (Exception e) { error("返回失败：" + e.getMessage()); }
+        } catch (Exception e) {
+            error("返回失败：" + e.getMessage());
+        }
     }
 
     // ====== 打开新增/编辑窗口 ======
@@ -145,9 +179,13 @@ public class BookCopyManagementController {
                     .newBuilder().addQueryParameter("isbn", isbn).build();
             Request req = new Request.Builder().url(url).get().build();
             try (Response resp = http.newCall(req).execute()) {
-                if (!resp.isSuccessful() || resp.body() == null) { setBookLabels(null); return; }
+                if (!resp.isSuccessful() || resp.body() == null) {
+                    setBookLabels(null);
+                    return;
+                }
                 List<BookInfoVM> list = mapper.readValue(resp.body().bytes(),
-                        new TypeReference<List<BookInfoVM>>() {});
+                        new TypeReference<List<BookInfoVM>>() {
+                        });
                 BookInfoVM info = (list == null || list.isEmpty()) ? null : list.get(0);
                 setBookLabels(info);
             }
@@ -158,18 +196,18 @@ public class BookCopyManagementController {
     }
 
     private void setBookLabels(BookInfoVM b) {
-        if (lblTitle    != null) lblTitle.setText("书名：" + (b == null ? "" : nz(b.title)));
-        if (lblAuthor   != null) lblAuthor.setText("作者：" + (b == null ? "" : nz(b.author)));
-        if (lblIsbn     != null) lblIsbn.setText("ISBN：" + (isbn == null ? "" : isbn));
+        if (lblTitle != null) lblTitle.setText("书名：" + (b == null ? "" : nz(b.title)));
+        if (lblAuthor != null) lblAuthor.setText("作者：" + (b == null ? "" : nz(b.author)));
+        if (lblIsbn != null) lblIsbn.setText("ISBN：" + (isbn == null ? "" : isbn));
         String pub = "";
         if (b != null) {
             String p1 = nz(b.publisher);
             String p2 = nz(b.publishDate);
             pub = (p1 + "  " + p2).trim();
         }
-        if (lblPub      != null) lblPub.setText("出版信息：" + pub);
+        if (lblPub != null) lblPub.setText("出版信息：" + pub);
         if (lblCategory != null) lblCategory.setText("类别：" + (b == null ? "" : nz(b.category)));
-        if (lblCounts   != null) lblCounts.setText("数量：加载中…");
+        if (lblCounts != null) lblCounts.setText("数量：加载中…");
     }
 
     // ====== 副本表格 + 数量统计 ======
@@ -185,12 +223,15 @@ public class BookCopyManagementController {
                     return;
                 }
                 List<CopyDTO> raw = mapper.readValue(resp.body().bytes(),
-                        new TypeReference<List<CopyDTO>>() {});
+                        new TypeReference<List<CopyDTO>>() {
+                        });
                 List<CopyVM> data = raw.stream().map(this::toVM).toList();
                 tableViewCopies.setItems(FXCollections.observableArrayList(data));
                 updateCounts(raw);
             }
-        } catch (Exception e) { error("加载副本失败：" + e.getMessage()); }
+        } catch (Exception e) {
+            error("加载副本失败：" + e.getMessage());
+        }
     }
 
     private void updateCounts(List<CopyDTO> raw) {
@@ -201,11 +242,12 @@ public class BookCopyManagementController {
                 String s = nz(d.status);
                 switch (s) {
                     case "IN_LIBRARY", "AVAILABLE" -> available++;
-                    case "BORROWED"                -> borrowed++;
-                    case "RESERVED"                -> reserved++;
-                    case "DAMAGED"                 -> damaged++;
-                    case "LOST"                    -> lost++;
-                    default -> {}
+                    case "BORROWED" -> borrowed++;
+                    case "RESERVED" -> reserved++;
+                    case "DAMAGED" -> damaged++;
+                    case "LOST" -> lost++;
+                    default -> {
+                    }
                 }
             }
         }
@@ -217,16 +259,16 @@ public class BookCopyManagementController {
 
     private CopyVM toVM(CopyDTO d) {
         CopyVM vm = new CopyVM();
-        vm.bookId  = nz(d.bookId);
-        vm.location= nz(d.location);
-        vm.statusEN= nz(d.status);
+        vm.bookId = nz(d.bookId);
+        vm.location = nz(d.location);
+        vm.statusEN = nz(d.status);
         vm.statusCN = switch (vm.statusEN) {
             case "IN_LIBRARY", "AVAILABLE" -> "在馆";
             case "BORROWED" -> "借出中";
             case "RESERVED" -> "已预约";
-            case "DAMAGED"  -> "损坏";
-            case "LOST"     -> "遗失";
-            default         -> vm.statusEN;
+            case "DAMAGED" -> "损坏";
+            case "LOST" -> "遗失";
+            default -> vm.statusEN;
         };
         return vm;
     }
@@ -234,16 +276,18 @@ public class BookCopyManagementController {
     // ====== 工具 ======
     private void info(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        a.setHeaderText(null); a.setTitle("提示"); a.showAndWait();
+        a.setHeaderText(null);
+        a.setTitle("提示");
+        a.showAndWait();
     }
 
     private void error(String msg) {
         if (lblMessage != null) lblMessage.setText(msg == null ? "" : msg);
         Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        a.setHeaderText(null); a.setTitle("错误"); a.showAndWait();
+        a.setHeaderText(null);
+        a.setTitle("错误");
+        a.showAndWait();
     }
-
-    private static String nz(String s) { return (s == null || s.isBlank()) ? "" : s; }
 
     // ====== 内部 VM/DTO ======
     public static class BookInfoVM {
@@ -254,12 +298,14 @@ public class BookCopyManagementController {
         public String publishDate;
         public String category;
     }
+
     public static class CopyDTO {
         public String bookId;
         public String isbn;
         public String status;
         public String location;
     }
+
     public static class CopyVM {
         public String bookId;
         public String statusEN;

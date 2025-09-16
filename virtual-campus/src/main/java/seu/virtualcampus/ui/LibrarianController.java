@@ -12,7 +12,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import okhttp3.*;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -21,31 +24,60 @@ import java.util.stream.Collectors;
 
 public class LibrarianController {
 
-    // ---------- 书籍管理 ----------
-    @FXML private TextField bookSearchField;
-    @FXML private TableView<BookInfoVM> tableViewBooks;
-    @FXML private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
-            colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservedCount;
-
-    // ---------- 借阅管理（只读） ----------
-    @FXML private TextField borrowSearchField;
-    @FXML private TableView<AdminBorrowVM> tableBorrows;
-    @FXML private TableColumn<AdminBorrowVM, String> colBorrowId, colBorrowBookId, colBorrowTitle,
-            colBorrowStudentId, colBorrowStatus;
-    @FXML private TableColumn<AdminBorrowVM, LocalDate> colBorrowDate, colReturnDate;
-
-    // ---------- 预约管理（只读） ----------
-    @FXML private TextField reservationSearchField;
-    @FXML private TableView<AdminReservationVM> tableReservations;
-    @FXML private TableColumn<AdminReservationVM, String> colReservationId, colReservationBookId,
-            colReservationTitle, colReservationStudentId, colReservationStatus;
-    @FXML private TableColumn<AdminReservationVM, LocalDate> colReserveDate;
-    @FXML private TableColumn<AdminReservationVM, Number> colQueuePosition;
-
     // ---------- HTTP / JSON ----------
     private final OkHttpClient client = new OkHttpClient();
     private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    private final String BASE = "http://localhost:8080/api/library";
+    private final String BASE = "http://" + MainApp.host + "/api/library";
+    // ---------- 书籍管理 ----------
+    @FXML
+    private TextField bookSearchField;
+    @FXML
+    private TableView<BookInfoVM> tableViewBooks;
+    @FXML
+    private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
+            colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservedCount;
+    // ---------- 借阅管理（只读） ----------
+    @FXML
+    private TextField borrowSearchField;
+    @FXML
+    private TableView<AdminBorrowVM> tableBorrows;
+    @FXML
+    private TableColumn<AdminBorrowVM, String> colBorrowId, colBorrowBookId, colBorrowTitle,
+            colBorrowStudentId, colBorrowStatus;
+    @FXML
+    private TableColumn<AdminBorrowVM, LocalDate> colBorrowDate, colReturnDate;
+    // ---------- 预约管理（只读） ----------
+    @FXML
+    private TextField reservationSearchField;
+    @FXML
+    private TableView<AdminReservationVM> tableReservations;
+    @FXML
+    private TableColumn<AdminReservationVM, String> colReservationId, colReservationBookId,
+            colReservationTitle, colReservationStudentId, colReservationStatus;
+    @FXML
+    private TableColumn<AdminReservationVM, LocalDate> colReserveDate;
+    @FXML
+    private TableColumn<AdminReservationVM, Number> colQueuePosition;
+
+    @SafeVarargs
+    private static <T> List<T> concat(List<T>... lists) {
+        return Arrays.stream(lists).filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
+    }
+
+    private static BookEditController.BookInfoDTO toBookInfo(BookInfoVM vm) {
+        BookEditController.BookInfoDTO d = new BookEditController.BookInfoDTO();
+        d.isbn = vm.isbn;
+        d.title = vm.title;
+        d.author = vm.author;
+        d.publisher = vm.publisher;
+        d.publishDate = vm.publishDate;
+        d.category = vm.category;
+        return d;
+    }
+
+    private static String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
 
     @FXML
     private void initialize() {
@@ -78,7 +110,9 @@ public class LibrarianController {
         loadBooks(kw);
     }
 
-    /** 关键字为空=取全部；否则在 title/author/isbn/category 各查一次并去重合并 */
+    /**
+     * 关键字为空=取全部；否则在 title/author/isbn/category 各查一次并去重合并
+     */
     private void loadBooks(String keyword) {
         try {
             List<BookInfoVM> all;
@@ -107,13 +141,9 @@ public class LibrarianController {
         Request req = new Request.Builder().url(ub.build()).get().build();
         try (Response resp = client.newCall(req).execute()) {
             if (!resp.isSuccessful() || resp.body() == null) return List.of();
-            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {});
+            return mapper.readValue(resp.body().bytes(), new TypeReference<List<BookInfoVM>>() {
+            });
         }
-    }
-
-    @SafeVarargs
-    private static <T> List<T> concat(List<T>... lists) {
-        return Arrays.stream(lists).filter(Objects::nonNull).flatMap(List::stream).collect(Collectors.toList());
     }
 
     @FXML
@@ -124,14 +154,20 @@ public class LibrarianController {
     @FXML
     private void onEditBook() {
         BookInfoVM sel = tableViewBooks.getSelectionModel().getSelectedItem();
-        if (sel == null) { info("请先选择一条图书记录"); return; }
+        if (sel == null) {
+            info("请先选择一条图书记录");
+            return;
+        }
         openBookEditDialog(sel);
     }
 
     @FXML
     private void onDeleteBook() {
         BookInfoVM sel = tableViewBooks.getSelectionModel().getSelectedItem();
-        if (sel == null) { info("请先选择一条图书记录"); return; }
+        if (sel == null) {
+            info("请先选择一条图书记录");
+            return;
+        }
         Alert a = new Alert(Alert.AlertType.CONFIRMATION, "确定删除《" + sel.title + "》(" + sel.isbn + ")？此操作不可撤销。", ButtonType.OK, ButtonType.CANCEL);
         a.setHeaderText("删除确认");
         a.showAndWait();
@@ -156,7 +192,10 @@ public class LibrarianController {
     @FXML
     private void onViewBookDetail() {
         BookInfoVM sel = tableViewBooks.getSelectionModel().getSelectedItem();
-        if (sel == null) { info("请先选择一条图书记录"); return; }
+        if (sel == null) {
+            info("请先选择一条图书记录");
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_copy_management.fxml"));
             Parent root = loader.load();
@@ -178,14 +217,16 @@ public class LibrarianController {
         }
     }
 
-    /** 简单打开编辑对话窗（使用 book_edit.fxml） */
+    /**
+     * 简单打开编辑对话窗（使用 book_edit.fxml）
+     */
     private void openBookEditDialog(BookInfoVM editing) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_edit.fxml"));
             Parent root = loader.load();
             BookEditController c = loader.getController();
             if (editing == null) c.initForAdd(() -> loadBooks(safeText(bookSearchField)));
-            else                c.initForEdit(toBookInfo(editing), () -> loadBooks(safeText(bookSearchField)));
+            else c.initForEdit(toBookInfo(editing), () -> loadBooks(safeText(bookSearchField)));
 
             Stage owner = (Stage) tableViewBooks.getScene().getWindow();
             Stage dialog = new Stage();
@@ -197,17 +238,6 @@ public class LibrarianController {
         } catch (Exception e) {
             showError("打开编辑窗口失败：" + e.getMessage());
         }
-    }
-
-    private static BookEditController.BookInfoDTO toBookInfo(BookInfoVM vm) {
-        BookEditController.BookInfoDTO d = new BookEditController.BookInfoDTO();
-        d.isbn = vm.isbn;
-        d.title = vm.title;
-        d.author = vm.author;
-        d.publisher = vm.publisher;
-        d.publishDate = vm.publishDate;
-        d.category = vm.category;
-        return d;
     }
 
     @FXML
@@ -239,8 +269,12 @@ public class LibrarianController {
                     .build();
             Request req = new Request.Builder().url(url).get().build();
             try (Response resp = client.newCall(req).execute()) {
-                if (!resp.isSuccessful() || resp.body() == null) { tableBorrows.getItems().clear(); return; }
-                List<AdminBorrowVM> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<AdminBorrowVM>>() {});
+                if (!resp.isSuccessful() || resp.body() == null) {
+                    tableBorrows.getItems().clear();
+                    return;
+                }
+                List<AdminBorrowVM> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<AdminBorrowVM>>() {
+                });
                 tableBorrows.getItems().setAll(list);
             }
         } catch (Exception e) {
@@ -277,8 +311,12 @@ public class LibrarianController {
                     .build();
             Request req = new Request.Builder().url(url).get().build();
             try (Response resp = client.newCall(req).execute()) {
-                if (!resp.isSuccessful() || resp.body() == null) { tableReservations.getItems().clear(); return; }
-                List<AdminReservationVM> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<AdminReservationVM>>() {});
+                if (!resp.isSuccessful() || resp.body() == null) {
+                    tableReservations.getItems().clear();
+                    return;
+                }
+                List<AdminReservationVM> list = mapper.readValue(resp.body().bytes(), new TypeReference<List<AdminReservationVM>>() {
+                });
                 tableReservations.getItems().setAll(list);
             }
         } catch (Exception e) {
@@ -290,6 +328,23 @@ public class LibrarianController {
     private void onRefreshReservations() {
         reservationSearchField.clear();
         loadReservations("");
+    }
+
+    // ================== 小工具 ==================
+    private String safeText(TextField tf) {
+        return tf == null || tf.getText() == null ? "" : tf.getText().trim();
+    }
+
+    private void showError(String msg) {
+        Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
+        a.setHeaderText("出错啦");
+        a.showAndWait();
+    }
+
+    private void info(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
+        a.setHeaderText(null);
+        a.showAndWait();
     }
 
     // ================== VM ==================
@@ -325,22 +380,5 @@ public class LibrarianController {
         public LocalDate reserveDate;
         public Integer queuePosition;
         public String status; // ACTIVE/NOTIFIED/FULFILLED/CANCELLED...
-    }
-
-    // ================== 小工具 ==================
-    private String safeText(TextField tf) {
-        return tf == null || tf.getText() == null ? "" : tf.getText().trim();
-    }
-    private static String nullToEmpty(String s) { return s == null ? "" : s; }
-
-    private void showError(String msg) {
-        Alert a = new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK);
-        a.setHeaderText("出错啦");
-        a.showAndWait();
-    }
-    private void info(String msg) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        a.setHeaderText(null);
-        a.showAndWait();
     }
 }
