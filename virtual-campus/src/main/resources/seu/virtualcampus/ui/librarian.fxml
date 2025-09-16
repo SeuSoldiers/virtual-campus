@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seu.virtualcampus.ui.LibrarianController"
+            style="-fx-font-family: 'Microsoft YaHei';
+                   -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+                   -fx-padding: 16;">
+
+    <children>
+        <TabPane tabClosingPolicy="UNAVAILABLE"
+                 AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                 style="-fx-background-color: transparent; -fx-tab-min-width:120;">
+            <tabs>
+
+                <!-- 图书管理 -->
+                <Tab text="📚 图书管理">
+                    <content>
+                        <VBox spacing="12" style="-fx-padding: 12;" AnchorPane.topAnchor="0.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+
+                            <!-- 搜索栏 -->
+                            <HBox spacing="10" alignment="CENTER">
+                                <TextField fx:id="bookSearchField" promptText="输入书名/作者/ISBN/类别"
+                                           HBox.hgrow="ALWAYS"
+                                           style="-fx-font-size: 14px; -fx-background-color: white;
+                                                  -fx-background-radius: 8; -fx-border-color: #90caf9; -fx-border-radius: 8;"/>
+                                <Button fx:id="btnSearchBook" text="查询" onAction="#onSearchBook"
+                                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                                <Button fx:id="btnRefreshBooks" text="刷新" onAction="#onRefreshBooks"
+                                        style="-fx-background-color: #64b5f6; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                            </HBox>
+
+                            <!-- 表格 -->
+                            <TableView fx:id="tableViewBooks" VBox.vgrow="ALWAYS"
+                                       style="-fx-background-color: white;
+                                              -fx-background-radius: 10;
+                                              -fx-border-color: #e0e7ef; -fx-border-radius: 10;
+                                              -fx-font-size: 14px;
+                                              -fx-table-cell-border-color: transparent;
+                                              -fx-selection-bar: #90caf9;
+                                              -fx-selection-bar-non-focused: #bbdefb;">
+                                <columns>
+                                    <TableColumn fx:id="colIsbn" text="ISBN"/>
+                                    <TableColumn fx:id="colTitle" text="书名"/>
+                                    <TableColumn fx:id="colAuthor" text="作者"/>
+                                    <TableColumn fx:id="colPublisher" text="出版社"/>
+                                    <TableColumn fx:id="colPublishDate" text="出版日期"/>
+                                    <TableColumn fx:id="colCategory" text="类别"/>
+                                    <TableColumn fx:id="colTotalCount" text="总数量"/>
+                                    <TableColumn fx:id="colAvailableCount" text="可借数量"/>
+                                    <TableColumn fx:id="colReservedCount" text="预约数量"/>
+                                </columns>
+                            </TableView>
+
+                            <!-- 操作按钮 -->
+                            <HBox spacing="12" alignment="CENTER">
+                                <Button fx:id="btnAddBook" text="增加图书" onAction="#onAddBook"
+                                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 8 24;"/>
+                                <Button fx:id="btnDeleteBook" text="删除图书" onAction="#onDeleteBook"
+                                        style="-fx-background-color: #ef5350; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 8 24;"/>
+                                <Button fx:id="btnEditBook" text="修改图书信息" onAction="#onEditBook"
+                                        style="-fx-background-color: #64b5f6; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 8 24;"/>
+                                <Button fx:id="btnViewBookDetail" text="查看详情" onAction="#onViewBookDetail"
+                                        style="-fx-background-color: #90caf9; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 8 24;"/>
+                            </HBox>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- 借阅管理 -->
+                <Tab text="📖 借阅管理">
+                    <content>
+                        <VBox spacing="12" style="-fx-padding: 12;" AnchorPane.topAnchor="0.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+
+                            <HBox spacing="10" alignment="CENTER">
+                                <TextField fx:id="borrowSearchField" promptText="输入借阅ID/图书ID/书名/借阅人ID"
+                                           HBox.hgrow="ALWAYS"
+                                           style="-fx-font-size: 14px; -fx-background-color: white;
+                                                  -fx-background-radius: 8; -fx-border-color: #90caf9; -fx-border-radius: 8;"/>
+                                <Button fx:id="btnSearchBorrow" text="查询" onAction="#onSearchBorrow"
+                                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                                <Button fx:id="btnRefreshBorrows" text="刷新" onAction="#onRefreshBorrows"
+                                        style="-fx-background-color: #64b5f6; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                            </HBox>
+
+                            <TableView fx:id="tableBorrows" VBox.vgrow="ALWAYS"
+                                       style="-fx-background-color: white;
+                                              -fx-background-radius: 10;
+                                              -fx-border-color: #e0e7ef; -fx-border-radius: 10;
+                                              -fx-font-size: 14px;
+                                              -fx-table-cell-border-color: transparent;
+                                              -fx-selection-bar: #90caf9;
+                                              -fx-selection-bar-non-focused: #bbdefb;">
+                                <columns>
+                                    <TableColumn fx:id="colBorrowId" text="借阅ID"/>
+                                    <TableColumn fx:id="colBorrowBookId" text="图书ID"/>
+                                    <TableColumn fx:id="colBorrowTitle" text="书名"/>
+                                    <TableColumn fx:id="colBorrowStudentId" text="借阅人ID"/>
+                                    <TableColumn fx:id="colBorrowDate" text="借阅日期"/>
+                                    <TableColumn fx:id="colReturnDate" text="归还日期"/>
+                                    <TableColumn fx:id="colBorrowStatus" text="状态"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+                <!-- 预约管理 -->
+                <Tab text="📝 预约管理">
+                    <content>
+                        <VBox spacing="12" style="-fx-padding: 12;" AnchorPane.topAnchor="0.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+
+                            <HBox spacing="10" alignment="CENTER">
+                                <TextField fx:id="reservationSearchField" promptText="输入预约ID/图书ID/书名/预约人ID"
+                                           HBox.hgrow="ALWAYS"
+                                           style="-fx-font-size: 14px; -fx-background-color: white;
+                                                  -fx-background-radius: 8; -fx-border-color: #90caf9; -fx-border-radius: 8;"/>
+                                <Button fx:id="btnSearchReservation" text="查询" onAction="#onSearchReservation"
+                                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                                <Button fx:id="btnRefreshReservations" text="刷新" onAction="#onRefreshReservations"
+                                        style="-fx-background-color: #64b5f6; -fx-text-fill: white;
+                                               -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                            </HBox>
+
+                            <TableView fx:id="tableReservations" VBox.vgrow="ALWAYS"
+                                       style="-fx-background-color: white;
+                                              -fx-background-radius: 10;
+                                              -fx-border-color: #e0e7ef; -fx-border-radius: 10;
+                                              -fx-font-size: 14px;
+                                              -fx-table-cell-border-color: transparent;
+                                              -fx-selection-bar: #90caf9;
+                                              -fx-selection-bar-non-focused: #bbdefb;">
+                                <columns>
+                                    <TableColumn fx:id="colReservationId" text="预约ID"/>
+                                    <TableColumn fx:id="colReservationBookId" text="图书ID"/>
+                                    <TableColumn fx:id="colReservationTitle" text="书名"/>
+                                    <TableColumn fx:id="colReservationStudentId" text="借阅人ID"/>
+                                    <TableColumn fx:id="colReserveDate" text="预约日期"/>
+                                    <TableColumn fx:id="colQueuePosition" text="排队号"/>
+                                    <TableColumn fx:id="colReservationStatus" text="状态"/>
+                                </columns>
+                            </TableView>
+                        </VBox>
+                    </content>
+                </Tab>
+
+            </tabs>
+        </TabPane>
+    </children>
+</AnchorPane>

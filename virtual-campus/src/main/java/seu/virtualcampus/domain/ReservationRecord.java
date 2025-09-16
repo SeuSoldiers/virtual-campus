@@ -12,9 +12,8 @@ import java.time.LocalDate;
 public class ReservationRecord {
     private String reservationId;
     private String userId;
-    private String bookId;
+    private String isbn;
     private LocalDate reserveDate;
     private String status; // 状态如: ACTIVE, CANCELLED, FULFILLED
     private Integer queuePosition;
-    private String notifyStatus; // 通知状态如: NOT_NOTIFIED, NOTIFIED
 }

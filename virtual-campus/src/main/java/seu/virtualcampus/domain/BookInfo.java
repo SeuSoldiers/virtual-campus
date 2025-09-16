@@ -9,16 +9,15 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Book {
-    private String bookId;
+public class BookInfo {
+    private String isbn;
     private String title;
     private String author;
-    private String isbn;
-    private String category;
-    private LocalDate publishDate;
     private String publisher;
+    private String category;
+    private String publishDate;
+
     private Integer totalCount;
     private Integer availableCount;
-    private String location;
     private Integer reservationCount;
 }

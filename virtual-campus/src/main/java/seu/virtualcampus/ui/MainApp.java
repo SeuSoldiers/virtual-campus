@@ -13,6 +13,7 @@ import java.util.logging.*;
 public class MainApp extends Application {
     public static String token; // 登录后保存 token
     public static String role; // 'student' 或 'registrar'
+    public static String username;  // 登录返回的学号（用户ID）
     private static Stage primaryStage;
 
     public static void switchToStudentScene() throws Exception {

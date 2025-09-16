@@ -3,8 +3,14 @@ package seu.virtualcampus.ui;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.ui.models.StudentInfo;
@@ -94,6 +100,36 @@ public class StudentController {
             });
         } catch (Exception e) {
             logger.log(Level.SEVERE, "学生信息提交异常", e);
+        }
+    }
+
+    @FXML
+    private Button btLibraryStudent;
+
+    @FXML
+    void onOpenLibraryStudent(ActionEvent event) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/student_library.fxml"));
+            Parent root = loader.load();
+            StudentLibraryController c = loader.getController();
+            c.init();
+
+            Stage libraryStage = new Stage();
+            libraryStage.setTitle("图书馆——学生端");
+            libraryStage.setScene(new Scene(root));
+
+            // 获取当前 StudentController 的窗口
+            Stage studentStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+
+            // 隐藏 StudentController 窗口
+            studentStage.hide();
+
+            // 当 StudentLibrary 窗口关闭时，重新显示 StudentController
+            libraryStage.setOnCloseRequest(e -> studentStage.show());
+
+            libraryStage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seu.virtualcampus.ui.BookEditController"
+            prefWidth="360" prefHeight="280"
+            style="-fx-font-family: 'Microsoft YaHei';
+                   -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+                   -fx-padding: 20;
+                   -fx-background-radius: 12;
+                   -fx-effect: dropshadow(gaussian, #90caf9, 16, 0.2, 0, 4);">
+
+    <children>
+        <!-- 表单布局 -->
+        <GridPane hgap="12" vgap="14" layoutX="20" layoutY="20">
+            <columnConstraints>
+                <ColumnConstraints minWidth="120"/>
+                <ColumnConstraints minWidth="280"/>
+            </columnConstraints>
+
+            <Label text="ISBN" GridPane.rowIndex="0" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfIsbn" GridPane.rowIndex="0" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+
+            <Label text="书名" GridPane.rowIndex="1" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfTitle" GridPane.rowIndex="1" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+
+            <Label text="作者" GridPane.rowIndex="2" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfAuthor" GridPane.rowIndex="2" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+
+            <Label text="出版社" GridPane.rowIndex="3" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfPublisher" GridPane.rowIndex="3" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+
+            <Label text="出版日期 (yyyy-MM-dd)" GridPane.rowIndex="4" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfPublishDate" GridPane.rowIndex="4" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+
+            <Label text="类别" GridPane.rowIndex="5" GridPane.columnIndex="0"
+                   style="-fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <TextField fx:id="tfCategory" GridPane.rowIndex="5" GridPane.columnIndex="1"
+                       style="-fx-background-radius: 8; -fx-border-color: #90caf9;
+                              -fx-border-radius: 8; -fx-font-size: 14px;"/>
+        </GridPane>
+
+        <!-- 按钮栏（靠右下角） -->
+        <HBox spacing="16" alignment="CENTER_RIGHT"
+              AnchorPane.rightAnchor="20.0" AnchorPane.bottomAnchor="20.0">
+            <children>
+                <Button fx:id="btnSave" text="保存" onAction="#onSave"
+                        style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                               -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                <Button fx:id="btnCancel" text="取消" onAction="#onCancel"
+                        style="-fx-background-color: #ef5350; -fx-text-fill: white;
+                               -fx-font-size: 14px; -fx-background-radius: 8; -fx-padding: 6 20;"/>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>

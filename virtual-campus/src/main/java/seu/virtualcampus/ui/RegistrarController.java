@@ -5,7 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
@@ -97,4 +101,37 @@ public class RegistrarController {
 
     @FXML private void handleApprove() { reviewSelected(true); }
     @FXML private void handleReject() { reviewSelected(false); }
+
+    // 测试
+    @FXML
+    private void handleLibraryManagement() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/librarian.fxml"));
+            Parent root = loader.load();
+
+            Stage currentStage = (Stage) auditList.getScene().getWindow();
+            Scene librarianScene = new Scene(root);
+
+            // 保存当前场景以便返回
+            Scene currentScene = currentStage.getScene();
+
+            currentStage.setScene(librarianScene);
+            currentStage.setTitle("图书馆管理");
+
+            // 设置窗口关闭事件，返回Registrar界面
+            currentStage.setOnCloseRequest(event -> {
+                try {
+                    currentStage.setScene(currentScene);
+                    currentStage.setTitle("教师审核");
+                    // 清除关闭事件处理器
+                    currentStage.setOnCloseRequest(null);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            msgLabel.setText("打开图书馆管理界面失败");
+        }
+    }
 }

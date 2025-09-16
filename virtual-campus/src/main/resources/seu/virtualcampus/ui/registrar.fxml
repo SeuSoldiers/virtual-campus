@@ -7,4 +7,5 @@
     <Button text="通过选中项" onAction="#handleApprove" />
     <Button text="拒绝选中项" onAction="#handleReject" />
     <Label fx:id="msgLabel" textFill="green" />
+    <Button text="图书馆管理" onAction="#handleLibraryManagement" />
 </VBox>
