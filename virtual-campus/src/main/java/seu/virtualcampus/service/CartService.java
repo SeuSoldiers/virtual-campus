@@ -26,13 +26,29 @@ public class CartService {
     private static final Logger log = LoggerFactory.getLogger(CartService.class);
 
     public int addCartItem(Cart cart) {
+        // 基础商品校验与库存校验
+        Product product = productMapper.selectById(cart.getProductId());
+        if (product == null) {
+            throw new RuntimeException("商品不存在");
+        }
+        if (cart.getQuantity() == null || cart.getQuantity() <= 0) {
+            throw new RuntimeException("购买数量必须大于0");
+        }
+
         // 检查是否已存在相同商品
         Cart existingItem = cartMapper.selectByUserAndProduct(
                 cart.getUserId(), cart.getProductId());
 
+        int currentQty = existingItem != null ? existingItem.getQuantity() : 0;
+        int desiredTotal = currentQty + cart.getQuantity();
+        if (product.getAvailableCount() == null || desiredTotal > product.getAvailableCount()) {
+            int stock = product.getAvailableCount() == null ? 0 : product.getAvailableCount();
+            throw new RuntimeException("库存不足：剩余 " + stock + " 件");
+        }
+
         if (existingItem != null) {
             // 如果已存在，更新数量
-            existingItem.setQuantity(existingItem.getQuantity() + cart.getQuantity());
+            existingItem.setQuantity(desiredTotal);
             return cartMapper.update(existingItem);
         } else {
             // 如果不存在，添加新项
@@ -84,12 +100,26 @@ public class CartService {
             throw new RuntimeException("商品不存在");
         }
 
+        if (quantity <= 0) {
+            throw new RuntimeException("购买数量必须大于0");
+        }
+
         // 检查是否已存在相同商品
         Cart existingItem = cartMapper.selectByUserAndProduct(userId, productId);
-        
+        int currentQty = existingItem != null ? existingItem.getQuantity() : 0;
+        int desiredTotal = currentQty + quantity;
+
+        // 库存校验：购物车内同款总量不能超过库存
+        Integer stock = product.getAvailableCount() == null ? 0 : product.getAvailableCount();
+        if (desiredTotal > stock) {
+            log.warn("[CartService] stock not enough. productId={}, stock={}, currentInCart={}, requestAdd={}",
+                    productId, stock, currentQty, quantity);
+            throw new RuntimeException("库存不足：剩余 " + stock + " 件");
+        }
+
         if (existingItem != null) {
             // 如果已存在，更新数量
-            int newQuantity = existingItem.getQuantity() + quantity;
+            int newQuantity = desiredTotal;
             int rows = cartMapper.updateQuantity(existingItem.getCartItemId(), newQuantity);
             log.info("[CartService] existing cart item. cartItemId={}, oldQty={}, newQty={}, affectedRows={}",
                     existingItem.getCartItemId(), existingItem.getQuantity(), newQuantity, rows);
@@ -122,6 +152,15 @@ public class CartService {
             // 数量为0或负数时删除该项
             return cartMapper.deleteById(cartItemId);
         } else {
+            // 库存校验
+            Product product = productMapper.selectById(cart.getProductId());
+            if (product == null) {
+                throw new RuntimeException("商品不存在");
+            }
+            Integer stock = product.getAvailableCount() == null ? 0 : product.getAvailableCount();
+            if (quantity > stock) {
+                throw new RuntimeException("库存不足：剩余 " + stock + " 件");
+            }
             return cartMapper.updateQuantity(cartItemId, quantity);
         }
     }

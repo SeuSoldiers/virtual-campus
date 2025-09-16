@@ -48,6 +48,30 @@ public class ProductDetailController {
         SpinnerValueFactory<Integer> valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 1, 1);
         quantitySpinner.setValueFactory(valueFactory);
         quantitySpinner.setEditable(true);
+
+        // 在按钮按下（尚未触发失焦提交）时进行本地库存校验，避免 Spinner 先将文本夹断
+        if (addToCartButton != null) {
+            addToCartButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_PRESSED, evt -> {
+                try {
+                    String raw = quantitySpinner.getEditor() != null ? quantitySpinner.getEditor().getText().trim() : "";
+                    if (raw.isEmpty()) return;
+                    int requested = Integer.parseInt(raw);
+                    int stock = (currentProduct != null && currentProduct.getAvailableCount() != null) ? currentProduct.getAvailableCount() : 0;
+                    if (requested > stock) {
+                        logger.warning("[UI] Block add: request exceeds stock on mouse press. requestQty=" + requested + ", stock=" + stock
+                                + ", productId=" + (currentProduct != null ? currentProduct.getProductId() : "null"));
+                        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                        alert.setTitle("库存不足");
+                        alert.setHeaderText("该商品库存不足");
+                        alert.setContentText("最多可购买 " + stock + " 件");
+                        alert.showAndWait();
+                        showMessage("库存不足：最多可购买 " + stock + " 件", true);
+                        evt.consume(); // 阻止后续触发 onAction
+                    }
+                } catch (Exception ignore) {
+                }
+            });
+        }
     }
 
     /**
@@ -161,13 +185,49 @@ public class ProductDetailController {
             return;
         }
 
-        int quantity = quantitySpinner.getValue();
+        int stock = currentProduct.getAvailableCount() != null ? currentProduct.getAvailableCount() : 0;
+
+        // 优先读取用户在 Spinner 文本框中输入的原始值，避免被上限自动夹断导致无法识别“超库存尝试”
+        int quantity;
+        try {
+            String rawText = quantitySpinner.getEditor() != null ? quantitySpinner.getEditor().getText().trim() : null;
+            if (rawText != null && !rawText.isEmpty()) {
+                quantity = Integer.parseInt(rawText);
+            } else {
+                quantity = quantitySpinner.getValue();
+            }
+        } catch (Exception ignore) {
+            quantity = quantitySpinner.getValue();
+        }
+
+        // 本地前置校验：输入超过库存时，直接弹窗警告，不发请求
+        if (quantity > stock) {
+            logger.warning("[UI] Input quantity exceeds stock. requestQty=" + quantity + ", stock=" + stock
+                    + ", productId=" + currentProduct.getProductId());
+            // 纠正显示为最大可购买数量
+            try {
+                quantitySpinner.getValueFactory().setValue(Math.max(1, stock));
+            } catch (Exception ignore) { }
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("库存不足");
+            alert.setHeaderText("该商品库存不足");
+            alert.setContentText("最多可购买 " + stock + " 件");
+            alert.showAndWait();
+            showMessage("库存不足：最多可购买 " + stock + " 件", true);
+            return;
+        }
+
+        logger.info("[UI] Try add-to-cart: productId=" + currentProduct.getProductId()
+                + ", name=" + currentProduct.getProductName()
+                + ", requestQty=" + quantity
+                + ", currentStock=" + stock);
 
         // 构建请求URL
+        final int finalQuantity = quantity; // 供回调内部与lambda使用
         HttpUrl url = Objects.requireNonNull(HttpUrl.parse("http://" + MainApp.host + "/api/cart/add-item")).newBuilder()
                 .addQueryParameter("userId", MainApp.username)
                 .addQueryParameter("productId", currentProduct.getProductId())
-                .addQueryParameter("quantity", String.valueOf(quantity))
+                .addQueryParameter("quantity", String.valueOf(finalQuantity))
                 .build();
         logger.info("[UI] Add-to-cart URL: " + url);
 
@@ -195,7 +255,7 @@ public class ProductDetailController {
             public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
-                        showMessage("成功添加 " + quantity + " 件商品到购物车！", false);
+                        showMessage("成功添加 " + finalQuantity + " 件商品到购物车！", false);
                         // 重新加载商品信息以更新库存，但不覆盖成功消息
                         loadProductDetailSilently();
                     } else {
@@ -204,10 +264,18 @@ public class ProductDetailController {
                             if (response.body() != null) {
                                 errorMsg = response.body().string();
                             }
-                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code() + ", body=" + errorMsg);
+                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code()
+                                    + ", body=" + errorMsg
+                                    + ", requestQty=" + finalQuantity
+                                    + ", stock=" + stock
+                                    + ", productId=" + currentProduct.getProductId());
                             showMessage("添加失败: " + errorMsg, true);
                         } catch (IOException e) {
-                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code() + ", no body");
+                            logger.log(Level.SEVERE, "[UI] Add-to-cart failed. code=" + response.code()
+                                    + ", no body"
+                                    + ", requestQty=" + finalQuantity
+                                    + ", stock=" + stock
+                                    + ", productId=" + currentProduct.getProductId());
                             showMessage("添加失败，状态码: " + response.code(), true);
                         }
                     }
