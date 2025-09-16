@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="seu.virtualcampus.ui.StudentLibraryController"
+            prefHeight="400.0" prefWidth="600.0"
+            style="-fx-font-family: 'Microsoft YaHei';
+                   -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+                   -fx-padding: 32;
+                   -fx-background-radius: 18;
+                   -fx-effect: dropshadow(gaussian, #90caf9, 16, 0.2, 0, 4);">
+
+    <children>
+        <!-- 搜索栏（保持原样） -->
+        <HBox layoutX="72.0" layoutY="82.0" spacing="10"
+              style="-fx-padding: 8; -fx-background-color: #ffffff; -fx-background-radius: 10; -fx-effect: dropshadow(gaussian, #cfd8dc, 4, 0.2, 0, 2);">
+            <children>
+                <TextField fx:id="searchField"
+                           prefHeight="36.0" prefWidth="350.0"
+                           promptText="请输入书名/作者/ISBN/类别"
+                           focusTraversable="false"
+                           style="-fx-font-size: 14px; -fx-background-radius: 6; -fx-border-color: #90caf9; -fx-border-radius: 6; -fx-prompt-text-fill: #90a4ae;"/>
+                <Button fx:id="btnSearch" text="搜索" onAction="#onSearch"
+                        style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-background-color: #42a5f5; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 6 16;"/>
+            </children>
+        </HBox>
+
+        <!-- 中间按钮组 -->
+        <VBox alignment="CENTER" spacing="40"
+              prefWidth="600.0" prefHeight="200.0"
+              layoutY="140.0">
+            <children>
+                <!-- 第一排按钮 -->
+                <HBox spacing="20" alignment="CENTER">
+                    <children>
+                        <Button fx:id="btnCurrentBorrow" text="当前借阅" onAction="#onQueryCurrentBorrow"
+                                style="-fx-font-size: 16px; -fx-background-color: #64b5f6; -fx-text-fill: white;
+                                       -fx-background-radius: 8; -fx-padding: 8 20;"/>
+                        <Button fx:id="btnAllBooks" text="所有图书" onAction="#onAllBooks"
+                                style="-fx-font-size: 16px; -fx-background-color: #1976d2; -fx-text-fill: white;
+                                       -fx-background-radius: 8; -fx-padding: 8 20;"/>
+                    </children>
+                </HBox>
+
+                <!-- 第二排按钮 -->
+                <HBox spacing="20" alignment="CENTER">
+                    <children>
+                        <Button fx:id="btnBorrowRecords" text="我的借阅记录" onAction="#onQueryHistoryBorrow"
+                                style="-fx-font-size: 16px; -fx-background-color: #64b5f6; -fx-text-fill: white;
+                                       -fx-background-radius: 8; -fx-padding: 8 20;"/>
+                        <Button fx:id="btnReservationRecords" text="我的预约信息" onAction="#onQueryReservation"
+                                style="-fx-font-size: 16px; -fx-background-color: #2196f3; -fx-text-fill: white;
+                                       -fx-background-radius: 8; -fx-padding: 8 20;"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

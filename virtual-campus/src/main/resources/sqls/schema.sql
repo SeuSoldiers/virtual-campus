@@ -67,20 +67,22 @@ CREATE TABLE IF NOT EXISTS banktransaction
 );
 
 -- 图书表
-CREATE TABLE IF NOT EXISTS books
-(
-    bookId           TEXT PRIMARY KEY,
-    title            TEXT NOT NULL,
-    author           TEXT,
-    isbn             TEXT,
-    category         TEXT,
-    publishDate      TEXT,
-    publisher        TEXT,
-    totalCount       INTEGER CHECK (totalCount >= 0),
-    availableCount   INTEGER CHECK (availableCount >= 0),
-    location         TEXT,
-    reservationCount INTEGER CHECK (reservationCount >= 0)
+CREATE TABLE IF NOT EXISTS book_info (
+                                         isbn TEXT PRIMARY KEY,
+                                         title TEXT,
+                                         author TEXT,
+                                         publisher TEXT,
+                                         category TEXT,
+                                         publishDate TEXT
 );
+
+CREATE TABLE IF NOT EXISTS book_copy (
+                                         bookId TEXT PRIMARY KEY,
+                                         isbn TEXT,
+                                         location TEXT,
+                                         status TEXT, -- IN_LIBRARY, BORROWED, RESERVED
+                                         FOREIGN KEY (isbn) REFERENCES book_info(isbn)
+    );
 
 -- 借阅记录表
 CREATE TABLE IF NOT EXISTS borrow_records
@@ -96,15 +98,13 @@ CREATE TABLE IF NOT EXISTS borrow_records
 );
 
 -- 预约记录表
-CREATE TABLE IF NOT EXISTS reservation_records
-(
-    reservationId TEXT PRIMARY KEY,
-    userId        TEXT NOT NULL,
-    bookId        TEXT NOT NULL,
-    reserveDate   TEXT NOT NULL,
-    status        TEXT NOT NULL,
-    queuePosition INTEGER CHECK (queuePosition >= 1),
-    notifyStatus  TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS reservation_records (
+       reservationId TEXT PRIMARY KEY,
+       userId TEXT NOT NULL,
+       isbn TEXT NOT NULL,
+       reserveDate TEXT NOT NULL,
+       status TEXT NOT NULL,
+       queuePosition INTEGER CHECK(queuePosition >= 1)
 );
 
 CREATE TABLE IF NOT EXISTS course
@@ -167,11 +167,15 @@ CREATE TABLE IF NOT EXISTS cart
     isActive   INTEGER DEFAULT 1,
     FOREIGN KEY (productId) REFERENCES product (productId) ON DELETE CASCADE
 );
--- 为books表添加索引
-CREATE INDEX IF NOT EXISTS idx_books_title ON books (title);
-CREATE INDEX IF NOT EXISTS idx_books_author ON books (author);
-CREATE INDEX IF NOT EXISTS idx_books_category ON books (category);
-CREATE INDEX IF NOT EXISTS idx_books_isbn ON books (isbn);
+-- 为book_info表添加索引
+CREATE INDEX IF NOT EXISTS idx_bookinfo_title ON book_info(title);
+CREATE INDEX IF NOT EXISTS idx_bookinfo_author ON book_info(author);
+CREATE INDEX IF NOT EXISTS idx_bookinfo_category ON book_info(category);
+
+-- 为book_copy表添加索引
+CREATE INDEX IF NOT EXISTS idx_bookcopy_isbn ON book_copy(isbn);
+CREATE INDEX IF NOT EXISTS idx_bookcopy_status ON book_copy(status);
+CREATE INDEX IF NOT EXISTS idx_bookcopy_location ON book_copy(location);
 
 -- 为borrow_records表添加索引
 CREATE INDEX IF NOT EXISTS idx_borrow_records_userId ON borrow_records (userId);
@@ -179,9 +183,9 @@ CREATE INDEX IF NOT EXISTS idx_borrow_records_bookId ON borrow_records (bookId);
 CREATE INDEX IF NOT EXISTS idx_borrow_records_status ON borrow_records (status);
 
 -- 为reservation_records表添加索引
-CREATE INDEX IF NOT EXISTS idx_reservation_records_userId ON reservation_records (userId);
-CREATE INDEX IF NOT EXISTS idx_reservation_records_bookId ON reservation_records (bookId);
-CREATE INDEX IF NOT EXISTS idx_reservation_records_status ON reservation_records (status);
+CREATE INDEX IF NOT EXISTS idx_reservation_records_userId ON reservation_records(userId);
+CREATE INDEX IF NOT EXISTS idx_reservation_records_isbn ON reservation_records(isbn);
+CREATE INDEX IF NOT EXISTS idx_reservation_records_status ON reservation_records(status);
 
 -- 选课关系表
 CREATE TABLE IF NOT EXISTS course_selection

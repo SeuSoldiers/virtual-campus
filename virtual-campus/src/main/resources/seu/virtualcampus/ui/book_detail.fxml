@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/24.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="seu.virtualcampus.ui.BookDetailController"
+            style="-fx-font-family: 'Microsoft YaHei';
+                   -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
+                   -fx-padding: 20;
+                   -fx-background-radius: 12;
+                   -fx-effect: dropshadow(gaussian, #90caf9, 16, 0.25, 0, 4);">
+
+    <children>
+        <VBox spacing="10" prefWidth="760" prefHeight="560"
+              AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
+              AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20">
+
+            <!-- 书籍基本信息 -->
+            <Label fx:id="lblTitle" text="书名："
+                   style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;"/>
+            <Label fx:id="lblAuthor" text="作者：" style="-fx-font-size: 14px;"/>
+            <Label fx:id="lblIsbn" text="ISBN：" style="-fx-font-size: 14px;"/>
+            <Label fx:id="lblPub" text="出版信息：" style="-fx-font-size: 14px;"/>
+            <Label fx:id="lblCategory" text="类别：" style="-fx-font-size: 14px;"/>
+            <Label fx:id="lblCounts" text="数量：" style="-fx-font-size: 14px;"/>
+
+            <!-- 分隔标题 -->
+            <Label text="馆藏副本："
+                   style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #0d47a1;">
+                <VBox.margin><Insets top="12.0"/></VBox.margin>
+            </Label>
+
+            <!-- 副本表 -->
+            <TableView fx:id="tableCopies" VBox.vgrow="ALWAYS"
+                       style="-fx-background-color: white;
+                              -fx-background-radius: 10;
+                              -fx-border-color: #e0e7ef;
+                              -fx-border-radius: 10;
+                              -fx-font-size: 14px;
+                              -fx-table-cell-border-color: transparent;
+                              -fx-selection-bar: #90caf9;
+                              -fx-selection-bar-non-focused: #bbdefb;">
+                <columns>
+                    <TableColumn fx:id="colBookId" text="图书编号" prefWidth="160.0"/>
+                    <TableColumn fx:id="colStatus"  text="状态" prefWidth="140.0"/>
+                    <TableColumn fx:id="colLocation" text="馆藏位置" prefWidth="440.0"/>
+                </columns>
+            </TableView>
+
+            <!-- 操作按钮 -->
+            <HBox spacing="12" alignment="CENTER_RIGHT">
+                <children>
+                    <Button text="借阅" fx:id="btnBorrow" onAction="#onBorrow"
+                            style="-fx-background-color: #42a5f5; -fx-text-fill: white;
+                                   -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                    <Button text="归还" fx:id="btnReturn" onAction="#onReturn"
+                            style="-fx-background-color: #64b5f6; -fx-text-fill: white;
+                                   -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                    <Button text="预约" fx:id="btnReserve" onAction="#onReserve"
+                            style="-fx-background-color: #90caf9; -fx-text-fill: white;
+                                   -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                    <Button text="取消预约" fx:id="btnCancelReserve" onAction="#onCancelReserve"
+                            style="-fx-background-color: #ef5350; -fx-text-fill: white;
+                                   -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                    <Button text="返回" onAction="#onBack"
+                            style="-fx-background-color: #b0bec5; -fx-text-fill: white;
+                                   -fx-background-radius: 8; -fx-padding: 6 20;"/>
+                </children>
+            </HBox>
+
+            <!-- 状态栏 -->
+            <Label fx:id="lblMessage" textFill="#666666" style="-fx-font-size: 13px;"/>
+        </VBox>
+    </children>
+</AnchorPane>

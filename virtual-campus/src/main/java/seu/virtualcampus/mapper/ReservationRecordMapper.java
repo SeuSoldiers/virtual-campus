@@ -2,17 +2,30 @@ package seu.virtualcampus.mapper;
 
 import org.apache.ibatis.annotations.*;
 import seu.virtualcampus.domain.ReservationRecord;
+
 import java.util.List;
 
 @Mapper
 public interface ReservationRecordMapper {
-    @Insert("INSERT INTO reservation_records(reservationId, userId, bookId, reserveDate, status, queuePosition, notifyStatus) " +
-            "VALUES(#{reservationId}, #{userId}, #{bookId}, #{reserveDate}, #{status}, #{queuePosition}, #{notifyStatus})")
-    void insert(ReservationRecord record);
 
-    @Update("UPDATE reservation_records SET userId=#{userId}, bookId=#{bookId}, reserveDate=#{reserveDate}, " +
-            "status=#{status}, queuePosition=#{queuePosition}, notifyStatus=#{notifyStatus} WHERE reservationId=#{reservationId}")
-    void update(ReservationRecord record);
+    @Insert("""
+        INSERT INTO reservation_records
+        (reservationId, userId, isbn, reserveDate, status, queuePosition)
+        VALUES
+        (#{reservationId}, #{userId}, #{isbn}, #{reserveDate}, #{status}, #{queuePosition})
+        """)
+    int insert(ReservationRecord record);
+
+    @Update("""
+        UPDATE reservation_records
+        SET userId=#{userId}, isbn=#{isbn}, reserveDate=#{reserveDate},
+            status=#{status}, queuePosition=#{queuePosition}
+        WHERE reservationId=#{reservationId}
+        """)
+    int update(ReservationRecord record);
+
+    @Delete("DELETE FROM reservation_records WHERE reservationId=#{reservationId}")
+    int delete(String reservationId);
 
     @Select("SELECT * FROM reservation_records WHERE reservationId=#{reservationId}")
     ReservationRecord findById(String reservationId);
@@ -20,29 +33,80 @@ public interface ReservationRecordMapper {
     @Select("SELECT * FROM reservation_records WHERE userId=#{userId}")
     List<ReservationRecord> findByUserId(String userId);
 
-    @Select("SELECT * FROM reservation_records WHERE bookId=#{bookId}")
-    List<ReservationRecord> findByBookId(String bookId);
+    @Select("SELECT * FROM reservation_records WHERE isbn=#{isbn}")
+    List<ReservationRecord> findByIsbn(String isbn);
 
-    @Select("SELECT * FROM reservation_records WHERE bookId=#{bookId} AND status='ACTIVE' ORDER BY reserveDate ASC")
-    List<ReservationRecord> findActiveByBookId(String bookId);
+    /** 某 ISBN 的有效排队（ACTIVE），按队列位次优先，其次按预约时间 */
+    @Select("""
+        SELECT * FROM reservation_records
+        WHERE isbn=#{isbn} AND status='ACTIVE'
+        ORDER BY queuePosition ASC, reserveDate ASC
+        """)
+    List<ReservationRecord> findActiveByIsbn(String isbn);
 
-    @Select("SELECT COUNT(*) FROM reservation_records WHERE bookId=#{bookId} AND status='ACTIVE'")
-    int countActiveByBookId(String bookId);
+    /** 队列长度（ACTIVE 数量） */
+    @Select("""
+        SELECT COUNT(*)
+        FROM reservation_records
+        WHERE isbn=#{isbn} AND status='ACTIVE'
+        """)
+    int countActiveByIsbn(String isbn);
 
-    @Update("UPDATE reservation_records SET status='CANCELLED' WHERE reservationId=#{reservationId}")
-    void cancelReservation(String reservationId);
+    /** 取队首（用于到书通知/自动分配），注意配合事务在 Service 层更新状态 */
+    @Select("""
+        SELECT * FROM reservation_records
+        WHERE isbn=#{isbn} AND status='ACTIVE'
+        ORDER BY queuePosition ASC, reserveDate ASC
+        LIMIT 1
+        """)
+    ReservationRecord findFirstActiveByIsbn(String isbn);
 
-    @Update("UPDATE reservation_records SET status='FULFILLED' WHERE reservationId=#{reservationId}")
-    void fulfillReservation(String reservationId);
+    /** 计算下一位队列号（插入前调用） */
+    @Select("""
+        SELECT COALESCE(MAX(queuePosition), 0) + 1
+        FROM reservation_records
+        WHERE isbn=#{isbn} AND status='ACTIVE'
+        """)
+    Integer nextQueuePosition(String isbn);
 
-    @Update("UPDATE reservation_records SET notifyStatus='NOTIFIED' WHERE reservationId=#{reservationId}")
-    void markAsNotified(String reservationId);
+    /** 取消预约（单条） */
+    @Update("""
+    UPDATE reservation_records
+    SET status='CANCELLED'
+    WHERE reservationId=#{reservationId} AND status='ACTIVE'
+    """)
+    int cancelReservation(String reservationId);
 
-    @Update("UPDATE reservation_records SET queuePosition = queuePosition - 1 WHERE bookId=#{bookId} AND status='ACTIVE' AND queuePosition > #{position}")
-    void decreaseQueuePositions(@Param("bookId") String bookId, @Param("position") int position);
 
-    @Select("SELECT * FROM reservation_records WHERE userId = #{userId} AND bookId = #{bookId}")
-    List<ReservationRecord> findByUserAndBook(@Param("userId") String userId, @Param("bookId") String bookId);
+    /** 预约兑现（借到书） */
+    @Update("UPDATE reservation_records SET status='FULFILLED' WHERE reservationId=#{reservationId} AND status='ACTIVE'")
+    int fulfillReservation(String reservationId);
+
+    /**
+     * 队列位次回填：当某一位取消/兑现后，所有该位之后（> position）的 ACTIVE 预约，位次 -1
+     * 需与取消/兑现操作放在同一事务中
+     */
+    @Update("""
+        UPDATE reservation_records
+        SET queuePosition = queuePosition - 1
+        WHERE isbn=#{isbn} AND status='ACTIVE' AND queuePosition > #{position}
+        """)
+    int decreaseQueuePositions(@Param("isbn") String isbn, @Param("position") int position);
+
+    /** 判断用户对某 ISBN 是否已有 ACTIVE 预约（防重复预约） */
+    @Select("""
+        SELECT COUNT(*)
+        FROM reservation_records
+        WHERE userId = #{userId} AND isbn = #{isbn} AND status='ACTIVE'
+        """)
+    int existsActiveByUserAndIsbn(@Param("userId") String userId, @Param("isbn") String isbn);
+
+    @Select("""
+        SELECT * FROM reservation_records
+        WHERE userId = #{userId} AND isbn = #{isbn}
+        ORDER BY reserveDate DESC
+        """)
+    List<ReservationRecord> findByUserAndIsbn(@Param("userId") String userId, @Param("isbn") String isbn);
 
     @Select("SELECT * FROM reservation_records")
     List<ReservationRecord> findAll();
@@ -50,6 +114,11 @@ public interface ReservationRecordMapper {
     @Select("SELECT * FROM reservation_records WHERE status = #{status}")
     List<ReservationRecord> findByStatus(String status);
 
-    @Select("SELECT * FROM reservation_records WHERE notifyStatus = #{notifyStatus}")
-    List<ReservationRecord> findByNotifyStatus(String notifyStatus);
+    @Update("""
+    UPDATE reservation_records
+    SET status = #{status}
+    WHERE reservationId = #{reservationId}
+    """)
+    int updateStatus(@Param("reservationId") String reservationId,
+                     @Param("status") String status);
 }

@@ -5,94 +5,106 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import seu.virtualcampus.domain.ReservationRecord;
 import seu.virtualcampus.mapper.ReservationRecordMapper;
-import java.time.LocalDate;
+
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class ReservationRecordService {
+
     @Autowired
     private ReservationRecordMapper reservationRecordMapper;
 
-    @Autowired
-    private BookService bookService;
-
+    /** 新增预约 */
     @Transactional
-    public ReservationRecord reserveBook(String userId, String bookId) {
-        // 获取当前预约排队位置
-        int queuePosition = reservationRecordMapper.countActiveByBookId(bookId) + 1;
-
-        // 创建预约记录
-        ReservationRecord record = new ReservationRecord();
-        record.setReservationId(UUID.randomUUID().toString());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setReserveDate(LocalDate.now());
-        record.setStatus("ACTIVE");
-        record.setQueuePosition(queuePosition);
-        record.setNotifyStatus("NOT_NOTIFIED");
-
+    public boolean addReservation(ReservationRecord record) {
+        // 防止重复预约
+        if (reservationRecordMapper.existsActiveByUserAndIsbn(record.getUserId(), record.getIsbn()) > 0) {
+            return false;
+        }
+        // 计算队列位置
+        Integer pos = reservationRecordMapper.nextQueuePosition(record.getIsbn());
+        record.setQueuePosition(pos);
         reservationRecordMapper.insert(record);
-
-        // 增加图书预约计数
-        bookService.increaseReservationCount(bookId);
-
-        return record;
+        return true;
     }
 
-    @Transactional
-    public void cancelReservation(String reservationId) {
-        ReservationRecord record = reservationRecordMapper.findById(reservationId);
-        if (record != null) {
-            reservationRecordMapper.cancelReservation(reservationId);
-            // 减少图书预约计数
-            bookService.decreaseReservationCount(record.getBookId());
-            // 更新排队位置
-            reservationRecordMapper.decreaseQueuePositions(record.getBookId(), record.getQueuePosition());
-        }
+    /** 更新预约（管理员或内部使用） */
+    public void updateReservation(ReservationRecord record) {
+        reservationRecordMapper.update(record);
     }
 
-    @Transactional
-    public void processReservationOnReturn(String bookId) {
-        // 获取最早的有效预约
-        List<ReservationRecord> activeReservations = reservationRecordMapper.findActiveByBookId(bookId);
-        if (!activeReservations.isEmpty()) {
-            ReservationRecord firstReservation = activeReservations.get(0);
-            // 标记为已通知
-            reservationRecordMapper.markAsNotified(firstReservation.getReservationId());
-            // 这里可以添加发送通知的逻辑
-        }
+    /** 删除预约 */
+    public void deleteReservation(String reservationId) {
+        reservationRecordMapper.delete(reservationId);
     }
 
-    public List<ReservationRecord> getUserReservations(String userId) {
+    public ReservationRecord getById(String reservationId) {
+        return reservationRecordMapper.findById(reservationId);
+    }
+
+    public List<ReservationRecord> getByUser(String userId) {
         return reservationRecordMapper.findByUserId(userId);
     }
 
-    public List<ReservationRecord> getActiveReservationsByBook(String bookId) {
-        return reservationRecordMapper.findActiveByBookId(bookId);
+    public List<ReservationRecord> getByIsbn(String isbn) {
+        return reservationRecordMapper.findByIsbn(isbn);
     }
 
-    public List<ReservationRecord> getReservationsByUserAndBook(String userId, String bookId) {
-        return reservationRecordMapper.findByUserAndBook(userId, bookId);
+    public List<ReservationRecord> getActiveByIsbn(String isbn) {
+        return reservationRecordMapper.findActiveByIsbn(isbn);
     }
 
-    public List<ReservationRecord> getAllReservations() {
+    /** 队首预约（用于归还后分配） */
+    public ReservationRecord getFirstActiveByIsbn(String isbn) {
+        return reservationRecordMapper.findFirstActiveByIsbn(isbn);
+    }
+
+    public int countActiveByIsbn(String isbn) {
+        return reservationRecordMapper.countActiveByIsbn(isbn);
+    }
+
+    /** 取消预约 + 队列调整 */
+    @Transactional
+    public boolean cancelReservation(String reservationId) {
+        ReservationRecord record = reservationRecordMapper.findById(reservationId);
+        if (record == null ||
+                !( "ACTIVE".equalsIgnoreCase(record.getStatus()) || "NOTIFIED".equalsIgnoreCase(record.getStatus()) )) {
+            return false;
+        }
+        int pos = record.getQueuePosition();
+        int updated = reservationRecordMapper.cancelReservation(reservationId);
+        if (updated > 0) {
+            reservationRecordMapper.decreaseQueuePositions(record.getIsbn(), pos);
+            return true;
+        }
+        return false;
+    }
+
+    /** 预约兑现（用户拿到书）+ 队列调整 */
+    @Transactional
+    public boolean fulfillReservation(String reservationId) {
+        ReservationRecord record = reservationRecordMapper.findById(reservationId);
+        if (record == null) return false;
+
+        if (!"ACTIVE".equalsIgnoreCase(record.getStatus())) {
+            return false;
+        }
+
+        // 更新为 FULFILLED
+        return reservationRecordMapper.updateStatus(
+                reservationId, "FULFILLED") > 0;
+    }
+
+    public List<ReservationRecord> getAll() {
         return reservationRecordMapper.findAll();
     }
 
-    public List<ReservationRecord> getReservationsByStatus(String status) {
+    public List<ReservationRecord> getByStatus(String status) {
         return reservationRecordMapper.findByStatus(status);
     }
 
-    public List<ReservationRecord> getReservationsByNotifyStatus(String notifyStatus) {
-        return reservationRecordMapper.findByNotifyStatus(notifyStatus);
-    }
-
-    public void updateReservationNotifyStatus(String reservationId, String notifyStatus) {
-        ReservationRecord record = reservationRecordMapper.findById(reservationId);
-        if (record != null) {
-            record.setNotifyStatus(notifyStatus);
-            reservationRecordMapper.update(record);
-        }
+    public String generateReservationId() {
+        int count = getAll().size();   // 获取已有预约记录数
+        return "RES" + String.format("%03d", count + 1); // 生成 RES001, RES002...
     }
 }

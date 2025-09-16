@@ -5,85 +5,83 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import seu.virtualcampus.domain.BorrowRecord;
 import seu.virtualcampus.mapper.BorrowRecordMapper;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class BorrowRecordService {
+
     @Autowired
     private BorrowRecordMapper borrowRecordMapper;
 
-    @Autowired
-    private BookService bookService;
-
-    @Transactional
-    public BorrowRecord borrowBook(String userId, String bookId) {
-        // 先尝试减少可用数量
-        boolean success = bookService.borrowBook(bookId);
-        if (!success) {
-            return null; // 图书不可借
-        }
-
-        // 创建借阅记录
-        BorrowRecord record = new BorrowRecord();
-        record.setRecordId(UUID.randomUUID().toString());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setBorrowDate(LocalDate.now());
-        record.setDueDate(LocalDate.now().plusDays(30)); // 默认借阅30天
-        record.setRenewCount(0);
-        record.setStatus("BORROWED");
-
+    /** 新增借阅记录 */
+    public void addBorrowRecord(BorrowRecord record) {
         borrowRecordMapper.insert(record);
-        return record;
     }
 
-    @Transactional
-    public void returnBook(String recordId) {
-        BorrowRecord record = borrowRecordMapper.findById(recordId);
-        if (record != null) {
-            // 更新归还日期和状态
-            borrowRecordMapper.returnBook(recordId, LocalDate.now().toString());
-            // 增加图书可用数量
-            bookService.returnBook(record.getBookId());
-        }
+    /** 更新借阅记录（一般不直接用） */
+    public void updateBorrowRecord(BorrowRecord record) {
+        borrowRecordMapper.update(record);
     }
 
-    @Transactional
-    public boolean renewBook(String recordId) {
-        BorrowRecord record = borrowRecordMapper.findById(recordId);
-        if (record != null && record.getRenewCount() < 3) { // 假设最多续借3次
-            LocalDate newDueDate = record.getDueDate().plusDays(30);
-            borrowRecordMapper.renewBook(recordId, newDueDate.toString());
-            return true;
-        }
-        return false;
+    /** 删除记录 */
+    public void deleteBorrowRecord(String recordId) {
+        borrowRecordMapper.delete(recordId);
     }
 
-    public List<BorrowRecord> getBorrowRecordsByUser(String userId) {
-        return borrowRecordMapper.findByUserId(userId);
-    }
-
-    public List<BorrowRecord> getActiveBorrowRecordsByUser(String userId) {
-        return borrowRecordMapper.findActiveByUserId(userId);
-    }
-
-    public List<BorrowRecord> getBorrowRecordsByBook(String bookId) {
-        return borrowRecordMapper.findByBookId(bookId);
-    }
-
-    public BorrowRecord getBorrowRecordById(String recordId) {
+    /** 查找 */
+    public BorrowRecord getById(String recordId) {
         return borrowRecordMapper.findById(recordId);
     }
 
-    public List<BorrowRecord> getBorrowRecordsByUserAndBook(String userId, String bookId) {
-        return borrowRecordMapper.findByUserAndBook(userId, bookId);
+    public List<BorrowRecord> getByUser(String userId) {
+        return borrowRecordMapper.findByUserId(userId);
     }
 
-    public List<BorrowRecord> getAllBorrowRecords() {
+    public List<BorrowRecord> getByBook(String bookId) {
+        return borrowRecordMapper.findByBookId(bookId);
+    }
+
+    public List<BorrowRecord> getActiveByUser(String userId) {
+        return borrowRecordMapper.findActiveByUserId(userId);
+    }
+
+    public List<BorrowRecord> getActiveByBook(String bookId) {
+        return borrowRecordMapper.findActiveByBookId(bookId);
+    }
+
+    /** 归还 */
+    @Transactional
+    public boolean returnBook(String recordId, String returnDate) {
+        return borrowRecordMapper.returnBook(recordId, returnDate) > 0;
+    }
+
+    /** 续借 */
+    @Transactional
+    public boolean renewBook(String recordId, String newDueDate) {
+        return borrowRecordMapper.renewBook(recordId, newDueDate) > 0;
+    }
+
+    /** 用户是否超过借阅上限 */
+    public boolean canBorrow(String userId, int maxAllowed) {
+        int active = borrowRecordMapper.countActiveByUser(userId);
+        return active < maxAllowed;
+    }
+
+    /** 检查并标记逾期 */
+    @Transactional
+    public int markOverdueIfNeeded() {
+        String today = LocalDate.now().toString();
+        return borrowRecordMapper.markOverdueByDate(today);
+    }
+
+    public List<BorrowRecord> getAll() {
         return borrowRecordMapper.findAll();
     }
 
-
+    public String generateRecordId() {
+        int count = getAll().size();   // 获取所有借阅记录数量
+        return "R" + String.format("%03d", count + 1); // 生成形如 R001, R002
+    }
 }
