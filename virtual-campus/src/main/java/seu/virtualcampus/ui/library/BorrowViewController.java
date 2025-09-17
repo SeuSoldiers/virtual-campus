@@ -49,8 +49,8 @@ public class BorrowViewController {
     private TableColumn<BorrowItemVM, String> col1RecordId, col1BookId, col1Title, col1Status;
     @FXML
     private TableColumn<BorrowItemVM, LocalDate> col1BorrowDate, col1DueDate;
-    @FXML
-    private TableColumn<BorrowItemVM, Void> col1Action;
+    @FXML private TableColumn<BorrowItemVM, Number> colRenewCount;
+    @FXML private TableColumn<BorrowItemVM, Void> colActionCurrent;
     // 借阅历史
     @FXML
     private TableView<BorrowHistoryItemVM> tableViewHistory;
@@ -58,6 +58,7 @@ public class BorrowViewController {
     private TableColumn<BorrowHistoryItemVM, String> col2RecordId, col2BookId, col2Title, col2Status;
     @FXML
     private TableColumn<BorrowHistoryItemVM, LocalDate> col2BorrowDate, col2ReturnDate;
+    @FXML private TableColumn<BorrowHistoryItemVM, Number> col2RenewCount;
     // 预约记录
     @FXML
     private TableView<ReservationItemVM> tableViewReservation;
@@ -78,26 +79,22 @@ public class BorrowViewController {
      *
      * @param openTab 默认打开的tab（current/history/reservation）。
      */
-    // ============== 初始化 ==============
     public void init(String openTab) {
         this.currentUserId = MainApp.username;
 
         bindColumns();
 
-        // 场景→窗口就绪后再去拿 Stage，避免 NPE
         tabPane.sceneProperty().addListener((obs, oldSc, sc) -> {
             if (sc != null) {
                 sc.windowProperty().addListener((o, oldWin, win) -> {
                     if (win != null) {
                         Stage stage = (Stage) win;
 
-                        // 右上角 ×：拦截后返回 student_library
                         stage.setOnCloseRequest(ev -> {
                             ev.consume();
                             backToStudentLibrary();
                         });
 
-                        // 窗口重新获得焦点时，刷新当前选中的页签（从其它页面返回很有用）
                         stage.focusedProperty().addListener((o2, was, is) -> {
                             if (is) refreshCurrentTab();
                         });
@@ -120,7 +117,9 @@ public class BorrowViewController {
         refreshCurrentTab();
     }
 
-    // ============== 当前选中页签刷新 ==============
+    /**
+     * 根据当前页签刷新列表。
+     */
     private void refreshCurrentTab() {
         Tab sel = tabPane.getSelectionModel().getSelectedItem();
         if (sel == tabCurrentBorrow) {
@@ -143,15 +142,24 @@ public class BorrowViewController {
         col1BorrowDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().borrowDate));
         col1DueDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().dueDate));
         col1Status.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().status));
-        // 当前借阅的操作列：归还
-        col1Action.setCellFactory(col -> new TableCell<>() {
-            private final Button btn = new Button("归还");
+        colRenewCount.setCellValueFactory(c -> new ReadOnlyIntegerWrapper(c.getValue().renewCount));
+        // 当前借阅的操作列
+        colActionCurrent.setCellFactory(col -> new TableCell<>() {
+            private final Button btnReturn = new Button("归还");
+            private final Button btnRenew = new Button("续借");
+            private final javafx.scene.layout.HBox box = new javafx.scene.layout.HBox(8, btnReturn, btnRenew);
 
             {
-                btn.setStyle("-fx-background-color: #42a5f5; -fx-text-fill: white; -fx-background-radius: 6;");
-                btn.setOnAction(e -> {
+                btnReturn.setStyle("-fx-background-color: #42a5f5; -fx-text-fill: white; -fx-background-radius: 6;");
+                btnRenew.setStyle("-fx-background-color: #66bb6a; -fx-text-fill: white; -fx-background-radius: 6;");
+
+                btnReturn.setOnAction(e -> {
                     BorrowItemVM item = getTableView().getItems().get(getIndex());
                     handleReturn(item);
+                });
+                btnRenew.setOnAction(e -> {
+                    BorrowItemVM item = getTableView().getItems().get(getIndex());
+                    handleRenew(item);
                 });
             }
 
@@ -162,11 +170,8 @@ public class BorrowViewController {
                     setGraphic(null);
                 } else {
                     BorrowItemVM b = getTableView().getItems().get(getIndex());
-                    if ("BORROWED".equalsIgnoreCase(b.status) || "OVERDUE".equalsIgnoreCase(b.status)) {
-                        setGraphic(btn);
-                    } else {
-                        setGraphic(null);
-                    }
+                    boolean canOperate = "BORROWED".equalsIgnoreCase(b.status) || "OVERDUE".equalsIgnoreCase(b.status);
+                    setGraphic(canOperate ? box : null);
                 }
             }
         });
@@ -177,6 +182,7 @@ public class BorrowViewController {
         col2Title.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().title));
         col2BorrowDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().borrowDate));
         col2ReturnDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().returnDate));
+        col2RenewCount.setCellValueFactory(c -> new ReadOnlyIntegerWrapper(c.getValue().renewCount));
         col2Status.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().status));
 
         // 预约记录
@@ -236,6 +242,9 @@ public class BorrowViewController {
         showReservation();
     }
 
+    /**
+     * 调用归还接口
+     */
     private void handleReturn(BorrowItemVM item) {
         if (item == null) return;
 
@@ -268,6 +277,38 @@ public class BorrowViewController {
             }
         } catch (Exception e) {
             showError("归还失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 调用续借接口
+     */
+    private void handleRenew(BorrowItemVM item) {
+        if (item == null) return;
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "确认续借《" + item.title + "》吗？\n每次延长30天，最多续借2次。",
+                ButtonType.OK, ButtonType.CANCEL);
+        confirm.setHeaderText(null);
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        try {
+            HttpUrl url = HttpUrl.parse(BASE + "/borrow/" + item.recordId + "/renew")
+                    .newBuilder().build();
+            Request req = withAuth(new Request.Builder().url(url)
+                    .post(RequestBody.create(new byte[0], null))).build();
+
+            try (Response resp = client.newCall(req).execute()) {
+                String msg = resp.body() != null ? resp.body().string() : "";
+                if (!resp.isSuccessful()) throw new IOException(msg.isBlank() ? "HTTP " + resp.code() : msg);
+
+                Alert a = new Alert(Alert.AlertType.INFORMATION,
+                        msg.isBlank() ? "续借成功" : msg, ButtonType.OK);
+                a.showAndWait();
+                showCurrentBorrow(); // 刷新列表
+            }
+        } catch (Exception e) {
+            showError("续借失败：" + e.getMessage());
         }
     }
 
@@ -314,23 +355,6 @@ public class BorrowViewController {
                 Request req = withAuth(new Request.Builder().url(url)
                         .post(RequestBody.create(new byte[0], null))).build();
 
-//                try (Response resp2 = client.newCall(req).execute()) {
-//                    String body = resp2.body() != null ? resp2.body().string() : "";
-//                    if (!resp2.isSuccessful()) {
-//                        // 把服务端返回的信息展示出来，便于定位
-//                        throw new IOException("兑付失败：" + (body.isBlank() ? ("HTTP " + resp2.code()) : body));
-//                    }
-//                    Platform.runLater(() -> {
-//                        Alert a = new Alert(Alert.AlertType.INFORMATION,
-//                                body.isBlank() ? "预约兑付成功！" : body, ButtonType.OK);
-//                        a.setHeaderText(null);
-//                        a.showAndWait();
-//                        // 兑现后刷新三处
-//                        showReservation();
-//                        showCurrentBorrow();
-//                        showHistoryBorrow();
-//                    });
-//                }
                 try (Response resp2 = client.newCall(req).execute()) {
                     String body = resp2.body() != null ? resp2.body().string() : "";
                     System.out.println("[DEBUG] fulfill response code=" + resp2.code() + ", body=" + body);
@@ -431,9 +455,8 @@ public class BorrowViewController {
                         new TypeReference<List<ReservationItemVM>>() {
                         });
 
-                // === 新增：计算每个 ISBN 是否有可兑现副本 ===
+                // 计算每个 ISBN 是否有可兑现副本
                 availableByIsbn.clear();
-                // 去重后的 ISBN 列表
                 java.util.List<String> isbns = list.stream()
                         .map(r -> r.isbn)
                         .distinct()
@@ -455,7 +478,6 @@ public class BorrowViewController {
                     }
                     availableByIsbn.put(isbn, has);
                 }
-                // === 以上为新增 ===
 
                 tableViewReservation.setItems(FXCollections.observableArrayList(list));
                 tableViewReservation.refresh(); // 让操作列依据 availableByIsbn 立即生效
@@ -513,6 +535,7 @@ public class BorrowViewController {
         public LocalDate borrowDate;
         public LocalDate dueDate;
         public String status;
+        public Integer renewCount;
     }
 
     public static class BorrowHistoryItemVM {
@@ -522,6 +545,7 @@ public class BorrowViewController {
         public LocalDate borrowDate;
         public LocalDate returnDate;
         public String status;
+        public Integer renewCount;
     }
 
     public static class ReservationItemVM {

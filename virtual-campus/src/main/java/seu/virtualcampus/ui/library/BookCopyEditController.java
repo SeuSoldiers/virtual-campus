@@ -36,21 +36,10 @@ public class BookCopyEditController {
     private TextField txtBookId;
     @FXML
     private TextField txtLocation;
-    @FXML
-    private ComboBox<String> cmbStatus;
     private boolean isCreate = true;
     private String isbn;
     private String editingBookId;
-    // === 新增：回调函数（上级传入） ===
     private Runnable onSuccess;
-
-    @FXML
-    private void initialize() {
-        if (cmbStatus != null && (cmbStatus.getItems() == null || cmbStatus.getItems().isEmpty())) {
-            cmbStatus.setItems(FXCollections.observableArrayList("在馆", "借出中", "损坏", "遗失"));
-            cmbStatus.getSelectionModel().select("在馆");
-        }
-    }
 
     /**
      * 初始化为新增副本模式。
@@ -65,7 +54,6 @@ public class BookCopyEditController {
             txtBookId.clear();
         }
         if (txtLocation != null) txtLocation.clear();
-        if (cmbStatus != null) cmbStatus.getSelectionModel().select("在馆");
     }
 
     /**
@@ -84,7 +72,6 @@ public class BookCopyEditController {
             txtBookId.setDisable(true);
         }
         if (txtLocation != null) txtLocation.setText(copy.location == null ? "" : copy.location);
-        if (cmbStatus != null) cmbStatus.getSelectionModel().select("在馆"); // 默认
     }
 
     /**
@@ -95,8 +82,7 @@ public class BookCopyEditController {
         try {
             String bookId = txtBookId.getText().trim();
             String location = txtLocation.getText();
-            String statusCN = cmbStatus.getValue() == null ? "在馆" : cmbStatus.getValue();
-            String status = toENStatus(statusCN);
+            String status = "IN_LIBRARY";
 
             Map<String, Object> body = new HashMap<>();
             body.put("isbn", isbn);
@@ -121,10 +107,8 @@ public class BookCopyEditController {
                 }
             }
 
-            // ✅ 保存成功后，关闭编辑窗口
             ((Stage) txtBookId.getScene().getWindow()).close();
 
-            // ✅ 通知上一级刷新（见下面的 onSuccess 回调）
             if (onSuccess != null) onSuccess.run();
 
         } catch (Exception e) {

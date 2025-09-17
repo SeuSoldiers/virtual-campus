@@ -154,9 +154,14 @@ public class ReservationRecordService {
             return false;
         }
 
-        // 更新为 FULFILLED
-        return reservationRecordMapper.updateStatus(
-                reservationId, "FULFILLED") > 0;
+        int pos = record.getQueuePosition();
+        int updated = reservationRecordMapper.updateStatus(reservationId, "FULFILLED");
+
+        if (updated > 0) {
+            reservationRecordMapper.decreaseQueuePositions(record.getIsbn(), pos);
+            return true;
+        }
+        return false;
     }
 
     /**

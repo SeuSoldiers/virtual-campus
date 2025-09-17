@@ -42,6 +42,7 @@ public class BookListController {
     private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
             colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservationCount;
     private String currentUserId;
+    private String lastKeyword = "";
 
     /**
      * 初始化页面，设置当前用户ID。
@@ -74,6 +75,7 @@ public class BookListController {
      * @param keyword 查询关键词。
      */
     public void loadBooks(String keyword) {
+        this.lastKeyword = (keyword == null ? "" : keyword.trim());
         try {
             String kw = keyword == null ? "" : keyword.trim();
 
@@ -161,14 +163,13 @@ public class BookListController {
             BookDetailController controller = loader.getController();
             controller.init(sel.isbn, sel.title);
 
-            // 新建一个窗口，不覆盖主窗口
             Stage dialog = new Stage();
             dialog.setTitle("图书详情 - " + sel.title);
             dialog.setScene(new Scene(root));
 
-            // 绑定父窗口，让它成为子窗口
             dialog.initOwner(tableView.getScene().getWindow());
             dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setOnHidden(event -> loadBooks(lastKeyword));
 
             dialog.show();
         } catch (Exception e) {

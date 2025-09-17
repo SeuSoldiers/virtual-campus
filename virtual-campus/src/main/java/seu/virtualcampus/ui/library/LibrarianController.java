@@ -3,6 +3,7 @@ package seu.virtualcampus.ui.library;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -12,10 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
@@ -54,6 +52,8 @@ public class LibrarianController {
             colBorrowStudentId, colBorrowStatus;
     @FXML
     private TableColumn<AdminBorrowVM, LocalDate> colBorrowDate, colReturnDate;
+    @FXML private TableColumn<AdminBorrowVM, LocalDate> colBorrowDueDate;
+    @FXML private TableColumn<AdminBorrowVM, Number> colBorrowRenewCount;
     // ---------- 预约管理（只读） ----------
     @FXML
     private TextField reservationSearchField;
@@ -243,16 +243,16 @@ public class LibrarianController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_copy_management.fxml"));
             Parent root = loader.load();
             BookCopyManagementController c = loader.getController();
-            c.init(sel.isbn); // 只看副本，不涉及用户 id
+            c.init(sel.isbn);
 
-            // 新建一个窗口
             Stage dialog = new Stage();
             dialog.setTitle("副本管理 - " + sel.title);
             dialog.setScene(new Scene(root));
 
-            // 绑定父窗口，设置为模态（如果你希望操作时必须先关掉）
             dialog.initOwner(tableViewBooks.getScene().getWindow());
             dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+
+            dialog.setOnHidden(ev -> loadBooks(safeText(bookSearchField)));
 
             dialog.show();
         } catch (Exception e) {
@@ -283,6 +283,9 @@ public class LibrarianController {
         }
     }
 
+    /**
+     * 刷新按钮事件。
+     */
     @FXML
     private void onRefreshBooks() {
         bookSearchField.clear();
@@ -298,6 +301,8 @@ public class LibrarianController {
         colBorrowDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().borrowDate));
         colReturnDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().returnDate));
         colBorrowStatus.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().status));
+        colBorrowDueDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().dueDate));
+        colBorrowRenewCount.setCellValueFactory(c -> new ReadOnlyIntegerWrapper(c.getValue().renewCount));
     }
 
     @FXML
@@ -305,8 +310,13 @@ public class LibrarianController {
         loadBorrows(safeText(borrowSearchField));
     }
 
+    /**
+     * 加载借阅记录。
+     * @param keyword 关键词
+     */
     private void loadBorrows(String keyword) {
         try {
+            checkOverdue();
             HttpUrl url = HttpUrl.parse(BASE + "/admin/borrows").newBuilder()
                     .addQueryParameter("keyword", keyword == null ? "" : keyword)
                     .build();
@@ -329,6 +339,29 @@ public class LibrarianController {
     private void onRefreshBorrows() {
         borrowSearchField.clear();
         loadBorrows("");
+    }
+
+    /**
+     * 检查逾期。
+     */
+    private void checkOverdue() {
+        try {
+            HttpUrl url = HttpUrl.parse(BASE + "/borrows/check-overdue")
+                    .newBuilder().build();
+
+            Request req = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(new byte[0], null))
+                    .build();
+
+            try (Response resp = client.newCall(req).execute()) {
+                if (!resp.isSuccessful()) {
+                    System.err.println("检查逾期失败: HTTP " + resp.code());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("检查逾期失败: " + e.getMessage());
+        }
     }
 
     // ================== 预约管理（只读） ==================
@@ -408,18 +441,18 @@ public class LibrarianController {
         public String bookId;
         public String title;
         public String userId;
-        public String userName; // 可选，没有就空
         public LocalDate borrowDate;
+        public LocalDate dueDate;
         public LocalDate returnDate;
         public String status; // BORROWED/OVERDUE/RETURNED...
+        public Integer renewCount;
     }
 
     public static class AdminReservationVM {
         public String reservationId;
         public String isbn;
         public String title;
-        public String userId;
-        public String userName; // 可选
+        public String userId;// 可选
         public LocalDate reserveDate;
         public Integer queuePosition;
         public String status; // ACTIVE/NOTIFIED/FULFILLED/CANCELLED...

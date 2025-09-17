@@ -40,13 +40,14 @@
                                                   -fx-selection-bar: #90caf9;
                                                   -fx-selection-bar-non-focused: #bbdefb;">
                                     <columns>
-                                        <TableColumn fx:id="col1RecordId"   prefWidth="100.0" text="记录ID"/>
-                                        <TableColumn fx:id="col1BookId"     prefWidth="100.0" text="图书编号"/>
-                                        <TableColumn fx:id="col1Title"      prefWidth="140.0" text="书名"/>
-                                        <TableColumn fx:id="col1BorrowDate" prefWidth="110.0" text="借阅日期"/>
-                                        <TableColumn fx:id="col1DueDate"    prefWidth="110.0" text="应还日期"/>
-                                        <TableColumn fx:id="col1Status"     prefWidth="100.0" text="状态"/>
-                                        <TableColumn fx:id="col1Action" prefWidth="100.0" text="归还"/>
+                                        <TableColumn fx:id="col1RecordId" prefWidth="100.0" text="记录ID" />
+                                        <TableColumn fx:id="col1BookId" prefWidth="100.0" text="图书ID" />
+                                        <TableColumn fx:id="col1Title" prefWidth="160.0" text="书名" />
+                                        <TableColumn fx:id="col1BorrowDate" prefWidth="110.0" text="借阅日期" />
+                                        <TableColumn fx:id="col1DueDate" prefWidth="110.0" text="应还日期" />
+                                        <TableColumn fx:id="colRenewCount" text="续借次数" prefWidth="100"/>
+                                        <TableColumn fx:id="col1Status" prefWidth="100.0" text="状态" />
+                                        <TableColumn fx:id="colActionCurrent" text="操作" prefWidth="160"/>
                                     </columns>
                                 </TableView>
                             </children>
@@ -71,12 +72,13 @@
                                                   -fx-selection-bar: #90caf9;
                                                   -fx-selection-bar-non-focused: #bbdefb;">
                                     <columns>
-                                        <TableColumn fx:id="col2RecordId"   prefWidth="100.0" text="记录ID"/>
-                                        <TableColumn fx:id="col2BookId"     prefWidth="100.0" text="图书编号"/>
-                                        <TableColumn fx:id="col2Title"      prefWidth="160.0" text="书名"/>
-                                        <TableColumn fx:id="col2BorrowDate" prefWidth="110.0" text="借阅日期"/>
-                                        <TableColumn fx:id="col2ReturnDate" prefWidth="110.0" text="归还日期"/>
-                                        <TableColumn fx:id="col2Status"     prefWidth="100.0" text="状态"/>
+                                        <TableColumn fx:id="col2RecordId" prefWidth="100.0" text="记录ID" />
+                                        <TableColumn fx:id="col2BookId" prefWidth="100.0" text="图书ID" />
+                                        <TableColumn fx:id="col2Title" prefWidth="160.0" text="书名" />
+                                        <TableColumn fx:id="col2BorrowDate" prefWidth="110.0" text="借阅日期" />
+                                        <TableColumn fx:id="col2ReturnDate" prefWidth="110.0" text="归还日期" />
+                                        <TableColumn fx:id="col2RenewCount" prefWidth="100.0" text="续借次数" />
+                                        <TableColumn fx:id="col2Status" prefWidth="100.0" text="状态" />
                                     </columns>
                                 </TableView>
                             </children>

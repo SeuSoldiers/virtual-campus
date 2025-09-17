@@ -172,12 +172,12 @@ public class BookDetailController {
             }
         }).start();
 
-        // 2) 当前用户是否对该 ISBN 有预约（ACTIVE/NOTIFIED）
+        // 2) 当前用户是否对该 ISBN 有预约（只有 ACTIVE 可以取消）
         new Thread(() -> {
             try {
                 ReservationLite r = getMyReservation(currentUserId, isbn);
-                boolean hasMyReservation = (r != null && r.reservationId != null && !"CANCELLED".equalsIgnoreCase(nvl(r.status)));
-                Platform.runLater(() -> btnCancelReserve.setDisable(!hasMyReservation));
+                boolean canCancel = (r != null && "ACTIVE".equalsIgnoreCase(nvl(r.status)));
+                Platform.runLater(() -> btnCancelReserve.setDisable(!canCancel));
             } catch (Exception ignored) {
             }
         }).start();
@@ -341,7 +341,7 @@ public class BookDetailController {
                     Platform.runLater(() -> {
                         setMsg(msg.isBlank() ? "取消预约成功" : msg, false);
                         loadBookInfo();
-                        loadCopiesAndRefreshButtons();   // 按钮状态会在这里内部刷新
+                        loadCopiesAndRefreshButtons();
                     });
                 }
             } catch (Exception e) {

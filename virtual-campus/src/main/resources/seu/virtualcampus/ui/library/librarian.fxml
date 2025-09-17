@@ -53,7 +53,7 @@
                                     <TableColumn fx:id="colPublishDate" text="出版日期"/>
                                     <TableColumn fx:id="colCategory" text="类别"/>
                                     <TableColumn fx:id="colTotalCount" text="总数量"/>
-                                    <TableColumn fx:id="colAvailableCount" text="可借数量"/>
+                                    <TableColumn fx:id="colAvailableCount" text="在馆数量"/>
                                     <TableColumn fx:id="colReservedCount" text="预约数量"/>
                                 </columns>
                             </TableView>
@@ -114,7 +114,9 @@
                                     <TableColumn fx:id="colBorrowTitle" text="书名"/>
                                     <TableColumn fx:id="colBorrowStudentId" text="借阅人ID"/>
                                     <TableColumn fx:id="colBorrowDate" text="借阅日期"/>
+                                    <TableColumn fx:id="colBorrowDueDate" text="应还日期" />
                                     <TableColumn fx:id="colReturnDate" text="归还日期"/>
+                                    <TableColumn fx:id="colBorrowRenewCount" text="续借次数" />
                                     <TableColumn fx:id="colBorrowStatus" text="状态"/>
                                 </columns>
                             </TableView>

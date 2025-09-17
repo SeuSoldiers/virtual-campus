@@ -28,8 +28,6 @@ public class LibraryController {
     @Autowired private BorrowRecordService borrowRecordService;
     @Autowired private ReservationRecordService reservationRecordService;
 
-    // ==================== 搜索/详情 ====================
-
     /**
      * 搜索图书信息。
      * <p>
@@ -72,8 +70,6 @@ public class LibraryController {
         return ResponseEntity.ok(bookCopyService.getCopiesByIsbn(isbn));
     }
 
-    // ==================== 借阅 ====================
-
     /**
      * 借阅一本图书。
      *
@@ -82,32 +78,60 @@ public class LibraryController {
      * @return 操作结果的消息。
      */
     @PostMapping("/borrow")
-    public ResponseEntity<String> borrowBook(@RequestParam String userId,
-                                             @RequestParam String bookId) {
-        // 校验用户是否还能借
-        if (!borrowRecordService.canBorrow(userId, 30)) {
-            return ResponseEntity.badRequest().body("已达借阅上限，无法借阅更多图书");
-        }
-        // 借阅副本
-        boolean success = bookCopyService.borrowBook(bookId);
-        if (!success) {
-            return ResponseEntity.badRequest().body("借阅失败，该副本不可借");
-        }
-        // 写入借阅记录
-        BorrowRecord record = new BorrowRecord();
-        record.setRecordId(borrowRecordService.generateRecordId());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setBorrowDate(LocalDate.now());
-        record.setDueDate(LocalDate.now().plusMonths(1));
-        record.setRenewCount(0);
-        record.setStatus("BORROWED");
-        borrowRecordService.addBorrowRecord(record);
+    public ResponseEntity<?> borrowBook(@RequestParam String userId, @RequestParam String bookId) {
+        try {
+            BookCopy copy = bookCopyService.getCopyById(bookId);
+            if (copy == null) {
+                return ResponseEntity.badRequest().body("借阅失败：副本不存在");
+            }
+            if (!"IN_LIBRARY".equalsIgnoreCase(copy.getStatus())) {
+                return ResponseEntity.badRequest().body("借阅失败：该副本不可借（当前状态：" + copy.getStatus() + "）");
+            }
 
-        return ResponseEntity.ok("借阅成功");
+            ReservationRecord firstRes = reservationRecordService.getFirstActiveByIsbn(copy.getIsbn());
+            if (firstRes != null) {
+                // 如果当前用户就是队首预约者，允许直接借阅
+                if (!firstRes.getUserId().equals(userId)) {
+                    return ResponseEntity.badRequest().body("该书已有预约，只有队首用户可兑付");
+                }
+
+                // 队首用户 -> 借阅成功，同时标记预约为 FULFILLED
+                boolean fulfilled = reservationRecordService.fulfillReservation(firstRes.getReservationId());
+                if (!fulfilled) {
+                    return ResponseEntity.badRequest().body("预约兑现失败，请稍后再试");
+                }
+            }
+
+            borrowRecordService.borrowBook(userId, bookId);
+
+            boolean ok = bookCopyService.borrowBook(bookId);
+            if (!ok) {
+                throw new RuntimeException("借阅失败：副本状态更新失败");
+            }
+
+            bookInfoService.refreshBookByIsbn(copy.getIsbn());
+
+            return ResponseEntity.ok("借书成功（30天）");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    // ==================== 归还 ====================
+    /**
+     * 续借一本图书。
+     *
+     * @param recordId 借阅记录的ID。
+     * @return 操作结果的消息。
+     */
+    @PostMapping("/borrow/{recordId}/renew")
+    public ResponseEntity<?> renewBorrow(@PathVariable String recordId) {
+        try {
+            borrowRecordService.renewBorrow(recordId);
+            return ResponseEntity.ok("续借成功（+30天）");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     /**
      * 归还一本图书。
@@ -121,24 +145,20 @@ public class LibraryController {
     public ResponseEntity<String> returnBook(@RequestParam String recordId,
                                              @RequestParam String bookId,
                                              @RequestParam String isbn) {
-        // 归还借阅记录
         boolean recordOk = borrowRecordService.returnBook(recordId, LocalDate.now().toString());
         if (!recordOk) {
             return ResponseEntity.badRequest().body("归还失败，借阅记录无效");
         }
-        // 归还副本
+
         bookCopyService.returnBook(bookId);
 
-        // 检查是否有预约队列
         ReservationRecord next = reservationRecordService.getFirstActiveByIsbn(isbn);
         if (next != null) {
-            // 直接保留副本 IN_LIBRARY 状态
             return ResponseEntity.ok("归还成功，该书已有预约用户，可以去兑现");
         }
+
         return ResponseEntity.ok("归还成功");
     }
-
-    // ==================== 预约 ====================
 
     /**
      * 预约一本图书。
@@ -167,6 +187,7 @@ public class LibraryController {
         record.setStatus("ACTIVE");
 
         boolean ok = reservationRecordService.addReservation(record);
+        if (ok) bookInfoService.refreshBookByIsbn(isbn);
         return ok ? ResponseEntity.ok("预约成功") : ResponseEntity.badRequest().body("您已预约过该书");
     }
 
@@ -179,10 +200,12 @@ public class LibraryController {
     @PostMapping("/cancel-reservation")
     public ResponseEntity<String> cancelReservation(@RequestParam String reservationId) {
         boolean ok = reservationRecordService.cancelReservation(reservationId);
+        if (ok) {
+            ReservationRecord res = reservationRecordService.getById(reservationId);
+            if (res != null) bookInfoService.refreshBookByIsbn(res.getIsbn());
+        }
         return ok ? ResponseEntity.ok("取消预约成功") : ResponseEntity.badRequest().body("取消失败");
     }
-
-    // ==================== 预约兑现 ====================
 
     /**
      * 兑现一个图书预约。
@@ -221,15 +244,14 @@ public class LibraryController {
         }
 
         // 写入借阅记录
-        BorrowRecord record = new BorrowRecord();
-        record.setRecordId(borrowRecordService.generateRecordId());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setBorrowDate(LocalDate.now());
-        record.setDueDate(LocalDate.now().plusMonths(1));
-        record.setRenewCount(0);
-        record.setStatus("BORROWED");
-        borrowRecordService.addBorrowRecord(record);
+        try {
+            borrowRecordService.borrowBook(userId, bookId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("借阅失败：" + e.getMessage());
+        }
+
+        String isbn = resolveIsbnByBookId(bookId);
+        if (isbn != null) bookInfoService.refreshBookByIsbn(isbn);
 
         return ResponseEntity.ok("预约兑现成功，图书已借出");
     }
@@ -268,9 +290,16 @@ public class LibraryController {
      */
     @DeleteMapping("/admin/book/{isbn}")
     public ResponseEntity<String> deleteBook(@PathVariable String isbn) {
+        List<BookCopy> copies = bookCopyService.getCopiesByIsbn(isbn);
+        for (BookCopy copy : copies) {
+            bookCopyService.deleteCopy(copy.getBookId());
+        }
+
         bookInfoService.deleteBook(isbn);
+
         return ResponseEntity.ok("图书删除成功");
     }
+
 
     /**
      * (管理员) 添加一个图书副本。
@@ -281,6 +310,7 @@ public class LibraryController {
     @PostMapping("/admin/copy")
     public ResponseEntity<String> addCopy(@RequestBody BookCopy copy) {
         bookCopyService.addCopy(copy);
+        bookInfoService.refreshBookByIsbn(copy.getIsbn());
         return ResponseEntity.ok("副本添加成功");
     }
 
@@ -293,6 +323,7 @@ public class LibraryController {
     @PutMapping("/admin/copy")
     public ResponseEntity<String> updateCopy(@RequestBody BookCopy copy) {
         bookCopyService.updateCopy(copy);
+        bookInfoService.refreshBookByIsbn(copy.getIsbn());
         return ResponseEntity.ok("副本更新成功");
     }
 
@@ -304,9 +335,14 @@ public class LibraryController {
      */
     @DeleteMapping("/admin/copy/{bookId}")
     public ResponseEntity<String> deleteCopy(@PathVariable String bookId) {
+        BookCopy copy = bookCopyService.getCopyById(bookId);
         bookCopyService.deleteCopy(bookId);
+        if (copy != null) {
+            bookInfoService.refreshBookByIsbn(copy.getIsbn());
+        }
         return ResponseEntity.ok("副本删除成功");
     }
+
 
     /**
      * (管理员) 获取所有借阅记录，支持关键词搜索。
@@ -328,8 +364,10 @@ public class LibraryController {
                     d.title = resolveTitleByBookId(br.getBookId());
                     d.userId = br.getUserId();
                     d.borrowDate = br.getBorrowDate();
+                    d.dueDate = br.getDueDate();
                     d.returnDate = br.getReturnDate();
                     d.status = br.getStatus();
+                    d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
                     return d;
                 })
                 .filter(d -> kw.isEmpty()
@@ -401,6 +439,7 @@ public class LibraryController {
             d.borrowDate = br.getBorrowDate();
             d.dueDate = br.getDueDate();
             d.status = br.getStatus();
+            d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
             return d;
         }).collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(dto);
@@ -436,6 +475,7 @@ public class LibraryController {
                     d.borrowDate = br.getBorrowDate();
                     d.returnDate = br.getReturnDate();
                     d.status = br.getStatus();
+                    d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
                     return d;
                 })
                 .collect(java.util.stream.Collectors.toList());
@@ -514,6 +554,7 @@ public class LibraryController {
         public java.time.LocalDate borrowDate;
         public java.time.LocalDate dueDate;
         public String status;
+        public Integer renewCount;
     }
     /** DTO for borrow history view. */
     public static class BorrowHistoryItemDTO {
@@ -523,6 +564,7 @@ public class LibraryController {
         public java.time.LocalDate borrowDate;
         public java.time.LocalDate returnDate;
         public String status;
+        public Integer renewCount;
     }
     /** DTO for reservations view. */
     public static class ReservationItemDTO {
@@ -539,10 +581,11 @@ public class LibraryController {
         public String bookId;
         public String title;
         public String userId;
-        public String userName;
         public java.time.LocalDate borrowDate;
+        public java.time.LocalDate dueDate;
         public java.time.LocalDate returnDate;
         public String status;
+        public Integer renewCount;
     }
     /** DTO for admin reservations view. */
     public static class AdminReservationItemDTO {
@@ -550,7 +593,6 @@ public class LibraryController {
         public String isbn;
         public String title;
         public String userId;
-        public String userName;
         public java.time.LocalDate reserveDate;
         public Integer queuePosition;
         public String status;
@@ -578,5 +620,16 @@ public class LibraryController {
     private String resolveTitleByIsbn(String isbn) {
         BookInfo info = bookInfoService.getBookByIsbn(isbn);
         return info == null ? "" : (info.getTitle() == null ? "" : info.getTitle());
+    }
+
+    /**
+     * 工具方法：通过图书副本ID解析出ISBN。
+     *
+     * @param bookId 图书副本ID。
+     * @return ISBN，如果找不到则返回空字符串。
+     */
+    private String resolveIsbnByBookId(String bookId) {
+        BookCopy copy = bookCopyService.getCopyById(bookId);
+        return copy == null ? null : copy.getIsbn();
     }
 }

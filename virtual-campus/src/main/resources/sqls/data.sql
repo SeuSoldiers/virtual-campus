@@ -44,13 +44,13 @@ VALUES
 ('B001_3', '9787111213826', 'A区1排', 'IN_LIBRARY'),
 ('B001_4', '9787111213826', 'A区1排', 'IN_LIBRARY'),
 ('B001_5', '9787111213826', 'A区1排', 'IN_LIBRARY'),
--- Spring实战：只预约场景（全部借出/预约）
+-- Spring实战：只预约场景（全部借出；不要 RESERVED）
 ('B002_1', '9787115447737', 'A区2排', 'BORROWED'),
 ('B002_2', '9787115447737', 'A区2排', 'BORROWED'),
-('B002_3', '9787115447737', 'A区2排', 'RESERVED'),
--- 数据库系统概念：预约兑现场景（部分在馆 + 部分已预约）
-('B003_1', '9787111557975', 'B区1排', 'BORROWED'),
-('B003_2', '9787111557975', 'B区1排', 'RESERVED'),
+('B002_3', '9787115447737', 'A区2排', 'BORROWED'),
+-- 数据库系统概念：预约兑现场景（部分在馆 + 有预约队列）
+('B003_1', '9787111557975', 'B区1排', 'IN_LIBRARY'),
+('B003_2', '9787111557975', 'B区1排', 'BORROWED'),
 ('B003_3', '9787111557975', 'B区1排', 'IN_LIBRARY'),
 ('B003_4', '9787111557975', 'B区1排', 'IN_LIBRARY'),
 -- Python编程：只借阅场景（2 借出 + 2 在馆）
@@ -65,20 +65,16 @@ VALUES
 
 -- 插入借阅记录（bookId 指向具体副本）
 INSERT OR IGNORE INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status)
-VALUES ('R001', '220231', 'B001_1', '2025-07-01', '2025-08-01', NULL, 0, 'BORROWED'),
-       ('R002', '220232', 'B002_1', '2025-07-15', '2025-08-15', NULL, 0, 'BORROWED'),
-       ('R003', '220233', 'B004_1', '2025-07-20', '2025-08-20', NULL, 0, 'BORROWED'),
-       ('R004', '220234', 'B005_1', '2025-06-10', '2025-07-10', NULL, 0, 'BORROWED');
+VALUES ('R001', '220231', 'B001_1', '2025-09-01', '2025-10-01', NULL, 0, 'BORROWED'),
+       ('R002', '220232', 'B002_1', '2025-08-20', '2025-09-20', NULL, 1, 'BORROWED'),
+       ('R003', '220231', 'B004_1', '2025-08-15', '2025-09-15', '2025-09-10', 0, 'RETURNED');
 
 -- 插入预约记录（使用 isbn）
 INSERT OR IGNORE INTO reservation_records (reservationId, userId, isbn, reserveDate, status, queuePosition)
-VALUES
--- Spring实战：只能预约
-('RES001', '220231', '9787115447737', '2025-07-20', 'ACTIVE', 1),
--- 数据库系统概念：测试预约兑现
-('RES002', '220232', '9787111557975', '2025-07-22', 'ACTIVE', 1),
--- 算法导论：全部借出，只能预约
-('RES003', '220233', '9787111407010', '2025-07-25', 'ACTIVE', 1);
+VALUES ('RES001', '220231', '9787115447737', '2025-09-10', 'ACTIVE', 1),
+       ('RES002', '220232', '9787111557975', '2025-09-12', 'ACTIVE', 1),
+       ('RES003', '220231', '9787111407010', '2025-09-14', 'ACTIVE', 1);
+
 -- 插入测试商品数据
 INSERT OR IGNORE INTO product (productId, productName, productPrice, availableCount, productType, status)
 VALUES ('P001', '笔记本电脑 - ThinkPad X1', 8999.00, 50, '电子产品', 'ACTIVE'),

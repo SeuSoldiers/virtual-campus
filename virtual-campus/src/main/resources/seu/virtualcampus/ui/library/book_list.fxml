@@ -41,7 +41,7 @@
                         <TableColumn fx:id="colPublishDate" text="出版日期" prefWidth="120"/>
                         <TableColumn fx:id="colCategory" text="类别" prefWidth="100"/>
                         <TableColumn fx:id="colTotalCount" text="总数量" prefWidth="90"/>
-                        <TableColumn fx:id="colAvailableCount" text="可借数量" prefWidth="90"/>
+                        <TableColumn fx:id="colAvailableCount" text="在馆数量" prefWidth="90"/>
                         <TableColumn fx:id="colReservationCount" text="预约数量" prefWidth="90"/>
                     </columns>
                 </TableView>
