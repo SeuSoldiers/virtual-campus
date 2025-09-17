@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,8 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -202,7 +204,7 @@ public class LibrarianController {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_copy_management.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_copy_management.fxml"));
             Parent root = loader.load();
             BookCopyManagementController c = loader.getController();
             c.init(sel.isbn); // 只看副本，不涉及用户 id
@@ -227,7 +229,7 @@ public class LibrarianController {
      */
     private void openBookEditDialog(BookInfoVM editing) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_edit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_edit.fxml"));
             Parent root = loader.load();
             BookEditController c = loader.getController();
             if (editing == null) c.initForAdd(() -> loadBooks(safeText(bookSearchField)));

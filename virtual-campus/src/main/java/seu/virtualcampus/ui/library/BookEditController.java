@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.MainApp;
 
 public class BookEditController {
 

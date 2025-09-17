@@ -4,7 +4,7 @@
 
 <AnchorPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seu.virtualcampus.ui.BookEditController"
+            fx:controller="seu.virtualcampus.ui.library.BookEditController"
             prefWidth="360" prefHeight="280"
             style="-fx-font-family: 'Microsoft YaHei';
                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);

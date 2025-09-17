@@ -108,7 +108,7 @@ public class DashboardController {
             cnt++;
         } else if ("LibraryMgr".equalsIgnoreCase(userRole)) {
             Button libraryBtn = createButtonWithIcon("图书管理", "/seu/virtualcampus/ui/icon/lib.png");
-            libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/librarian.fxml", entryBox));
+            libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/library/librarian.fxml", entryBox));
             entryBox.add(libraryBtn, cnt % 4, cnt / 4);
             cnt++;
         }
@@ -131,7 +131,7 @@ public class DashboardController {
         cnt++;
 
         Button libraryBtn = createButtonWithIcon("图书馆", "/seu/virtualcampus/ui/icon/lib.png");
-        libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/student_library.fxml", entryBox));
+        libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/library/student_library.fxml", entryBox));
         entryBox.add(libraryBtn, cnt % 4, cnt / 4);
     }
 

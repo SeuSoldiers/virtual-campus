@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import seu.virtualcampus.ui.DashboardController;
+import seu.virtualcampus.ui.MainApp;
 
 public class StudentLibraryController {
 
@@ -29,7 +31,7 @@ public class StudentLibraryController {
         try {
             String keyword = searchField.getText() == null ? "" : searchField.getText().trim();
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_list.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_list.fxml"));
             Parent root = loader.load();
             BookListController controller = loader.getController();
             controller.init(currentUserId);
@@ -68,7 +70,7 @@ public class StudentLibraryController {
     @FXML
     private void onAllBooks(ActionEvent e) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_list.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_list.fxml"));
             Parent root = loader.load();
             BookListController controller = loader.getController();
             controller.init(currentUserId);
@@ -114,7 +116,7 @@ public class StudentLibraryController {
      */
     private void openBorrowView(String tab) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/BorrowView.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/BorrowView.fxml"));
             Parent root = loader.load();
             BorrowViewController controller = loader.getController();
             controller.init(tab);

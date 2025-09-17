@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.domain.BookCopy;
 import seu.virtualcampus.domain.BookInfo;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.time.LocalDate;

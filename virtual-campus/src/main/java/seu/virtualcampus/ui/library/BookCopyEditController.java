@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,6 +14,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.MainApp;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -131,7 +132,7 @@ public class BookCopyEditController {
      */
     private void backToManagement() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_copy_management.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_copy_management.fxml"));
             Parent root = loader.load();
             BookCopyManagementController c = loader.getController();
             c.init(isbn);

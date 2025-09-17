@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1"
             xmlns="http://javafx.com/javafx"
-            fx:controller="seu.virtualcampus.ui.LibrarianController"
+            fx:controller="seu.virtualcampus.ui.library.LibrarianController"
             style="-fx-font-family: 'Microsoft YaHei';
                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
                    -fx-padding: 16;">

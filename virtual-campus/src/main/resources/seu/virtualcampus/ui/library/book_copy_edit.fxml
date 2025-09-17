@@ -6,7 +6,7 @@
 <AnchorPane prefHeight="220.0" prefWidth="420.0"
             xmlns="http://javafx.com/javafx/24.0.1"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seu.virtualcampus.ui.BookCopyEditController"
+            fx:controller="seu.virtualcampus.ui.library.BookCopyEditController"
             style="-fx-font-family: 'Microsoft YaHei';
                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
                    -fx-padding: 20;

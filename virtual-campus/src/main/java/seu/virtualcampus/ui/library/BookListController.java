@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -17,6 +17,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -122,7 +123,7 @@ public class BookListController {
         if (sel == null) return;
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_detail.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_detail.fxml"));
             Parent root = loader.load();
 
             BookDetailController controller = loader.getController();
@@ -147,7 +148,7 @@ public class BookListController {
     @FXML
     private void onBack() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/student_library.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/student_library.fxml"));
             Parent root = loader.load();
             Stage stage = (Stage) tableView.getScene().getWindow();
             stage.setScene(new Scene(root));

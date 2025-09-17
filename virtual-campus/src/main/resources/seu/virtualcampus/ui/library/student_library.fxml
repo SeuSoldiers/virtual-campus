@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml"
-            fx:controller="seu.virtualcampus.ui.StudentLibraryController"
+            fx:controller="seu.virtualcampus.ui.library.StudentLibraryController"
             prefHeight="400.0" prefWidth="600.0"
             style="-fx-font-family: 'Microsoft YaHei';
                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);

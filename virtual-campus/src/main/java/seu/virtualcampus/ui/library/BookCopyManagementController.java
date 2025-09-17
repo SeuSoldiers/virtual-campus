@@ -1,4 +1,4 @@
-package seu.virtualcampus.ui;
+package seu.virtualcampus.ui.library;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -16,6 +16,7 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
 import java.util.List;
@@ -135,7 +136,7 @@ public class BookCopyManagementController {
     // ====== 打开新增/编辑窗口 ======
     private void openEditDialog(CopyVM copy) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/book_copy_edit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/library/book_copy_edit.fxml"));
             Parent root = loader.load();
             BookCopyEditController c = loader.getController();
 
