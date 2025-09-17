@@ -35,6 +35,7 @@ public class BookListController {
     private TableColumn<BookInfoVM, String> colIsbn, colTitle, colAuthor, colPublisher,
             colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservationCount;
     private String currentUserId;
+    private String lastKeyword = "";
 
     public void init(String userId) {
         this.currentUserId = userId;
@@ -57,6 +58,7 @@ public class BookListController {
      * 从学生页传来的关键字加载数据
      */
     public void loadBooks(String keyword) {
+        this.lastKeyword = (keyword == null ? "" : keyword.trim());
         try {
             String kw = keyword == null ? "" : keyword.trim();
 
@@ -136,6 +138,7 @@ public class BookListController {
             // 绑定父窗口，让它成为子窗口
             dialog.initOwner(tableView.getScene().getWindow());
             dialog.initModality(javafx.stage.Modality.WINDOW_MODAL);
+            dialog.setOnHidden(event -> loadBooks(lastKeyword));
 
             dialog.show();
         } catch (Exception e) {

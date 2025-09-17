@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import seu.virtualcampus.domain.BookInfo;
 import seu.virtualcampus.mapper.BookInfoMapper;
 import seu.virtualcampus.mapper.BookCopyMapper;
+import seu.virtualcampus.mapper.ReservationRecordMapper;
 
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,9 @@ public class BookInfoService {
 
     @Autowired
     private BookCopyMapper bookCopyMapper;
+
+    @Autowired
+    private ReservationRecordMapper reservationRecordMapper;
 
     public void addBook(BookInfo bookInfo) {
         bookInfoMapper.insert(bookInfo);
@@ -65,19 +69,32 @@ public class BookInfoService {
 
     /** 给单本书计算数量并填充 */
     private void attachCounts(BookInfo book) {
+        // 1. 副本数
         Map<String, Object> counts = bookCopyMapper.getCountsByIsbn(book.getIsbn());
+        int total = 0;
+        int available = 0;
         if (counts != null) {
-            Object total = counts.get("totalCount");
-            Object available = counts.get("availableCount");
-            Object reserved = counts.get("reservationCount");
-
-            book.setTotalCount(total == null ? 0 : ((Number) total).intValue());
-            book.setAvailableCount(available == null ? 0 : ((Number) available).intValue());
-            book.setReservationCount(reserved == null ? 0 : ((Number) reserved).intValue());
-        } else {
-            book.setTotalCount(0);
-            book.setAvailableCount(0);
-            book.setReservationCount(0);
+            Object totalObj = counts.get("totalCount");
+            Object availObj = counts.get("availableCount");
+            total = (totalObj == null ? 0 : ((Number) totalObj).intValue());
+            available = (availObj == null ? 0 : ((Number) availObj).intValue());
         }
+
+        // 2. 预约数（只算 ACTIVE）
+        int reserved = reservationRecordMapper.countActiveByIsbn(book.getIsbn());
+
+        // 3. 写回 BookInfo
+        book.setTotalCount(total);
+        book.setAvailableCount(available);
+        book.setReservationCount(reserved);
+    }
+
+    /** 对外提供刷新后的 BookInfo（按 ISBN 查） */
+    public BookInfo refreshBookByIsbn(String isbn) {
+        BookInfo book = bookInfoMapper.findByIsbn(isbn);
+        if (book != null) {
+            attachCounts(book);
+        }
+        return book;
     }
 }

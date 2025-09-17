@@ -33,4 +33,7 @@ public interface BookInfoMapper {
 
     @Select("SELECT * FROM book_info")
     List<BookInfo> findAll();
+
+    @Select("SELECT COUNT(*) FROM reservation_record WHERE isbn = #{isbn} AND status = 'ACTIVE'")
+    int countActiveByIsbn(@Param("isbn") String isbn);
 }

@@ -74,6 +74,9 @@ public class LibraryController {
         record.setStatus("BORROWED");
         borrowRecordService.addBorrowRecord(record);
 
+        String isbn = resolveIsbnByBookId(bookId);
+        if (isbn != null) bookInfoService.refreshBookByIsbn(isbn);
+
         return ResponseEntity.ok("借阅成功");
     }
 
@@ -90,6 +93,7 @@ public class LibraryController {
         }
         // 归还副本
         bookCopyService.returnBook(bookId);
+        bookInfoService.refreshBookByIsbn(isbn);
 
         // 检查是否有预约队列
         ReservationRecord next = reservationRecordService.getFirstActiveByIsbn(isbn);
@@ -120,12 +124,17 @@ public class LibraryController {
         record.setStatus("ACTIVE");
 
         boolean ok = reservationRecordService.addReservation(record);
+        if (ok) bookInfoService.refreshBookByIsbn(isbn);
         return ok ? ResponseEntity.ok("预约成功") : ResponseEntity.badRequest().body("您已预约过该书");
     }
 
     @PostMapping("/cancel-reservation")
     public ResponseEntity<String> cancelReservation(@RequestParam String reservationId) {
         boolean ok = reservationRecordService.cancelReservation(reservationId);
+        if (ok) {
+            ReservationRecord res = reservationRecordService.getById(reservationId);
+            if (res != null) bookInfoService.refreshBookByIsbn(res.getIsbn());
+        }
         return ok ? ResponseEntity.ok("取消预约成功") : ResponseEntity.badRequest().body("取消失败");
     }
 
@@ -167,6 +176,9 @@ public class LibraryController {
         record.setRenewCount(0);
         record.setStatus("BORROWED");
         borrowRecordService.addBorrowRecord(record);
+
+        String isbn = resolveIsbnByBookId(bookId);
+        if (isbn != null) bookInfoService.refreshBookByIsbn(isbn);
 
         return ResponseEntity.ok("预约兑现成功，图书已借出");
     }
@@ -428,5 +440,11 @@ public class LibraryController {
     private String resolveTitleByIsbn(String isbn) {
         BookInfo info = bookInfoService.getBookByIsbn(isbn);
         return info == null ? "" : (info.getTitle() == null ? "" : info.getTitle());
+    }
+
+    /** 工具：bookId → isbn */
+    private String resolveIsbnByBookId(String bookId) {
+        BookCopy copy = bookCopyService.getCopyById(bookId);
+        return copy == null ? null : copy.getIsbn();
     }
 }
