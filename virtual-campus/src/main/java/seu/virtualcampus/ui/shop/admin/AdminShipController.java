@@ -1,13 +1,17 @@
 package seu.virtualcampus.ui.shop.admin;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javafx.application.Platform;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import okhttp3.*;
 import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
@@ -24,16 +28,32 @@ public class AdminShipController implements Initializable {
 
     private static final Logger logger = Logger.getLogger(AdminShipController.class.getName());
     private final OkHttpClient httpClient = new OkHttpClient();
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .registerModule(new JavaTimeModule())
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final String baseUrl = "http://" + MainApp.host;
-    @FXML
-    private TextField orderIdField;
     @FXML
     private Button shipButton;
     @FXML
     private Label resultLabel;
     @FXML
     private Label currentUserLabel;
+
+    // 订单列表视图
+    @FXML
+    private TableView<seu.virtualcampus.domain.Order> ordersTable;
+    @FXML
+    private TableColumn<seu.virtualcampus.domain.Order, String> orderIdCol;
+    @FXML
+    private TableColumn<seu.virtualcampus.domain.Order, String> userIdCol;
+    @FXML
+    private TableColumn<seu.virtualcampus.domain.Order, String> statusCol;
+    @FXML
+    private TableColumn<seu.virtualcampus.domain.Order, Double> amountCol;
+    @FXML
+    private TableColumn<seu.virtualcampus.domain.Order, String> timeCol;
+
+    private final ObservableList<seu.virtualcampus.domain.Order> orderData = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -43,28 +63,15 @@ public class AdminShipController implements Initializable {
             resultLabel.setText("权限不足");
             resultLabel.setStyle("-fx-text-fill: #e74c3c; -fx-font-weight: bold;");
             shipButton.setDisable(true);
-            orderIdField.setDisable(true);
             return;
         }
 
         updateCurrentUserDisplay();
         clearResult();
 
-        // 监听订单号输入框变化
-        orderIdField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null && !newValue.trim().isEmpty()) {
-                shipButton.setDisable(false);
-                clearResult();
-            } else {
-                shipButton.setDisable(true);
-            }
-        });
-
-        // 初始状态
-        shipButton.setDisable(true);
-
-        // 监听回车键
-        orderIdField.setOnAction(event -> handleShip());
+        // 初始化表格列并加载数据
+        setupTable();
+        loadOrders();
     }
 
     /**
@@ -88,13 +95,25 @@ public class AdminShipController implements Initializable {
      */
     @FXML
     private void handleShip() {
-        String orderIdText = orderIdField.getText();
-        if (orderIdText == null || orderIdText.trim().isEmpty()) {
-            showResult("请输入订单号", false);
+        // 使用所选订单
+        seu.virtualcampus.domain.Order selected = ordersTable != null ? ordersTable.getSelectionModel().getSelectedItem() : null;
+        if (selected == null) {
+            showResult("请先选择一个订单", false);
             return;
         }
 
-        final String orderId = orderIdText.trim();
+        final String orderId = selected.getOrderId();
+        if (orderId == null || orderId.isBlank()) {
+            showResult("订单号无效", false);
+            return;
+        }
+
+        // 仅允许已支付订单发货
+        String status = selected.getStatus();
+        if (status == null || !"PAID".equals(status)) {
+            showResult("只有已支付(PAID)的订单才能发货", false);
+            return;
+        }
         showResult("正在发货...", null);
         shipButton.setDisable(true);
 
@@ -131,8 +150,10 @@ public class AdminShipController implements Initializable {
                 Platform.runLater(() -> {
                     if (response.isSuccessful()) {
                         showResult("订单 " + orderId + " 发货成功！", true);
-                        clearOrderIdField();
                         showAlert("发货成功", "订单 " + orderId + " 已成功发货！\n订单状态已更新为已发货。");
+                        // 刷新
+                        loadOrders();
+                        if (ordersTable != null) ordersTable.getSelectionModel().clearSelection();
                     } else {
                         String errorMessage = parseErrorMessage(responseBody);
                         showResult("发货失败: " + errorMessage, false);
@@ -148,7 +169,7 @@ public class AdminShipController implements Initializable {
      */
     @FXML
     private void handleBack() {
-        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", orderIdField);
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", currentUserLabel);
     }
 
     /**
@@ -177,12 +198,81 @@ public class AdminShipController implements Initializable {
         resultLabel.setStyle("");
     }
 
-    /**
-     * 清空订单号输入框
-     */
-    private void clearOrderIdField() {
-        orderIdField.clear();
-        shipButton.setDisable(true);
+    // ========== 订单列表相关 ==========
+    private void setupTable() {
+        if (ordersTable == null) return;
+        ordersTable.setItems(orderData);
+
+        if (orderIdCol != null) orderIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getOrderId()));
+        if (userIdCol != null) userIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserId()));
+        if (statusCol != null) statusCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus()));
+        if (amountCol != null) {
+            amountCol.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getTotalAmount()));
+            amountCol.setCellFactory(col -> new TableCell<>() {
+                @Override
+                protected void updateItem(Double v, boolean empty) {
+                    super.updateItem(v, empty);
+                    setText(empty || v == null ? null : String.format("¥%.2f", v));
+                }
+            });
+        }
+        if (timeCol != null) {
+            timeCol.setCellValueFactory(c -> {
+                String t = c.getValue().getOrderDate();
+                if (t == null && c.getValue().getCreatedAt() != null) t = c.getValue().getCreatedAt().toString();
+                return new SimpleStringProperty(t);
+            });
+        }
+
+        ordersTable.getSelectionModel().selectedItemProperty().addListener((obs, o, n) -> {
+            if (n == null) shipButton.setDisable(true);
+            else shipButton.setDisable(!"PAID".equals(n.getStatus()));
+            clearResult();
+        });
+    }
+
+    private void loadOrders() {
+        if (ordersTable == null) return;
+        showResult("正在加载订单...", null);
+        Request request = new Request.Builder()
+                .url(baseUrl + "/api/orders/all")
+                .header("Authorization", MainApp.token != null ? MainApp.token : "")
+                .get()
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Platform.runLater(() -> showResult("加载订单失败: " + e.getMessage(), false));
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String body = response.body() != null ? response.body().string() : "";
+                Platform.runLater(() -> {
+                    try {
+                        if (!response.isSuccessful()) {
+                            showResult("加载订单失败: HTTP " + response.code() + " " + body, false);
+                            return;
+                        }
+                        java.util.List<seu.virtualcampus.domain.Order> list = objectMapper.readValue(body, new TypeReference<>(){});
+                        orderData.setAll(list);
+                        showResult("加载完成，共 " + list.size() + " 笔订单", true);
+                    } catch (Exception ex) {
+                        showResult("解析订单失败: " + ex.getMessage(), false);
+                    }
+                });
+            }
+        });
+    }
+
+    @FXML
+    private void handleRefresh() { loadOrders(); }
+
+    // 兼容：外部可获取当前选择的订单号
+    public String getorderid() {
+        seu.virtualcampus.domain.Order sel = ordersTable != null ? ordersTable.getSelectionModel().getSelectedItem() : null;
+        return sel != null ? sel.getOrderId() : null;
     }
 
     /**
