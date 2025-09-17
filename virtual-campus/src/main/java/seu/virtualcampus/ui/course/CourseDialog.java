@@ -6,6 +6,12 @@ import javafx.scene.layout.GridPane;
 import org.jetbrains.annotations.NotNull;
 import seu.virtualcampus.domain.Course;
 
+/**
+ * 课程新增与编辑对话框。
+ * <p>
+ * 用于添加或编辑课程信息，支持输入课程ID、名称、教师、学分、容量、时间、地点等。
+ * </p>
+ */
 public class CourseDialog extends Dialog<Course> {
     private final TextField courseIdField = new TextField();
     private final TextField courseNameField = new TextField();
@@ -15,10 +21,20 @@ public class CourseDialog extends Dialog<Course> {
     private final TextField timeField = new TextField();
     private final TextField locationField = new TextField();
 
+    /**
+     * 创建用于添加课程的对话框。
+     * <p>初始化对话框标题为“添加课程”。</p>
+     */
     public CourseDialog() {
         initDialog("添加课程");
     }
 
+    /**
+     * 创建用于编辑课程的对话框。
+     * <p>初始化对话框标题为“编辑课程”，并填充已有课程信息。</p>
+     *
+     * @param course 需要编辑的课程对象
+     */
     public CourseDialog(Course course) {
         initDialog("编辑课程");
         courseIdField.setText(course.getCourseId());
@@ -31,6 +47,11 @@ public class CourseDialog extends Dialog<Course> {
         courseIdField.setDisable(true); // 编辑时不能修改课程ID
     }
 
+    /**
+     * 初始化对话框界面和事件。
+     *
+     * @param title 对话框标题
+     */
     private void initDialog(String title) {
         setTitle(title);
         setHeaderText("请输入课程信息");
@@ -74,6 +95,12 @@ public class CourseDialog extends Dialog<Course> {
         });
     }
 
+    /**
+     * 获取用户输入的课程信息。
+     *
+     * @return 填写完成的课程对象
+     * @throws NumberFormatException 当学分或容量输入不是有效数字时抛出
+     */
     @NotNull
     private Course getCourse() {
         Course course = new Course();

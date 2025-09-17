@@ -18,6 +18,13 @@ import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.Alert.AlertType.WARNING;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
+/**
+ * 银行管理员登录控制器。
+ * <p>
+ * 负责管理员账户的登录验证与页面跳转。
+ * </p>
+ */
+
 public class bank_administratorController {
 
     private static final Logger logger = Logger.getLogger(bank_administratorController.class.getName());
@@ -40,6 +47,11 @@ public class bank_administratorController {
     }
 
 
+    /**
+     * 管理员登录操作，校验输入并发起验证。
+     *
+     * @param actionEvent 事件对象。
+     */
     public void login(ActionEvent actionEvent) {
         //
         String accountNumber = administratorid_text.getText();
@@ -60,6 +72,12 @@ public class bank_administratorController {
 
     }
 
+    /**
+     * 验证管理员账户和密码。
+     *
+     * @param accountNumber 管理员账户号。
+     * @param password      管理员密码。
+     */
     private void verifyAdminAndPassword(String accountNumber, String password) {
         // 构造URL，使用管理员验证端点
         String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/verify-admin-password";

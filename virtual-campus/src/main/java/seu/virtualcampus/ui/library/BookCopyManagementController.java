@@ -23,7 +23,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 管理员端：ISBN 维度的副本管理页
+ * 管理员端：ISBN维度的副本管理页面控制器。
+ * <p>
+ * 负责加载图书信息、管理副本列表、处理副本的增删改等操作。
+ * </p>
  */
 public class BookCopyManagementController {
 
@@ -62,7 +65,9 @@ public class BookCopyManagementController {
     }
 
     /**
-     * 外部入口：librarian 列表页传入 ISBN
+     * 外部入口：librarian列表页传入ISBN，初始化页面。
+     *
+     * @param isbn 图书ISBN。
      */
     public void init(String isbn) {
         this.isbn = isbn;
@@ -72,11 +77,18 @@ public class BookCopyManagementController {
     }
 
     // ====== 事件：按钮 ======
+
+    /**
+     * 新增副本按钮事件。
+     */
     @FXML
     private void onAddBookCopy() {
         openEditDialog(null);
     }
 
+    /**
+     * 删除副本按钮事件。
+     */
     @FXML
     private void onDeleteBookCopy() {
         CopyVM sel = tableViewCopies.getSelectionModel().getSelectedItem();
@@ -108,6 +120,9 @@ public class BookCopyManagementController {
         }
     }
 
+    /**
+     * 修改副本按钮事件。
+     */
     @FXML
     private void onChangeBookCopy() {
         CopyVM sel = tableViewCopies.getSelectionModel().getSelectedItem();
@@ -118,11 +133,17 @@ public class BookCopyManagementController {
         openEditDialog(sel);
     }
 
+    /**
+     * 刷新副本列表按钮事件。
+     */
     @FXML
     private void onRefreshCopies() {
         loadCopies();
     }
 
+    /**
+     * 返回按钮事件，关闭当前窗口。
+     */
     @FXML
     private void onBack() {
         try {
@@ -164,6 +185,10 @@ public class BookCopyManagementController {
     }
 
     // ====== 表格列绑定 ======
+
+    /**
+     * 绑定表格列。
+     */
     private void bindColumns() {
         colBookId.setCellValueFactory(c -> new ReadOnlyStringWrapper(nz(c.getValue().bookId)));
         colStatus.setCellValueFactory(c -> new ReadOnlyStringWrapper(nz(c.getValue().statusCN)));
@@ -171,6 +196,10 @@ public class BookCopyManagementController {
     }
 
     // ====== 顶部书籍信息 ======
+
+    /**
+     * 加载图书信息。
+     */
     private void loadBookInfo() {
         try {
             HttpUrl url = Objects.requireNonNull(HttpUrl.parse(BASE + "/search"))
@@ -209,6 +238,10 @@ public class BookCopyManagementController {
     }
 
     // ====== 副本表格 + 数量统计 ======
+
+    /**
+     * 加载副本列表。
+     */
     private void loadCopies() {
         try {
             Request req = new Request.Builder()
@@ -272,6 +305,12 @@ public class BookCopyManagementController {
     }
 
     // ====== 工具 ======
+
+    /**
+     * 信息提示。
+     *
+     * @param msg 提示内容。
+     */
     private void info(String msg) {
         Alert a = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
         a.setHeaderText(null);

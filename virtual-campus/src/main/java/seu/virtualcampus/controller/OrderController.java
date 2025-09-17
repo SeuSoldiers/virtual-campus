@@ -10,6 +10,11 @@ import seu.virtualcampus.service.OrderService;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 订单控制器。
+ * <p>
+ * 提供与商品订单相关的API接口，包括创建、取消、更新、查询订单，以及支付、发货、确认收货等订单流程操作。
+ */
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -19,7 +24,13 @@ public class OrderController {
 
     private static final Logger log = LoggerFactory.getLogger(OrderController.class);
 
-    // 新版：根据购物车创建订单
+    /**
+     * 根据购物车项目创建新订单。
+     *
+     * @param userId      用户ID。
+     * @param cartItemIds 购物车项目ID列表（可选）。如果为空，则使用该用户购物车中的所有商品。
+     * @return 包含创建结果（如订单ID）的Map。
+     */
     @PostMapping("/create")
     public ResponseEntity<Map<String, Object>> createOrder(@RequestParam String userId,
                                                            @RequestParam(required = false) List<String> cartItemIds) {
@@ -27,6 +38,12 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * (旧) 取消一个订单。
+     *
+     * @param orderId 要取消的订单ID。
+     * @return 操作结果的消息。
+     */
     @DeleteMapping("/cancel/{orderId}")
     public ResponseEntity<String> cancelOrder(@PathVariable String orderId) {
         int result = orderService.cancelOrder(orderId);
@@ -37,6 +54,12 @@ public class OrderController {
         }
     }
 
+    /**
+     * 更新一个订单的信息。
+     *
+     * @param order 包含更新信息的订单对象。
+     * @return 操作结果的消息。
+     */
     @PutMapping("/update")
     public ResponseEntity<String> updateOrder(@RequestBody Order order) {
         int result = orderService.updateOrder(order);
@@ -47,6 +70,12 @@ public class OrderController {
         }
     }
 
+    /**
+     * (旧) 根据ID获取订单信息。
+     *
+     * @param orderId 订单ID。
+     * @return 订单对象；如果未找到则返回404。
+     */
     @GetMapping("/get/{orderId}")
     public ResponseEntity<Order> getOrderById(@PathVariable String orderId) {
         Order order = orderService.getOrderById(orderId);
@@ -57,20 +86,40 @@ public class OrderController {
         }
     }
 
+    /**
+     * 获取指定用户的所有订单。
+     *
+     * @param userId 用户ID。
+     * @return 该用户的订单列表。
+     */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable String userId) {
         List<Order> orders = orderService.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
     }
 
+    /**
+     * (管理员) 获取所有订单。
+     *
+     * @return 系统中的所有订单列表。
+     */
     @GetMapping("/all")
     public ResponseEntity<List<Order>> getAllOrders() {
         List<Order> orders = orderService.getAllOrders();
         return ResponseEntity.ok(orders);
     }
 
-    // ========== 新增业务接口 ==========
+    // ========== 新增业务接口 ========== 
 
+    /**
+     * 预览订单信息。
+     * <p>
+     * 在正式创建订单前，根据购物车内容计算订单总额、商品列表等信息。
+     *
+     * @param userId      用户ID。
+     * @param cartItemIds 购物车项目ID列表（可选）。如果为空，则预览整个购物车的订单。
+     * @return 包含订单预览信息的Map。
+     */
     @PostMapping("/preview")
     public ResponseEntity<Map<String, Object>> previewOrder(@RequestParam String userId, 
                                                            @RequestParam(required = false) List<String> cartItemIds) {
@@ -78,7 +127,15 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 兼容UI：POST 取消订单（可选传 userId 进行权限校验）
+    /**
+     * (新) 取消订单。
+     * <p>
+     * 兼容通过POST请求取消订单，并可选地校验用户ID。
+     *
+     * @param orderId 要取消的订单ID。
+     * @param userId  用户ID（可选），用于权限校验。
+     * @return 包含操作结果的Map。
+     */
     @PostMapping("/{orderId}/cancel")
     public ResponseEntity<Map<String, Object>> cancelOrderNew(@PathVariable String orderId,
                                                              @RequestParam(required = false) String userId) {
@@ -93,6 +150,16 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 支付订单。
+     *
+     * @param orderId       要支付的订单ID。
+     * @param userId        用户ID。
+     * @param accountNumber 支付用的银行账户号码。
+     * @param password      银行账户密码。
+     * @param paymentMethod 支付方式（如 "DEBIT_CARD", "CREDIT_CARD"）。
+     * @return 包含支付结果的Map。
+     */
     @PostMapping("/{orderId}/pay")
     public ResponseEntity<Map<String, Object>> payOrder(@PathVariable String orderId,
                                                        @RequestParam String userId,
@@ -103,6 +170,14 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * (管理员) 对订单进行发货操作。
+     *
+     * @param orderId 订单ID。
+     * @param adminId 操作的管理员ID（可选）。
+     * @param token   管理员的认证Token（可选），用于在缺少adminId时作为备用标识。
+     * @return 包含操作结果的Map。
+     */
     @PutMapping("/{orderId}/deliver")
     public ResponseEntity<Map<String, Object>> deliverOrder(@PathVariable String orderId,
                                                            @RequestParam(required = false) String adminId,
@@ -118,6 +193,13 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 用户确认收货。
+     *
+     * @param orderId 订单ID。
+     * @param userId  用户ID（可选）。如果为空，会尝试从订单信息中获取。
+     * @return 包含操作结果的Map。
+     */
     @PutMapping("/{orderId}/confirm")
     public ResponseEntity<Map<String, Object>> confirmOrder(@PathVariable String orderId,
                                                            @RequestParam(required = false) String userId) {
@@ -132,6 +214,13 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * 获取订单的详细信息，包括订单下的所有商品项。
+     *
+     * @param orderId 订单ID。
+     * @param userId  用户ID，用于权限验证。
+     * @return 包含订单详细信息的Map。
+     */
     @GetMapping("/{orderId}/detail")
     public ResponseEntity<Map<String, Object>> getOrderDetail(@PathVariable String orderId,
                                                              @RequestParam String userId) {
@@ -139,7 +228,15 @@ public class OrderController {
         return ResponseEntity.ok(result);
     }
 
-    // 兼容前端：GET /api/orders/{orderId} 返回扁平结构，便于 OrderDetailController 直接解析
+    /**
+     * (兼容接口) 获取扁平化的订单详情。
+     * <p>
+     * 此接口主要为了兼容旧版前端UI (OrderDetailController) 的数据结构要求。
+     * 它将订单和订单项的数据整合到一个扁平的Map结构中。
+     *
+     * @param orderId 订单ID。
+     * @return 扁平化的订单详情；如果订单不存在或获取失败，返回相应的错误响应。
+     */
     @GetMapping("/{orderId}")
     public ResponseEntity<?> getOrderDetailFlat(@PathVariable String orderId) {
         Order order = orderService.getOrderById(orderId);

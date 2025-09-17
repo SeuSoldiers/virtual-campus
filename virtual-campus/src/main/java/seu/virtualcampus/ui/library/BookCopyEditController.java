@@ -19,6 +19,12 @@ import seu.virtualcampus.ui.MainApp;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 图书副本编辑对话框控制器。
+ * <p>
+ * 用于新增或编辑图书副本信息，包括副本编号、馆藏位置、状态等，支持与后端交互保存数据。
+ * </p>
+ */
 public class BookCopyEditController {
 
     private static final String BASE = "http://" + MainApp.host + "/api/library";
@@ -47,7 +53,9 @@ public class BookCopyEditController {
     }
 
     /**
-     * 新增模式
+     * 初始化为新增副本模式。
+     *
+     * @param isbn 所属图书ISBN
      */
     public void initForCreate(String isbn) {
         this.isbn = isbn;
@@ -61,7 +69,10 @@ public class BookCopyEditController {
     }
 
     /**
-     * 修改模式
+     * 初始化为编辑副本模式。
+     *
+     * @param isbn 所属图书ISBN
+     * @param copy 需要编辑的副本信息
      */
     public void initForEdit(String isbn, BookCopyManagementController.CopyVM copy) {
         this.isbn = isbn;
@@ -76,6 +87,9 @@ public class BookCopyEditController {
         if (cmbStatus != null) cmbStatus.getSelectionModel().select("在馆"); // 默认
     }
 
+    /**
+     * 保存按钮事件，提交副本信息。
+     */
     @FXML
     public void onSave() {
         try {
@@ -118,17 +132,25 @@ public class BookCopyEditController {
         }
     }
 
+    /**
+     * 取消按钮事件，关闭对话框。
+     */
     @FXML
     public void onCancel() {
         ((Stage) txtBookId.getScene().getWindow()).close();
     }
 
+    /**
+     * 设置保存成功后的回调函数。
+     *
+     * @param r 保存成功后执行的回调
+     */
     public void setOnSuccess(Runnable r) {
         this.onSuccess = r;
     }
 
     /**
-     * 返回副本管理页面
+     * 返回副本管理页面。
      */
     private void backToManagement() {
         try {
@@ -146,7 +168,10 @@ public class BookCopyEditController {
     }
 
     /**
-     * 中文状态转英文状态
+     * 中文状态转英文状态。
+     *
+     * @param cn 中文状态
+     * @return 英文状态字符串
      */
     private String toENStatus(String cn) {
         if (cn == null) return "IN_LIBRARY";

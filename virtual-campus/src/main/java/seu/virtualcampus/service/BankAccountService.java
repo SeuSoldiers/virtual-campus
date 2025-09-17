@@ -1,13 +1,19 @@
-// BankAccountService.java (部分更新)
+/**
+ * 银行账户服务类。
+ * <p>
+ * 提供银行账户的开户、存取款、转账、密码管理、定期/活期转换、交易记录查询、账户状态管理、商店消费、先用后付等相关业务逻辑。
+ * </p>
+ */
+
 package seu.virtualcampus.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import seu.virtualcampus.domain.BankAccount;
 import seu.virtualcampus.domain.Transaction;
 import seu.virtualcampus.mapper.BankAccountMapper;
 import seu.virtualcampus.mapper.TransactionMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -24,9 +30,17 @@ public class BankAccountService {
     @Autowired
     private TransactionMapper transactionMapper;
 
-    // 创建新账户
+    /**
+     * 创建新账户。
+     *
+     * @param userId         用户ID。
+     * @param accountType    账户类型。
+     * @param password       账户密码。
+     * @param initialDeposit 初始存款金额。
+     * @return 新建的银行账户对象。
+     */
     @Transactional
-    public BankAccount createAccount(String userId, String accountType, String password,BigDecimal initialDeposit) {
+    public BankAccount createAccount(String userId, String accountType, String password, BigDecimal initialDeposit) {
         String accountNumber = generateAccountNumber();
 
         BankAccount account = new BankAccount(
@@ -50,7 +64,7 @@ public class BankAccountService {
                     initialDeposit,
                     "DEPOSIT",
                     LocalDateTime.now(),
-                    "开户（初始存款）："+initialDeposit+"元",
+                    "开户（初始存款）：" + initialDeposit + "元",
                     "ACTIVE"
             );
             transactionMapper.insertTransaction(transaction);
@@ -59,7 +73,15 @@ public class BankAccountService {
         return account;
     }
 
-    // 处理存款
+    /**
+     * 处理存款。
+     *
+     * @param accountNumber 账户号。
+     * @param amount        存款金额。
+     * @return 存款交易记录。
+     * @throws RuntimeException         账户不存在或状态异常。
+     * @throws IllegalArgumentException 存款金额不为正数时抛出。
+     */
     @Transactional
     public Transaction processDeposit(String accountNumber, BigDecimal amount) {
         // 验证账户存在且有效
@@ -67,7 +89,7 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
             throw new RuntimeException("Account is not active/limit");
         }
 
@@ -89,7 +111,7 @@ public class BankAccountService {
                 amount,
                 "DEPOSIT",
                 LocalDateTime.now(),
-                "存款:"+amount+"元",
+                "存款:" + amount + "元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -97,7 +119,15 @@ public class BankAccountService {
         return transaction;
     }
 
-    // 处理取款
+    /**
+     * 处理取款。
+     *
+     * @param accountNumber 账户号。
+     * @param amount        取款金额。
+     * @param password      账户密码。
+     * @return 取款交易记录。
+     * @throws RuntimeException 账户不存在、状态异常、密码错误或余额不足时抛出。
+     */
     @Transactional
     public Transaction processWithdrawal(String accountNumber, BigDecimal amount, String password) {
         // 验证账户存在且有效
@@ -105,7 +135,7 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
             throw new RuntimeException("Account is not active/limit");
         }
 
@@ -131,7 +161,7 @@ public class BankAccountService {
                 amount,
                 "WITHDRAWAL",
                 LocalDateTime.now(),
-                "取款："+amount+"元",
+                "取款：" + amount + "元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -139,7 +169,16 @@ public class BankAccountService {
         return transaction;
     }
 
-    // 处理转账
+    /**
+     * 处理转账。
+     *
+     * @param fromAccount 转出账户号。
+     * @param toAccount   转入账户号。
+     * @param amount      转账金额。
+     * @param password    转出账户密码。
+     * @return 转账交易记录。
+     * @throws RuntimeException 账户不存在、状态异常、密码错误、余额不足或转账给自己时抛出。
+     */
     @Transactional
     public Transaction processTransfer(String fromAccount, String toAccount, BigDecimal amount, String password) {
         // 验证转出账户
@@ -147,7 +186,7 @@ public class BankAccountService {
         if (from == null) {
             throw new RuntimeException("from account not found");
         }
-        if (!"ACTIVE".equals(from.getStatus())&&!"LIMIT".equals(from.getStatus())) {
+        if (!"ACTIVE".equals(from.getStatus()) && !"LIMIT".equals(from.getStatus())) {
             throw new RuntimeException("from account is not active/limit");
         }
 
@@ -161,7 +200,7 @@ public class BankAccountService {
         if (to == null) {
             throw new RuntimeException("to account not found");
         }
-        if (!"ACTIVE".equals(to.getStatus())&&!"LIMIT".equals(to.getStatus())) {
+        if (!"ACTIVE".equals(to.getStatus()) && !"LIMIT".equals(to.getStatus())) {
             throw new RuntimeException("to account is not active/limit");
         }
 
@@ -191,7 +230,7 @@ public class BankAccountService {
                 amount,
                 "TRANSFER",
                 LocalDateTime.now(),
-                "转账:"+amount+"元",
+                "转账:" + amount + "元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -199,6 +238,13 @@ public class BankAccountService {
         return transaction;
     }
 
+    /**
+     * 获取账户信息。
+     *
+     * @param accountNumber 账户号。
+     * @return 对应的银行账户对象。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     // 获取余额（***改为个人信息查询）
     public BankAccount getAccountInfo(String accountNumber) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
@@ -208,12 +254,26 @@ public class BankAccountService {
         return account;
     }
 
-    // 获取交易历史
+    /**
+     * 获取账户的交易历史。
+     *
+     * @param accountNumber 账户号。
+     * @param start         起始时间。
+     * @param end           结束时间。
+     * @return 交易记录列表。
+     */
     public List<Transaction> getTransactionHistory(String accountNumber, LocalDateTime start, LocalDateTime end) {
         return transactionMapper.selectByAccountNumberAndTimeRange(accountNumber, start, end);
     }
 
-    // 更新账户状态
+    /**
+     * 更新账户状态。
+     *
+     * @param accountNumber 账户号。
+     * @param newStatus     新状态。
+     * @return 更新成功返回true，否则返回false。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     public boolean updateAccountStatus(String accountNumber, String newStatus) {
 
         // 首先获取账户的当前状态
@@ -255,28 +315,42 @@ public class BankAccountService {
         return "TX" + System.currentTimeMillis() + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
-    // 验证账户密码(登录)
+    /**
+     * 验证账户密码（登录）。
+     *
+     * @param accountNumber 账户号。
+     * @param password      密码。
+     * @return 密码正确且账户状态允许时返回true，否则返回false。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     public boolean verifyAccountPassword(String accountNumber, String password) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber); // 使用正确的方法名
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
         // 检查账户状态，只有ACTIVE或BLOCKED状态的账户才能验证密码
-        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
             // 对于已销户(CLOSED)或其他非活跃状态的账户，直接返回false，不允许验证密码
             return false;
         }
         return account.getPassword().equals(password);
     }
 
-    // 验证管理员账户密码(登录)
+    /**
+     * 验证管理员账户密码（登录）。
+     *
+     * @param accountNumber 账户号。
+     * @param password      密码。
+     * @return 密码正确且账户为管理员且状态允许时返回true，否则返回false。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     public boolean verifyAdminPassword(String accountNumber, String password) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
         if (account == null) {
             throw new RuntimeException("Account not found");
         }
         // 检查账户状态，只有ACTIVE或BLOCKED状态的账户才能验证密码
-        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus()) && !"BLOCKED".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
             // 对于已销户(CLOSED)或其他非活跃状态的账户，直接返回false，不允许验证密码
             return false;
         }
@@ -289,10 +363,14 @@ public class BankAccountService {
         return account.getPassword().equals(password);
     }
 
-
-
-
-
+    /**
+     * 更新账户密码。
+     *
+     * @param accountNumber 账户号。
+     * @param oldPassword   旧密码。
+     * @param newPassword   新密码。
+     * @return 更新成功返回true，否则返回false。
+     */
     // 更新账户密码：思考（能不能把验证账户密码结合到这个方法里面来，提高代码复用性）
     @Transactional
     public boolean updateAccountPassword(String accountNumber, String oldPassword, String newPassword) {
@@ -327,9 +405,13 @@ public class BankAccountService {
         return result > 0;
     }
 
-
-
-    // 查询账户的所有定期存款记录
+    /**
+     * 查询账户的所有定期存款记录。
+     *
+     * @param accountNumber 账户号。
+     * @return 定期存款交易记录列表。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     public List<Transaction> getFixedDepositTransactions(String accountNumber) {
         // 验证账户存在
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
@@ -359,9 +441,13 @@ public class BankAccountService {
         return fixedTransactions;
     }
 
-
-
-    // 根据定期类型计算利息（简化版）
+    /**
+     * 根据定期类型计算利息（简化版）。
+     *
+     * @param principal 本金。
+     * @param type      定期类型（如1年、3年、5年）。
+     * @return 计算得到的利息金额。
+     */
     private BigDecimal calculateInterestByType(BigDecimal principal, String type) {
         // 简化处理：根据类型设定利率
         BigDecimal interestRate = switch (type) {
@@ -375,7 +461,66 @@ public class BankAccountService {
         return principal.multiply(interestRate);
     }
 
-    //定期转活期操作
+    /**
+     * 活期转定期。
+     *
+     * @param accountNumber 账户号。
+     * @param amount        转存金额。
+     * @param password      账户密码。
+     * @param type          定期类型（如1年、3年、5年）。
+     * @return 转存交易记录。
+     * @throws RuntimeException 账户不存在、状态异常、密码错误或余额不足时抛出。
+     */
+    @Transactional
+    public Transaction convertCurrentToFixed(String accountNumber, BigDecimal amount, String password, String type) {
+        // 验证账户存在且有效
+        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
+        if (account == null) {
+            throw new RuntimeException("account not found");
+        }
+        if (!"ACTIVE".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
+            throw new RuntimeException("account is not active/limit");
+        }
+
+        // 验证密码
+        if (!account.getPassword().equals(password)) {
+            throw new RuntimeException("invalid password");
+        }
+
+        // 检查余额是否充足
+        if (account.getBalance().compareTo(amount) < 0) {
+            throw new RuntimeException("insufficient balance");
+        }
+
+        // 更新余额
+        BigDecimal newBalance = account.getBalance().subtract(amount);
+        bankAccountMapper.updateBalance(accountNumber, newBalance);
+
+        // 创建交易记录
+        Transaction transaction = new Transaction(
+                generateTransactionId(),
+                accountNumber,
+                accountNumber,
+                amount,
+                "CurrentToFixed" + type,
+                LocalDateTime.now(),
+                "活期转定期" + type + " " + amount + "元",
+                "COMPLETED"
+        );
+        transactionMapper.insertTransaction(transaction);
+
+        return transaction;
+    }
+
+    /**
+     * 定期转活期。
+     *
+     * @param accountNumber 账户号。
+     * @param transactionId 定期存款交易ID。
+     * @param password      账户密码。
+     * @return 转换成功返回true，否则抛出异常。
+     * @throws RuntimeException 账户不存在、状态异常、密码错误、交易记录异常或未到期时抛出。
+     */
     @Transactional
     public boolean convertFixedToCurrent(String accountNumber, String transactionId, String password) {
         // 验证账户存在且有效
@@ -383,7 +528,7 @@ public class BankAccountService {
         if (account == null) {
             throw new RuntimeException("account not found");
         }
-        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
+        if (!"ACTIVE".equals(account.getStatus()) && !"LIMIT".equals(account.getStatus())) {
             throw new RuntimeException("account status abnormal");
         }
 
@@ -473,66 +618,31 @@ public class BankAccountService {
         return maturityDate != null && !now.isBefore(maturityDate);
     }
 
-
-
-
-    // 活期转定期
-    @Transactional
-    public Transaction convertCurrentToFixed(String accountNumber, BigDecimal amount, String password,String type) {
-        // 验证账户存在且有效
-        BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
-        if (account == null) {
-            throw new RuntimeException("account not found");
-        }
-        if (!"ACTIVE".equals(account.getStatus())&&!"LIMIT".equals(account.getStatus())) {
-            throw new RuntimeException("account is not active/limit");
-        }
-
-        // 验证密码
-        if (!account.getPassword().equals(password)) {
-            throw new RuntimeException("invalid password");
-        }
-
-        // 检查余额是否充足
-        if (account.getBalance().compareTo(amount) < 0) {
-            throw new RuntimeException("insufficient balance");
-        }
-
-        // 更新余额
-        BigDecimal newBalance = account.getBalance().subtract(amount);
-        bankAccountMapper.updateBalance(accountNumber, newBalance);
-
-        // 创建交易记录
-        Transaction transaction = new Transaction(
-                generateTransactionId(),
-                accountNumber,
-                accountNumber,
-                amount,
-                "CurrentToFixed"+type,
-                LocalDateTime.now(),
-                "活期转定期"+type+" "+amount+"元",
-                "COMPLETED"
-        );
-        transactionMapper.insertTransaction(transaction);
-
-        return transaction;
-    }
-
-
-
-    //管理员部分********************************************************
-
-    // 获取所有账户信息（供管理员使用）
+    /**
+     * 获取所有账户信息（管理员）。
+     *
+     * @return 所有银行账户列表。
+     */
     public List<BankAccount> getAllAccounts() {
         return bankAccountMapper.selectAllAccounts();
     }
 
-    // 获取所有交易记录（供管理员使用）
+    /**
+     * 获取所有交易记录（管理员）。
+     *
+     * @return 所有交易记录列表。
+     */
     public List<Transaction> getAllTransactions() {
         return transactionMapper.selectAllTransactions();
     }
 
-    // 根据交易ID获取交易记录
+    /**
+     * 根据交易ID获取交易记录。
+     *
+     * @param transactionId 交易ID。
+     * @return 对应的交易记录对象。
+     * @throws RuntimeException 交易记录不存在时抛出。
+     */
     public Transaction getTransactionById(String transactionId) {
         Transaction transaction = transactionMapper.selectByTransactionId(transactionId);
         if (transaction == null) {
@@ -541,13 +651,25 @@ public class BankAccountService {
         return transaction;
     }
 
-
-    // 获取所有交易记录（按时间范围）
+    /**
+     * 获取所有交易记录（按时间范围，管理员）。
+     *
+     * @param start 起始时间。
+     * @param end   结束时间。
+     * @return 交易记录列表。
+     */
     public List<Transaction> getAllTransactionsByTimeRange(LocalDateTime start, LocalDateTime end) {
         return transactionMapper.selectAllTransactionsByTimeRange(start, end);
     }
 
-    // 更新账户类型（设置管理员权限）
+    /**
+     * 更新账户类型（设置管理员权限）。
+     *
+     * @param accountNumber  账户号。
+     * @param newAccountType 新账户类型。
+     * @return 更新成功返回true，否则返回false。
+     * @throws RuntimeException 账户不存在时抛出。
+     */
     public boolean updateAccountType(String accountNumber, String newAccountType) {
         BankAccount account = bankAccountMapper.selectByAccountNumber(accountNumber);
         if (account == null) {
@@ -559,16 +681,17 @@ public class BankAccountService {
         return result > 0;
     }
 
-// 商店逻辑**************************************************
+    // 商店逻辑**************************************************
 
-    // 商店消费
     /**
-     * 处理商店消费
-     * @param fromAccount 消费者账户
-     * @param password 消费者账户密码
-     * @param toAccount 商家账户
-     * @param amount 消费金额
-     * @return 交易记录
+     * 处理商店消费。
+     *
+     * @param fromAccount 消费者账户号。
+     * @param password    消费者账户密码。
+     * @param toAccount   商家账户号。
+     * @param amount      消费金额。
+     * @return 交易记录。
+     * @throws RuntimeException 账户不存在、状态异常、密码错误或余额不足时抛出。
      */
     @Transactional
     public Transaction processShopping(String fromAccount, String password, String toAccount, BigDecimal amount) {
@@ -616,7 +739,7 @@ public class BankAccountService {
                 amount,
                 "SHOPPING", // 商店消费特色交易类型
                 LocalDateTime.now(),
-                "商店消费"+amount+"元",
+                "商店消费" + amount + "元",
                 "COMPLETED"
         );
         transactionMapper.insertTransaction(transaction);
@@ -624,12 +747,11 @@ public class BankAccountService {
         return transaction;
     }
 
-
     /**
-     * 检查并更新违约交易状态
-     * @return 更新的交易数量
+     * 检查并更新违约交易状态。
+     *
+     * @return 更新的交易数量。
      */
-
     public int checkAndMarkOverdueTransactions() {
         // 获取所有交易记录
         List<Transaction> allTransactions = transactionMapper.selectAllTransactions();
@@ -671,7 +793,7 @@ public class BankAccountService {
                         transactionMapper.insertTransaction(deductionTransaction);
 
                         // 更新原交易状态为COMPLETED
-                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(),"COMPLETED",transaction.getRemark() + " (逾期自动扣款完成)");
+                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(), "COMPLETED", transaction.getRemark() + " (逾期自动扣款完成)");
                     } else {
                         // 如果余额不足，将账户拉入黑名单
                         bankAccountMapper.updateStatus(fromAccount.getAccountNumber(), "LIMIT");
@@ -690,7 +812,7 @@ public class BankAccountService {
                         transactionMapper.insertTransaction(blacklistTransaction);
 
                         // 更新交易状态为BREAK_CONTRACT
-                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(),"BREAK_CONTRACT",transaction.getRemark() + "(先用后付违约，余额不足被拉黑)");
+                        transactionMapper.updateTransactionStatusAndRemark(transaction.getTransactionId(), "BREAK_CONTRACT", transaction.getRemark() + "(先用后付违约，余额不足被拉黑)");
                     }
 
                     updatedCount++;
@@ -701,6 +823,16 @@ public class BankAccountService {
         return updatedCount;
     }
 
+    /**
+     * 处理先用后付交易。
+     *
+     * @param fromAccount 消费者账户号。
+     * @param password    消费者账户密码。
+     * @param toAccount   商家账户号。
+     * @param amount      消费金额。
+     * @return 交易记录。
+     * @throws RuntimeException 账户不存在、状态异常或密码错误时抛出。
+     */
     @Transactional
     public Transaction processPayLater(String fromAccount, String password, String toAccount, BigDecimal amount) {
         // 验证转出账户
@@ -708,7 +840,7 @@ public class BankAccountService {
         if (from == null) {
             throw new RuntimeException("消费者账户不存在");
         }
-        if (!"ACTIVE".equals(from.getStatus()) ) {
+        if (!"ACTIVE".equals(from.getStatus())) {
             throw new RuntimeException("消费者账户状态异常");
         }
 
@@ -738,15 +870,13 @@ public class BankAccountService {
                 amount,
                 "PAY_LATER", // 商店消费特色交易类型
                 LocalDateTime.now(),
-                "商店消费"+amount+"元",
+                "商店消费" + amount + "元",
                 "ARREARAGE"
         );
         transactionMapper.insertTransaction(transaction);
 
         return transaction;
     }
-
-
 
 
 }

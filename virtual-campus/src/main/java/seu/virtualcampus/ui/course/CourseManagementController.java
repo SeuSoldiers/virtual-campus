@@ -22,6 +22,12 @@ import static javafx.scene.control.Alert.AlertType.ERROR;
 import static javafx.scene.control.Alert.AlertType.INFORMATION;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
+/**
+ * 课程管理控制器。
+ * <p>
+ * 用于管理课程的增删改查、分页显示、表格交互等功能，支持课程的添加、编辑、删除和分页浏览。
+ * </p>
+ */
 public class CourseManagementController {
     private final ObservableList<Course> allCourses = FXCollections.observableArrayList();
     private final ObservableList<Course> displayedCourses = FXCollections.observableArrayList();
@@ -52,6 +58,10 @@ public class CourseManagementController {
     // 用于延迟设置窗口大小
     private Stage primaryStage;
 
+    /**
+     * 初始化界面组件和事件。
+     * <p>设置表格列、事件处理器、分页控件并加载课程数据。</p>
+     */
     @FXML
     private void initialize() {
         setupTableColumns();
@@ -60,6 +70,9 @@ public class CourseManagementController {
         loadCourses();
     }
 
+    /**
+     * 设置课程表格各列的属性和单元格工厂。
+     */
     private void setupTableColumns() {
         // 设置列宽
         courseIdColumn.setPrefWidth(80);
@@ -119,6 +132,9 @@ public class CourseManagementController {
         });
     }
 
+    /**
+     * 设置按钮、分页等事件处理器和样式。
+     */
     private void setupEventHandlers() {
         // 设置按钮样式和大小
         addButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14px; -fx-padding: 8px 16px;");
@@ -150,6 +166,9 @@ public class CourseManagementController {
         pageInfoLabel.setStyle("-fx-font-size: 12px; -fx-padding: 5px 10px;");
     }
 
+    /**
+     * 设置分页控件的样式和初始状态。
+     */
     private void setupPagination() {
         // 鼠标悬停效果
         prevPageButton.setOnMouseEntered(e -> prevPageButton.setStyle("-fx-background-color: #5a6268; -fx-text-fill: white; -fx-font-size: 12px; -fx-padding: 5px 10px;"));
@@ -165,6 +184,9 @@ public class CourseManagementController {
         paginationContainer.setStyle("-fx-padding: 10px; -fx-spacing: 15px;");
     }
 
+    /**
+     * 根据当前课程数据更新分页信息和表格内容。
+     */
     private void updatePagination() {
         if (allCourses.isEmpty()) {
             paginationContainer.setVisible(false);
@@ -188,6 +210,9 @@ public class CourseManagementController {
         updateTableForCurrentPage();
     }
 
+    /**
+     * 根据当前页码刷新表格显示的课程数据。
+     */
     private void updateTableForCurrentPage() {
         int fromIndex = (currentPage - 1) * itemsPerPage;
         int toIndex = Math.min(fromIndex + itemsPerPage, allCourses.size());
@@ -200,6 +225,9 @@ public class CourseManagementController {
         }
     }
 
+    /**
+     * 跳转到上一页并刷新表格。
+     */
     private void goToPreviousPage() {
         if (currentPage > 1) {
             currentPage--;
@@ -207,6 +235,9 @@ public class CourseManagementController {
         }
     }
 
+    /**
+     * 跳转到下一页并刷新表格。
+     */
     private void goToNextPage() {
         if (currentPage < totalPages) {
             currentPage++;
@@ -214,6 +245,9 @@ public class CourseManagementController {
         }
     }
 
+    /**
+     * 加载所有课程数据并刷新界面。
+     */
     private void loadCourses() {
         loadingLabel.setText("加载中...");
         loadingLabel.setStyle("-fx-font-size: 14px; -fx-padding: 10px;");
@@ -244,6 +278,13 @@ public class CourseManagementController {
         );
     }
 
+    /**
+     * 执行API请求，获取数据后回调处理。
+     *
+     * @param url            请求的API地址
+     * @param successHandler 成功回调处理器，参数为响应内容
+     * @param errorHandler   失败回调处理器，参数为错误信息
+     */
     private void executeApiRequest(String url, ResponseHandler successHandler, ErrorHandler errorHandler) {
         new Thread(() -> {
             try {
@@ -268,6 +309,9 @@ public class CourseManagementController {
         }).start();
     }
 
+    /**
+     * 打开添加课程对话框并提交新增课程。
+     */
     private void addCourse() {
         // 打开添加课程对话框
         CourseDialog dialog = new CourseDialog();
@@ -285,6 +329,11 @@ public class CourseManagementController {
         ));
     }
 
+    /**
+     * 打开编辑课程对话框并提交课程更新。
+     *
+     * @param course 需要编辑的课程对象
+     */
     private void editCourse(Course course) {
         // 打开编辑课程对话框
         CourseDialog dialog = new CourseDialog(course);
@@ -305,6 +354,11 @@ public class CourseManagementController {
         });
     }
 
+    /**
+     * 删除指定课程，操作前弹出确认对话框。
+     *
+     * @param course 需要删除的课程对象
+     */
     private void deleteCourse(Course course) {
         // 创建更详细的确认对话框
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -340,18 +394,50 @@ public class CourseManagementController {
         });
     }
 
+    /**
+     * 执行POST请求，提交数据到API。
+     *
+     * @param url            API地址
+     * @param data           提交的数据对象
+     * @param successHandler 成功回调
+     * @param errorHandler   失败回调
+     */
     private void executeApiPost(String url, Object data, Runnable successHandler, ErrorHandler errorHandler) {
         executeApiMethod(url, data, "POST", successHandler, errorHandler);
     }
 
+    /**
+     * 执行PUT请求，更新数据到API。
+     *
+     * @param url            API地址
+     * @param data           更新的数据对象
+     * @param successHandler 成功回调
+     * @param errorHandler   失败回调
+     */
     private void executeApiPut(String url, Object data, Runnable successHandler, ErrorHandler errorHandler) {
         executeApiMethod(url, data, "PUT", successHandler, errorHandler);
     }
 
+    /**
+     * 执行DELETE请求，删除API数据。
+     *
+     * @param url            API地址
+     * @param successHandler 成功回调
+     * @param errorHandler   失败回调
+     */
     private void executeApiDelete(String url, Runnable successHandler, ErrorHandler errorHandler) {
         executeApiMethod(url, null, "DELETE", successHandler, errorHandler);
     }
 
+    /**
+     * 通用API方法，根据method参数执行POST、PUT、DELETE等操作。
+     *
+     * @param url            API地址
+     * @param data           提交的数据对象（可为null）
+     * @param method         请求方法（POST/PUT/DELETE）
+     * @param successHandler 成功回调
+     * @param errorHandler   失败回调
+     */
     private void executeApiMethod(String url, Object data, String method, Runnable successHandler, ErrorHandler errorHandler) {
         new Thread(() -> {
             try {
@@ -391,13 +477,31 @@ public class CourseManagementController {
         }).start();
     }
 
+    /**
+     * API响应处理函数式接口。
+     */
     @FunctionalInterface
     private interface ResponseHandler {
+        /**
+         * 处理API响应内容。
+         *
+         * @param response API响应内容
+         * @throws Exception 处理过程中可能抛出的异常
+         */
         void handle(String response) throws Exception;
     }
 
+    /**
+     * API错误处理函数式接口。
+     */
     @FunctionalInterface
     private interface ErrorHandler {
+        /**
+         * 处理API错误信息。
+         *
+         * @param error 错误信息
+         */
         void handle(String error);
     }
 }
+

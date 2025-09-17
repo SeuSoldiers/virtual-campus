@@ -26,6 +26,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 活期转定期业务控制器。
+ * <p>
+ * 负责活期存款转为定期存款的相关操作及页面展示。
+ * </p>
+ */
 public class bank_ftocController implements Initializable {
     private static final Logger logger = Logger.getLogger(bank_ftocController.class.getName());
 

@@ -12,6 +12,11 @@ import seu.virtualcampus.mapper.CourseSelectionMapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 课程服务类。
+ * <p>
+ * 提供课程的增删改查、选课、退课、冲突检测等相关业务逻辑。
+ */
 @Service
 public class CourseService {
 
@@ -21,6 +26,11 @@ public class CourseService {
     @Autowired
     private CourseSelectionMapper courseSelectionMapper;
 
+    /**
+     * 新增课程。
+     *
+     * @param course 课程对象。
+     */
     // 增加课程
     public void courseAdd(Course course) {
         // 设置新课程的已选人数为0
@@ -28,6 +38,11 @@ public class CourseService {
         courseMapper.courseAdd(course);
     }
 
+    /**
+     * 删除课程。
+     *
+     * @param courseId 课程ID。
+     */
     // 删除课程
     @Transactional
     public void courseDelete(String courseId) {
@@ -39,6 +54,11 @@ public class CourseService {
         courseMapper.courseDelete(courseId);
     }
 
+    /**
+     * 更新课程信息。
+     *
+     * @param course 课程对象。
+     */
     // 更新课程
     public void courseUpdate(Course course) {
         // 先获取原有课程的选课人数
@@ -53,21 +73,45 @@ public class CourseService {
         courseMapper.courseUpdate(course);
     }
 
+    /**
+     * 根据ID查询课程。
+     *
+     * @param courseId 课程ID。
+     * @return 对应的课程对象，若不存在则返回null。
+     */
     // 查询课程
     public Course courseFind(String courseId) {
         return courseMapper.courseFind(courseId);
     }
 
+    /**
+     * 获取所有课程。
+     *
+     * @return 所有课程列表。
+     */
     // 获取所有课程
     public List<Course> getAllCourses() {
         return courseMapper.findAllCourses();
     }
 
+    /**
+     * 获取课程统计信息。
+     *
+     * @param courseId 课程ID。
+     * @return 课程统计信息对象。
+     */
     // 统计选课情况
     public CourseStats getCourseStats(String courseId) {
         return courseMapper.getCourseStats(courseId);
     }
 
+    /**
+     * 学生选课。
+     *
+     * @param studentId 学生ID。
+     * @param courseId  课程ID。
+     * @return 选课成功返回true，否则返回false。
+     */
     // 学生选课
     @Transactional
     public boolean selectCourse(String studentId, String courseId) {
@@ -106,6 +150,13 @@ public class CourseService {
         return false;
     }
 
+    /**
+     * 学生退课。
+     *
+     * @param studentId 学生ID。
+     * @param courseId  课程ID。
+     * @return 退课成功返回true，否则返回false。
+     */
     // 学生退课
     @Transactional
     public boolean dropCourse(String studentId, String courseId) {
@@ -126,6 +177,12 @@ public class CourseService {
         return false;
     }
 
+    /**
+     * 获取学生已选课程列表。
+     *
+     * @param studentId 学生ID。
+     * @return 学生已选课程列表。
+     */
     // 获取学生已选课程
     public List<Course> getStudentCourses(String studentId) {
         return courseSelectionMapper.findSelectionsByStudentId(studentId).stream()
@@ -133,16 +190,35 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 检查学生是否已选某课程。
+     *
+     * @param studentId 学生ID。
+     * @param courseId  课程ID。
+     * @return 如果已选则返回true，否则返回false。
+     */
     // 检查学生是否已选某课程
     public boolean isCourseSelected(String studentId, String courseId) {
         return courseSelectionMapper.checkSelection(studentId, courseId) > 0;
     }
 
+    /**
+     * 获取课程的选课人数。
+     *
+     * @param courseId 课程ID。
+     * @return 选课人数。
+     */
     // 获取课程选课人数
     public int getCourseEnrollmentCount(String courseId) {
         return courseSelectionMapper.getEnrollmentCount(courseId);
     }
 
+    /**
+     * 获取学生课程表（按星期和节数组织）。
+     *
+     * @param studentId 学生ID。
+     * @return 学生课程表。
+     */
     // 获取学生课程表（按星期和节数组织）
     public Map<String, Map<String, List<Course>>> getStudentTimetable(String studentId) {
         List<Course> courses = getStudentCourses(studentId);
@@ -241,6 +317,12 @@ public class CourseService {
         return conflicts;
     }
 
+    /**
+     * 获取可选课程（排除已选和冲突课程）。
+     *
+     * @param studentId 学生ID。
+     * @return 可选课程列表。
+     */
     // 获取可选课程（排除已选和冲突课程）
     public List<Course> getAvailableCourses(String studentId) {
         List<Course> allCourses = getAllCourses();
@@ -254,6 +336,13 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 获取推荐课程（基于学生已选课程和专业）。
+     *
+     * @param studentId 学生ID。
+     * @param major     专业名称。
+     * @return 推荐课程列表。
+     */
     // 获取推荐课程（基于学生已选课程和专业）
     public List<Course> getRecommendedCourses(String studentId, String major) {
         List<Course> availableCourses = getAvailableCourses(studentId);

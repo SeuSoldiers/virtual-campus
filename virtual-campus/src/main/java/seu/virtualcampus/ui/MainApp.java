@@ -12,12 +12,22 @@ import java.util.Objects;
 import java.util.logging.*;
 
 
+/**
+ * JavaFX应用主入口。
+ * <p>
+ * 负责应用初始化、主窗口启动及全局参数设置。
+ */
 public class MainApp extends Application {
     public static String token; // 登录后保存 token
     public static String role; // 'student' 或 'registrar'
     public static String username; // 新增，保存当前用户名
     public static String host = "127.0.0.1:12345"; // 新增，保存后端服务地址（ip:port）
 
+    /**
+     * 应用程序主入口。
+     *
+     * @param args 启动参数。
+     */
     public static void main(String[] args) {
         // 支持自定义ip和端口号，作为程序参数传递
         if (args.length > 0 && args[0] != null && args[0].matches("\\d+\\.\\d+\\.\\d+\\.\\d+:\\d+")) {
@@ -39,6 +49,12 @@ public class MainApp extends Application {
         launch(args);
     }
 
+    /**
+     * JavaFX启动方法，加载登录界面。
+     *
+     * @param stage 主舞台。
+     * @throws Exception 加载FXML或资源失败时抛出。
+     */
     @Override
     public void start(Stage stage) throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/login.fxml"));

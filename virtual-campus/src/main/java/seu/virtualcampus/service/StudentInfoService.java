@@ -8,6 +8,11 @@ import seu.virtualcampus.mapper.AuditRecordMapper;
 import seu.virtualcampus.mapper.StudentInfoMapper;
 
 
+/**
+ * 学生信息服务类。
+ * <p>
+ * 提供学生信息的查询与变更申请（需审核）等相关业务逻辑。
+ */
 @Service
 public class StudentInfoService {
     private final StudentInfoMapper studentInfoMapper;
@@ -20,14 +25,24 @@ public class StudentInfoService {
     }
 
 
+    /**
+     * 根据学生ID获取学生信息。
+     *
+     * @param studentId 学生ID。
+     * @return 对应的学生信息对象，若不存在则返回null。
+     */
     public StudentInfo getStudentInfo(Long studentId) {
         return studentInfoMapper.findById(studentId);
     }
 
 
     /**
-     * Submit changes as pending audit records. For simplicity, we compare fields and create
-     * per-field audit records for changed fields.
+     * 提交学生信息变更，生成待审核记录。
+     * <p>
+     * 会对比原有信息与新信息，仅对有变更的字段生成审核记录。
+     *
+     * @param studentId 学生ID。
+     * @param updated   新的学生信息对象。
      */
     public void submitChanges(Long studentId, StudentInfo updated) {
         StudentInfo original = studentInfoMapper.findById(studentId);
@@ -71,6 +86,13 @@ public class StudentInfoService {
     }
 
 
+    /**
+     * 判断两个字符串是否不相等。
+     *
+     * @param a 字符串a。
+     * @param b 字符串b。
+     * @return 不相等返回true，相等返回false。
+     */
     private boolean notEquals(String a, String b) {
         if (a == null && b == null) return false;
         if (a == null) return true;
@@ -78,11 +100,25 @@ public class StudentInfoService {
     }
 
 
+    /**
+     * 判断字符串是否非空。
+     *
+     * @param s 待判断字符串。
+     * @return 非空返回true，否则返回false。
+     */
     private boolean notEmpty(String s) {
         return s != null && !s.isEmpty();
     }
 
 
+    /**
+     * 为指定字段创建审核记录。
+     *
+     * @param studentId 学生ID。
+     * @param field     字段名。
+     * @param oldValue  原值。
+     * @param newValue  新值。
+     */
     private void createAuditForField(Long studentId, String field, String oldValue, String newValue) {
         AuditRecord r = new AuditRecord();
         r.setStudentId(studentId);

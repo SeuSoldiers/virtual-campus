@@ -23,6 +23,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 借阅中心页面控制器。
+ * <p>
+ * 展示当前借阅、借阅历史、预约记录，支持归还、预约兑现、取消预约等操作。
+ * </p>
+ */
 public class BorrowViewController {
 
     private static final String BASE = "http://" + MainApp.host + "/api/library";
@@ -68,7 +74,9 @@ public class BorrowViewController {
     private String currentUserId;
 
     /**
-     * 由 StudentLibraryController 调用
+     * 由 StudentLibraryController 调用，初始化页面。
+     *
+     * @param openTab 默认打开的tab（current/history/reservation）。
      */
     // ============== 初始化 ==============
     public void init(String openTab) {
@@ -124,6 +132,9 @@ public class BorrowViewController {
         }
     }
 
+    /**
+     * 绑定表格列。
+     */
     private void bindColumns() {
         // 当前借阅
         col1RecordId.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().recordId));

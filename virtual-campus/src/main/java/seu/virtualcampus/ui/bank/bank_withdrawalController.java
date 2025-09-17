@@ -19,6 +19,13 @@ import java.util.logging.Logger;
 import static javafx.scene.control.Alert.AlertType.*;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
+/**
+ * 银行取款业务控制器。
+ * <p>
+ * 负责处理用户取款操作及相关页面跳转。
+ * </p>
+ */
+
 public class bank_withdrawalController {
 
     @FXML
@@ -33,11 +40,21 @@ public class bank_withdrawalController {
     @FXML
     private Button yesbtn;
 
+    /**
+     * 取消取款，返回服务大厅。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void withdrawal_no(ActionEvent event) {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", nobtn);
     }
 
+    /**
+     * 确认取款，校验输入并发起取款请求。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void withdrawal_yes(ActionEvent event) {
         try {

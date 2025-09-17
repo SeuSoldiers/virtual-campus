@@ -21,6 +21,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 定期转活期业务控制器。
+ * <p>
+ * 负责定期存款转为活期存款的相关操作。
+ * </p>
+ */
 public class bank_ctofController {
 
     private final Logger logger = Logger.getLogger(bank_ctofController.class.getName());
@@ -47,6 +53,9 @@ public class bank_ctofController {
             .configure(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .setDateFormat(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
+    /**
+     * 初始化方法，设置定期选项组。
+     */
     @FXML
     public void initialize() {
         // 创建ToggleGroup并将RadioButton添加到组中

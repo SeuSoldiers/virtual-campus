@@ -26,6 +26,12 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 结算页面控制器。
+ * <p>
+ * 负责订单预览、创建、支付、跳转等结算相关功能。
+ * </p>
+ */
 public class CheckoutController implements Initializable {
     private static final Logger logger = Logger.getLogger(CheckoutController.class.getName());
     private final OkHttpClient httpClient = new OkHttpClient();
@@ -68,6 +74,12 @@ public class CheckoutController implements Initializable {
     private String currentOrderId; // 可为空，创建订单后赋值
     private String currentUserId;
 
+    /**
+     * 初始化方法，完成表格、控件初始化及首次预览。
+     *
+     * @param location  FXML资源URL
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 绑定列
@@ -105,6 +117,13 @@ public class CheckoutController implements Initializable {
         handlePreview();
     }
 
+    /**
+     * 订单预览处理。
+     * <p>
+     * 发送请求获取订单预览数据，更新表格和金额显示。
+     * </p>
+     * 日志记录请求和响应详情，处理异常。
+     */
     @FXML
     private void handlePreview() {
         String previewUrl = baseUrl + "/api/orders/preview?userId=" + currentUserId;
@@ -169,6 +188,13 @@ public class CheckoutController implements Initializable {
         });
     }
 
+    /**
+     * 创建订单处理。
+     * <p>
+     * 发送请求创建订单，更新当前订单ID，启用支付和查看按钮。
+     * </p>
+     * 日志记录请求和响应详情，处理异常。
+     */
     @FXML
     private void handleCreateOrder() {
         try {
@@ -206,6 +232,13 @@ public class CheckoutController implements Initializable {
         }
     }
 
+    /**
+     * 订单支付处理。
+     * <p>
+     * 发送请求支付当前订单，处理支付结果，更新界面状态。
+     * </p>
+     * 日志记录请求和响应详情，处理异常。
+     */
     @FXML
     private void handlePayOrder() {
         if (currentOrderId == null || currentOrderId.isEmpty()) {
@@ -315,6 +348,13 @@ public class CheckoutController implements Initializable {
         }
     }
 
+    /**
+     * 查看订单详情处理。
+     * <p>
+     * 打开订单详情页面，传递当前订单ID。
+     * </p>
+     * 日志记录操作详情，处理异常。
+     */
     @FXML
     private void handleViewOrder() {
         if (currentOrderId == null || currentOrderId.isEmpty()) {
@@ -335,6 +375,13 @@ public class CheckoutController implements Initializable {
         }
     }
 
+    /**
+     * 返回购物车处理。
+     * <p>
+     * 跳转回购物车页面。
+     * </p>
+     * 日志记录操作详情，处理异常。
+     */
     @FXML
     private void handleBackToCart() {
         try {
@@ -359,6 +406,12 @@ public class CheckoutController implements Initializable {
         }
     }
 
+    /**
+     * 订单项数据模型。
+     * <p>
+     * 用于在表格中显示订单项的属性。
+     * </p>
+     */
     public static class OrderItemModel {
         private final SimpleStringProperty productName;
         private final SimpleDoubleProperty productPrice;

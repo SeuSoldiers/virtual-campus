@@ -18,6 +18,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+/**
+ * 银行开户控制器。
+ * <p>
+ * 负责用户开户操作及相关页面跳转。
+ * </p>
+ */
+
 public class bank_openController {
 
     private static final Logger logger = Logger.getLogger(bank_openController.class.getName());
@@ -47,6 +54,9 @@ public class bank_openController {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_login.fxml", back_btn);
     }
 
+    /**
+     * 处理开户操作，校验输入并发起开户请求。
+     */
     @FXML
     private void handleOpenAccount() {
         // 获取用户输入的数据

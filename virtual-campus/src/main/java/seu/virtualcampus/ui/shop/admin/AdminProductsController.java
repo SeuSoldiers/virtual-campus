@@ -24,7 +24,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * 管理员商品管理控制器
+ * 管理员商品管理控制器。
+ * <p>
+ * 负责商品的增删改查、分页、搜索、状态切换等后台管理功能。
+ * </p>
  */
 public class AdminProductsController implements Initializable {
 
@@ -101,6 +104,12 @@ public class AdminProductsController implements Initializable {
         return "OFF";
     }
 
+    /**
+     * 初始化方法，完成控件、表格、权限等初始化。
+     *
+     * @param location  FXML资源URL
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
@@ -219,7 +228,7 @@ public class AdminProductsController implements Initializable {
     }
 
     /**
-     * 初始化表格列
+     * 初始化表格列。
      */
     private void initializeTableColumns() {
         idColumn.setCellValueFactory(cellData -> cellData.getValue().idProperty());
@@ -300,7 +309,7 @@ public class AdminProductsController implements Initializable {
     }
 
     /**
-     * 初始化事件处理
+     * 初始化事件处理。
      */
     private void initializeEventHandlers() {
         // 初始化ChoiceBox的选项和默认值
@@ -320,14 +329,16 @@ public class AdminProductsController implements Initializable {
     }
 
     /**
-     * 检查是否为管理员
+     * 检查当前用户是否为管理员。
+     *
+     * @return 是否为管理员
      */
     private boolean isAdmin() {
         return "ShopMgr".equalsIgnoreCase(MainApp.role);
     }
 
     /**
-     * 更新当前用户显示
+     * 更新当前用户显示信息。
      */
     private void updateCurrentUserDisplay() {
         currentUserLabel.setText("当前用户: " + (MainApp.username != null ? MainApp.username : "未知用户") +
@@ -335,7 +346,7 @@ public class AdminProductsController implements Initializable {
     }
 
     /**
-     * 加载商品列表
+     * 加载商品列表。
      */
     private void loadProducts() {
         String searchText = searchField.getText() != null ? searchField.getText().trim() : "";

@@ -19,9 +19,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+/**
+ * 学籍管理员界面控制器，负责处理待审核记录的加载、审批和驳回等操作。
+ */
 public class RegistrarController {
+    /**
+     * 日志记录器
+     */
     private static final Logger logger = Logger.getLogger(RegistrarController.class.getName());
+    /**
+     * HTTP客户端
+     */
     private final OkHttpClient client = new OkHttpClient();
+    /**
+     * JSON对象映射器
+     */
     private final ObjectMapper mapper = new ObjectMapper();
     @FXML
     private TableView<AuditRecordView> auditTable;
@@ -32,6 +44,9 @@ public class RegistrarController {
     @FXML
     private Label msgLabel;
 
+    /**
+     * 初始化方法，绑定表格列并加载待审核记录。
+     */
     @FXML
     public void initialize() {
         // 表格列绑定
@@ -47,6 +62,10 @@ public class RegistrarController {
     }
 
 
+    /**
+     * 加载待审核的学籍变更记录。
+     * 若网络异常或请求失败，会在界面显示提示信息。
+     */
     private void loadPending() {
         Request request = new Request.Builder()
                 .url("http://" + MainApp.host + "/api/audit/pending")
@@ -88,20 +107,37 @@ public class RegistrarController {
         });
     }
 
+    /**
+     * 获取当前选中的审核记录。
+     *
+     * @return 当前选中的AuditRecordView对象，若无选中则返回null
+     */
     private AuditRecordView getSelectedRecord() {
         return auditTable.getSelectionModel().getSelectedItem();
     }
 
+    /**
+     * 审批选中记录。
+     * 触发审核通过操作。
+     */
     @FXML
     private void handleApprove() {
         reviewSelected(true);
     }
 
-    @FXML
+    /**
+     * 驳回选中记录。
+     * 触发审核不通过操作。
+     */
     private void handleReject() {
         reviewSelected(false);
     }
 
+    /**
+     * 审核选中的记录。
+     *
+     * @param approve 是否通过审核，true为通过，false为驳回
+     */
     private void reviewSelected(boolean approve) {
         AuditRecordView selected = getSelectedRecord();
         if (selected == null) {
@@ -130,6 +166,11 @@ public class RegistrarController {
         });
     }
 
+    /**
+     * 返回到主面板界面。
+     *
+     * @param event 触发返回的事件对象
+     */
     @FXML
     private void handleBack(javafx.event.ActionEvent event) {
         try {
@@ -144,7 +185,18 @@ public class RegistrarController {
         }
     }
 
-    // 表格数据模型
+    /**
+     * 审核记录表格的数据模型。
+     *
+     * @param id         记录ID
+     * @param studentId  学生ID
+     * @param field      变更字段
+     * @param oldValue   原值
+     * @param newValue   新值
+     * @param createTime 创建时间
+     * @param reviewTime 审核时间
+     * @param remark     备注
+     */
     public record AuditRecordView(String id, String studentId, String field, String oldValue, String newValue,
                                   String createTime, String reviewTime, String remark) {
     }

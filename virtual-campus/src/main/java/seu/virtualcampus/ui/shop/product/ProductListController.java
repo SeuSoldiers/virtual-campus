@@ -10,7 +10,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +29,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 商品列表页面控制器。
+ * <p>
+ * 负责商品列表的展示、搜索、排序、分页、跳转等功能。
+ * </p>
+ */
 public class ProductListController {
     private static final Logger logger = Logger.getLogger(ProductListController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
@@ -58,6 +63,9 @@ public class ProductListController {
     private ScheduledExecutorService poller;
     private volatile String lastSignature = null;
 
+    /**
+     * 初始化方法，完成排序、表格、轮询等初始化。
+     */
     @FXML
     public void initialize() {
         // 初始化排序选择框（中文显示 -> 参数值）
@@ -137,6 +145,9 @@ public class ProductListController {
         });
     }
 
+    /**
+     * 搜索商品。
+     */
     @FXML
     private void handleSearch() {
         currentKeyword = searchField.getText().trim();
@@ -144,6 +155,9 @@ public class ProductListController {
         loadProducts(false);
     }
 
+    /**
+     * 排序方式变更处理。
+     */
     @FXML
     private void handleSortChange() {
         currentSort = sortDisplayToValue.getOrDefault(sortChoiceBox.getValue(), "name,asc");
@@ -151,8 +165,14 @@ public class ProductListController {
         loadProducts(false);
     }
 
+    /**
+     * 表格双击事件处理。
+     *
+     * @param event 鼠标事件
+     * @throws IOException 加载页面失败时抛出
+     */
     @FXML
-    private void handleTableClick(MouseEvent event) throws IOException {
+    private void handleTableClick(javafx.scene.input.MouseEvent event) throws IOException {
         if (event.getClickCount() == 2) { // 双击
             Product selectedProduct = productTable.getSelectionModel().getSelectedItem();
             if (selectedProduct != null) {
@@ -161,6 +181,9 @@ public class ProductListController {
         }
     }
 
+    /**
+     * 上一页。
+     */
     @FXML
     private void handlePrevPage() {
         if (currentPage > 1) {
@@ -169,6 +192,9 @@ public class ProductListController {
         }
     }
 
+    /**
+     * 下一页。
+     */
     @FXML
     private void handleNextPage() {
         long totalPages = (totalCount + pageSize - 1) / pageSize;
@@ -182,7 +208,11 @@ public class ProductListController {
         loadProducts(false);
     }
 
-    // silent=true 时仅在数据变化时刷新UI且不提示信息
+    /**
+     * 加载商品列表（可静默）。
+     *
+     * @param silent 是否静默加载
+     */
     private void loadProducts(boolean silent) {
         // 构建请求URL
         HttpUrl.Builder urlBuilder;
@@ -259,6 +289,12 @@ public class ProductListController {
         });
     }
 
+    /**
+     * 构建商品签名。
+     *
+     * @param products 商品列表
+     * @return 签名字符串
+     */
     private String buildSignature(List<Product> products) {
         StringBuilder sb = new StringBuilder(products.size() * 16);
         for (Product p : products) {
@@ -271,6 +307,9 @@ public class ProductListController {
         return Integer.toHexString(sb.toString().hashCode());
     }
 
+    /**
+     * 启动商品列表轮询。
+     */
     private void startPolling() {
         if (poller != null && !poller.isShutdown()) return;
         poller = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -289,6 +328,9 @@ public class ProductListController {
         }, 10, 10, TimeUnit.SECONDS);
     }
 
+    /**
+     * 停止商品列表轮询。
+     */
     private void stopPolling() {
         if (poller != null) {
             poller.shutdownNow();
@@ -296,7 +338,9 @@ public class ProductListController {
         }
     }
 
-    // 让表格高度刚好容纳 pageSize 行，避免出现表格内部空白
+    /**
+     * 调整表格高度以适配分页。
+     */
     private void applyFixedRowHeight() {
         try {
             double rowHeight = 36; // 每行高度（根据字体略作调整）
@@ -310,6 +354,9 @@ public class ProductListController {
         }
     }
 
+    /**
+     * 更新分页信息。
+     */
     private void updatePagination() {
         long totalPages = Math.max(1, (totalCount + pageSize - 1) / pageSize);
 
@@ -335,6 +382,12 @@ public class ProductListController {
         }
     }
 
+    /**
+     * 打开商品详情页面。
+     *
+     * @param productId 商品ID
+     * @throws IOException 加载页面失败时抛出
+     */
     private void openProductDetail(String productId) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/shop/product_detail.fxml"));
         Parent root = loader.load();
@@ -345,11 +398,20 @@ public class ProductListController {
         stage.setScene(new Scene(root));
     }
 
+    /**
+     * 返回上一页。
+     */
     @FXML
     private void handleBack() {
         DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", productTable);
     }
 
+    /**
+     * 显示消息。
+     *
+     * @param message 消息内容
+     * @param isError 是否为错误
+     */
     private void showMessage(String message, boolean isError) {
         msgLabel.setText(message);
         msgLabel.setTextFill(isError ? javafx.scene.paint.Color.RED : javafx.scene.paint.Color.GREEN);

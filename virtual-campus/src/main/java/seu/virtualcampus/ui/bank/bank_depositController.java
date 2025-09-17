@@ -15,6 +15,13 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
+/**
+ * 银行存款业务控制器。
+ * <p>
+ * 负责处理用户存款操作及相关页面跳转。
+ * </p>
+ */
+
 public class bank_depositController {
 
     @FXML
@@ -26,11 +33,21 @@ public class bank_depositController {
     @FXML
     private Button yesbtn;
 
+    /**
+     * 取消存款，返回服务大厅。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void deposit_no(ActionEvent event) {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", nobtn);
     }
 
+    /**
+     * 确认存款，校验输入并发起存款请求。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void deposit_yes(ActionEvent event) {
         try {

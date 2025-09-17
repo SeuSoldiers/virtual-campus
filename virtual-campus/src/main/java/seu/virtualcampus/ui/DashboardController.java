@@ -19,6 +19,12 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 主面板控制器。
+ * <p>
+ * 负责根据用户角色动态生成入口按钮，页面跳转及全局提示等功能。
+ * </p>
+ */
 public class DashboardController {
     private final Logger logger = Logger.getLogger(DashboardController.class.getName());
     @FXML
@@ -29,7 +35,11 @@ public class DashboardController {
     private String username;
 
     /**
-     * 统一页面跳转方法，根据 FXML 路径切换 Scene
+     * 页面跳转方法，根据FXML路径切换Scene。
+     *
+     * @param fxmlPath FXML文件路径。
+     * @param node     当前节点，用于获取Stage。
+     * @throws RuntimeException 如果加载FXML文件失败。
      */
     public static void navigateToScene(String fxmlPath, Node node) {
         try {
@@ -44,7 +54,12 @@ public class DashboardController {
     }
 
     /**
-     * 显示错误提示
+     * 显示错误提示。
+     *
+     * @param title   弹窗标题。
+     * @param message 提示内容。
+     * @param header  弹窗头部内容。
+     * @param type    弹窗类型。
      */
     public static void showAlert(String title, String message, String header, Alert.AlertType type) {
         Alert alert = new Alert(type != null ? type : Alert.AlertType.ERROR);
@@ -67,6 +82,12 @@ public class DashboardController {
         }
     }
 
+    /**
+     * 设置用户信息并刷新欢迎语和入口。
+     *
+     * @param username 用户名。
+     * @param role     用户角色。
+     */
     public void setUserInfo(String username, String role) {
         this.userRole = role;
         this.username = username;
@@ -74,6 +95,9 @@ public class DashboardController {
         setupEntries();
     }
 
+    /**
+     * 动态生成入口按钮，根据用户角色展示不同功能。
+     */
     private void setupEntries() {
         entryBox.getChildren().clear();
         int cnt = 0;
@@ -135,6 +159,13 @@ public class DashboardController {
         entryBox.add(libraryBtn, cnt % 4, cnt / 4);
     }
 
+    /**
+     * 创建带图标的按钮。
+     *
+     * @param text     按钮文本。
+     * @param iconPath 图标路径。
+     * @return 创建的按钮对象。
+     */
     private Button createButtonWithIcon(String text, String iconPath) {
         Button button = new Button(text);
         Tooltip tooltip = new Tooltip(text);
@@ -183,6 +214,9 @@ public class DashboardController {
         return button;
     }
 
+    /**
+     * 打开选课界面。
+     */
     private void openCourseSelectionUI() {
         try {
             logger.info("学生 " + this.username + " 尝试打开选课系统");

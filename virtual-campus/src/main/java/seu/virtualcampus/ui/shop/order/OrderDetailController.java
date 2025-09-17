@@ -8,16 +8,12 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import okhttp3.*;
-import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -29,7 +25,10 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 /**
- * 订单详情页面控制器
+ * 订单详情页面控制器。
+ * <p>
+ * 负责订单详情的展示、确认收货、返回等功能。
+ * </p>
  */
 public class OrderDetailController implements Initializable {
     private static final Logger logger = Logger.getLogger(OrderDetailController.class.getName());
@@ -37,6 +36,8 @@ public class OrderDetailController implements Initializable {
     private final OkHttpClient httpClient = new OkHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl = "http://" + MainApp.host;
+    @FXML
+    public Button backButton;
     @FXML
     private Label orderIdLabel;
     @FXML
@@ -68,12 +69,16 @@ public class OrderDetailController implements Initializable {
     @FXML
     private Button copyOrderIdButton;
     @FXML
-    public Button backButton;
-    @FXML
     private Button refreshButton;
     private String orderId;
     private String currentUserId;
 
+    /**
+     * 初始化方法，完成表格、控件初始化及事件绑定。
+     *
+     * @param location  FXML资源URL
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 初始化表格列
@@ -132,7 +137,9 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 设置订单ID并加载订单详情
+     * 设置订单ID并加载订单详情。
+     *
+     * @param orderId 订单ID
      */
     public void setOrderId(String orderId) {
         this.orderId = orderId;
@@ -140,7 +147,7 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 页面显示时加载订单详情
+     * 页面显示时加载订单详情。
      */
     public void onShown() {
         if (orderId != null) {
@@ -149,7 +156,7 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 加载订单详情
+     * 加载订单详情。
      */
     private void loadOrderDetail() {
         if (orderId == null || orderId.isEmpty()) {
@@ -280,7 +287,9 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 更新订单详情显示
+     * 更新订单详情显示。
+     *
+     * @param orderDetail 订单详情数据
      */
     private void updateOrderDetail(OrderDetailResponse orderDetail) {
         // 更新订单基本信息
@@ -314,7 +323,9 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 根据订单状态更新按钮可见性
+     * 根据订单状态更新按钮可见性。
+     *
+     * @param status 订单状态
      */
     private void updateButtonVisibility(String status) {
         logger.info(String.format("[OrderDetail] 按钮可见性检查: status=%s", status));
@@ -323,7 +334,10 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 获取状态显示文本
+     * 获取状态显示文本。
+     *
+     * @param status 状态字符串
+     * @return 状态中文描述
      */
     private String getStatusText(String status) {
         if (status == null) return "";
@@ -349,7 +363,7 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 确认收货
+     * 确认收货。
      */
     @FXML
     private void confirmOrder() {
@@ -393,7 +407,7 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 返回首页
+     * 返回首页。
      */
     @FXML
     private void goBackToHome() {
@@ -402,7 +416,10 @@ public class OrderDetailController implements Initializable {
     }
 
     /**
-     * 显示提示对话框
+     * 显示提示对话框。
+     *
+     * @param title   标题
+     * @param message 内容
      */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

@@ -22,6 +22,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 图书详情页面控制器。
+ * <p>
+ * 用于展示图书详细信息、所有副本状态，并支持借阅、归还、预约等操作。
+ * </p>
+ */
 public class BookDetailController {
 
     private static final String BASE = "http://" + MainApp.host + "/api/library";
@@ -57,6 +63,13 @@ public class BookDetailController {
     }
 
     // ====== 初始化 ======
+
+    /**
+     * 初始化页面，设置ISBN、标题和当前用户。
+     *
+     * @param isbn  图书ISBN。
+     * @param title 图书标题。
+     */
     public void init(String isbn, String title) {
         this.isbn = isbn;
         this.bookTitle = title;
@@ -67,6 +80,9 @@ public class BookDetailController {
         loadCopiesAndRefreshButtons();
     }
 
+    /**
+     * 绑定表格列。
+     */
     private void bindColumns() {
         colBookId.setCellValueFactory(c -> new ReadOnlyStringWrapper(nvl(c.getValue().getBookId())));
         colStatus.setCellValueFactory(c -> new ReadOnlyStringWrapper(nvl(c.getValue().getStatus())));
@@ -74,6 +90,10 @@ public class BookDetailController {
     }
 
     // ====== 数据加载 ======
+
+    /**
+     * 加载图书信息。
+     */
     private void loadBookInfo() {
         new Thread(() -> {
             try {
@@ -105,6 +125,9 @@ public class BookDetailController {
         }).start();
     }
 
+    /**
+     * 加载副本并刷新按钮状态。
+     */
     private void loadCopiesAndRefreshButtons() {
         new Thread(() -> {
             try {
@@ -127,7 +150,7 @@ public class BookDetailController {
     }
 
     /**
-     * 根据当前数据刷新按钮可用性
+     * 根据当前数据刷新按钮可用性。
      */
     private void refreshButtons() {
         boolean hasAvailable = tableCopies.getItems().stream().anyMatch(c -> "IN_LIBRARY".equalsIgnoreCase(nvl(c.getStatus())));
@@ -161,6 +184,10 @@ public class BookDetailController {
     }
 
     // ====== 交互 ======
+
+    /**
+     * 借阅按钮事件。
+     */
     @FXML
     private void onBorrow() {
         BookCopy sel = tableCopies.getSelectionModel().getSelectedItem();
@@ -192,6 +219,9 @@ public class BookDetailController {
         }).start();
     }
 
+    /**
+     * 归还按钮事件。
+     */
     @FXML
     private void onReturn() {
         BookCopy sel = tableCopies.getSelectionModel().getSelectedItem();
@@ -248,6 +278,9 @@ public class BookDetailController {
 
     // ====== 调用后端的小工具 ======
 
+    /**
+     * 预约按钮事件。
+     */
     @FXML
     private void onReserve() {
         // 有可借副本就不允许预约
@@ -276,6 +309,9 @@ public class BookDetailController {
         }).start();
     }
 
+    /**
+     * 取消预约按钮事件。
+     */
     @FXML
     private void onCancelReserve() {
         // 先在 FX 线程做确认
@@ -355,6 +391,11 @@ public class BookDetailController {
         return b;
     }
 
+    /**
+     * 显示提示信息。
+     *
+     * @param msg 提示内容。
+     */
     private void setMsg(String msg, boolean isErr) {
         Platform.runLater(() -> {
             lblMessage.setText(msg);

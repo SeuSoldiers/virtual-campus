@@ -18,6 +18,13 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * 银行转账业务控制器。
+ * <p>
+ * 负责处理用户转账操作及相关页面跳转。
+ * </p>
+ */
+
 public class bank_transferController {
 
     @FXML
@@ -40,6 +47,11 @@ public class bank_transferController {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_service.fxml", nobtn);
     }
 
+    /**
+     * 确认转账，校验输入并发起转账请求。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void transfer_yes(ActionEvent event) {
         try {

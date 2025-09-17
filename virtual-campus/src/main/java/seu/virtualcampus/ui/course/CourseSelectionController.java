@@ -29,6 +29,12 @@ import java.util.logging.Logger;
 import static javafx.scene.control.Alert.AlertType.*;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
+/**
+ * 课程选课控制器。
+ * <p>
+ * 用于学生选课、退课、课程搜索、分页浏览、冲突检测等功能，支持课程表格交互和选课状态管理。
+ * </p>
+ */
 public class CourseSelectionController {
     private final ObservableList<Course> allCourses = FXCollections.observableArrayList();
     private final ObservableList<Course> filteredCourses = FXCollections.observableArrayList();
@@ -76,6 +82,11 @@ public class CourseSelectionController {
     // 用于跟踪是否正在执行操作
     private boolean isOperationInProgress = false;
 
+    /**
+     * 设置当前学生ID，并加载其可选课程和已选课程。
+     *
+     * @param studentId 当前学生学号
+     */
     public void setStudentId(String studentId) {
         this.studentId = studentId;
         studentIdLabel.setText("学号: " + studentId);
@@ -83,6 +94,10 @@ public class CourseSelectionController {
         loadSelectedCourses();
     }
 
+    /**
+     * 初始化界面组件和事件。
+     * <p>设置表格列、样式、事件处理器和分页控件。</p>
+     */
     @FXML
     private void initialize() {
         try {
@@ -96,6 +111,9 @@ public class CourseSelectionController {
         }
     }
 
+    /**
+     * 设置课程表格的行样式，显示选课、满员、冲突等状态。
+     */
     private void setupTableStyles() {
         // 设置课程表格行样式，显示冲突状态
         courseTable.setRowFactory(tv -> new TableRow<>() {
@@ -124,6 +142,9 @@ public class CourseSelectionController {
         });
     }
 
+    /**
+     * 设置所有课程和已选课程表格的列属性。
+     */
     private void setupTableColumns() {
         // 所有课程表格列
         courseIdColumn.setCellValueFactory(new PropertyValueFactory<>("courseId"));
@@ -146,6 +167,9 @@ public class CourseSelectionController {
         setupActionColumns();
     }
 
+    /**
+     * 设置课程表格的操作列（选课、退课按钮）。
+     */
     private void setupActionColumns() {
         actionColumn.setCellFactory(param -> new TableCell<>() {
             private final Button selectButton = new Button("选课");
@@ -227,6 +251,9 @@ public class CourseSelectionController {
         });
     }
 
+    /**
+     * 设置按钮、分页等事件处理器和样式。
+     */
     private void setupEventHandlers() {
         searchButton.setOnAction(e -> {
             currentSearchKeyword = searchField.getText().trim();
@@ -257,11 +284,17 @@ public class CourseSelectionController {
         pageInfoLabel.setStyle("-fx-font-size: 12px; -fx-padding: 5px 10px;");
     }
 
+    /**
+     * 设置分页控件的初始状态。
+     */
     private void setupPagination() {
         // 初始隐藏分页控件
         paginationContainer.setVisible(false);
     }
 
+    /**
+     * 根据当前课程数据更新分页信息和表格内容。
+     */
     private void updatePagination() {
         if (filteredCourses.isEmpty()) {
             paginationContainer.setVisible(false);
@@ -293,6 +326,9 @@ public class CourseSelectionController {
         updateTableForCurrentPage();
     }
 
+    /**
+     * 根据当前页码刷新表格显示的课程数据。
+     */
     private void updateTableForCurrentPage() {
         int fromIndex = (currentPage - 1) * itemsPerPage;
         int toIndex = Math.min(fromIndex + itemsPerPage, filteredCourses.size());
@@ -307,6 +343,9 @@ public class CourseSelectionController {
         }
     }
 
+    /**
+     * 跳转到上一页并刷新表格。
+     */
     private void goToPreviousPage() {
         if (currentPage > 1) {
             currentPage--;
@@ -314,6 +353,9 @@ public class CourseSelectionController {
         }
     }
 
+    /**
+     * 跳转到下一页并刷新表格。
+     */
     private void goToNextPage() {
         if (currentPage < totalPages) {
             currentPage++;
@@ -321,6 +363,9 @@ public class CourseSelectionController {
         }
     }
 
+    /**
+     * 加载所有可选课程数据。
+     */
     private void loadAllCourses() {
         loadingLabel.setText("加载中...");
         executeApiRequest("http://" + MainApp.host + "/api/course/all",
@@ -365,6 +410,9 @@ public class CourseSelectionController {
         );
     }
 
+    /**
+     * 加载当前学生已选课程数据。
+     */
     private void loadSelectedCourses() {
         executeApiRequest("http://" + MainApp.host + "/api/course/student/" + studentId,
                 response -> {
@@ -393,7 +441,9 @@ public class CourseSelectionController {
         );
     }
 
-    // 更新已选课程的时间段映射
+    /**
+     * 更新已选课程的时间段映射。
+     */
     private void updateTimeSlotsMap() {
         timeSlotsMap.clear();
         for (Course course : selectedCourses) {
@@ -672,3 +722,4 @@ public class CourseSelectionController {
         void handle(String error);
     }
 }
+

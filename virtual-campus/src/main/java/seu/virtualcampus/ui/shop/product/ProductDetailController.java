@@ -24,6 +24,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 商品详情页面控制器。
+ * <p>
+ * 负责商品详情的展示、加购、轮询库存等功能。
+ * </p>
+ */
 public class ProductDetailController {
     private static final Logger logger = Logger.getLogger(ProductDetailController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
@@ -42,6 +48,9 @@ public class ProductDetailController {
     // 轮询（详情）
     private ScheduledExecutorService poller;
 
+    /**
+     * 初始化方法，完成数量选择器初始化及本地校验。
+     */
     @FXML
     public void initialize() {
         // 初始化数量选择器 (默认范围1-1，加载商品后会更新)
@@ -75,7 +84,9 @@ public class ProductDetailController {
     }
 
     /**
-     * 设置要显示的商品ID并加载商品详情
+     * 设置要显示的商品ID并加载商品详情。
+     *
+     * @param productId 商品ID
      */
     public void setProductId(String productId) {
         this.currentProductId = productId;
@@ -84,7 +95,7 @@ public class ProductDetailController {
     }
 
     /**
-     * 从URL加载商品详情
+     * 从URL加载商品详情。
      */
     private void loadProductDetail() {
         if (currentProductId == null || currentProductId.isEmpty()) {
@@ -135,7 +146,9 @@ public class ProductDetailController {
     }
 
     /**
-     * 显示商品详情信息
+     * 显示商品详情信息。
+     *
+     * @param product 商品对象
      */
     private void displayProductDetail(Product product) {
         productIdLabel.setText(product.getProductId());
@@ -173,6 +186,9 @@ public class ProductDetailController {
         }
     }
 
+    /**
+     * 加入购物车操作。
+     */
     @FXML
     private void handleAddToCart() {
         if (currentProduct == null) {
@@ -207,7 +223,8 @@ public class ProductDetailController {
             // 纠正显示为最大可购买数量
             try {
                 quantitySpinner.getValueFactory().setValue(Math.max(1, stock));
-            } catch (Exception ignore) { }
+            } catch (Exception ignore) {
+            }
             javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
             alert.setTitle("库存不足");
             alert.setHeaderText("该商品库存不足");
@@ -285,18 +302,24 @@ public class ProductDetailController {
         });
     }
 
+    /**
+     * 查看购物车页面。
+     */
     @FXML
     private void handleViewCart() {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/shop/cart.fxml", productIdLabel);
     }
 
+    /**
+     * 返回商品列表页面。
+     */
     @FXML
     private void handleBackToList() {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/shop/product_list.fxml", productIdLabel);
     }
 
     /**
-     * 重置添加到购物车按钮状态
+     * 重置加入购物车按钮状态。
      */
     private void resetAddToCartButton() {
         addToCartButton.setText("加入购物车");
@@ -306,7 +329,7 @@ public class ProductDetailController {
     }
 
     /**
-     * 静默加载商品详情（不显示加载成功消息）
+     * 静默加载商品详情（不显示加载成功消息）。
      */
     private void loadProductDetailSilently() {
         if (currentProductId == null || currentProductId.isEmpty()) {
@@ -388,7 +411,10 @@ public class ProductDetailController {
     }
 
     /**
-     * 显示消息
+     * 显示消息。
+     *
+     * @param message 消息内容
+     * @param isError 是否为错误
      */
     private void showMessage(String message, boolean isError) {
         msgLabel.setText(message);

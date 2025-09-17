@@ -9,6 +9,13 @@ import seu.virtualcampus.ui.DashboardController;
 
 import java.util.Optional;
 
+/**
+ * 银行服务大厅主界面控制器。
+ * <p>
+ * 负责各类银行业务入口的页面跳转。
+ * </p>
+ */
+
 public class bank_serviceController {
 
     @FXML
@@ -32,16 +39,31 @@ public class bank_serviceController {
     @FXML
     private Button withdrawalbtn;
 
+    /**
+     * 跳转到账户信息页面。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void bankservice_account(ActionEvent event) {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_manage.fxml", accountbtn);
     }
 
+    /**
+     * 跳转到存款页面。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void bankservice_deposit(ActionEvent event) {
         DashboardController.navigateToScene("/seu/virtualcampus/ui/bank/bank_deposit.fxml", depositbtn);
     }
 
+    /**
+     * 退出银行服务大厅，返回登录页面。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void bankservice_exit(ActionEvent event) {
 

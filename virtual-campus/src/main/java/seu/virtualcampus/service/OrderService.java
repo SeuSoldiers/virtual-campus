@@ -25,6 +25,11 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 订单服务类。
+ * <p>
+ * 提供订单的预览、创建、支付、发货、确认、取消、详情查询等相关业务逻辑，支持与银行账户模块集成。
+ */
 @Service
 public class OrderService {
     private static final Logger logger = Logger.getLogger(OrderService.class.getName());
@@ -51,7 +56,13 @@ public class OrderService {
     private StudentInfoService studentInfoService;
 
     /**
-     * 预览订单 - 计算总价但不创建订单
+     * 预览订单。
+     * <p>
+     * 计算购物车中商品的总价、折扣和明细，但不创建订单。
+     *
+     * @param userId      用户ID。
+     * @param cartItemIds 购物车项ID列表，可为空。
+     * @return 包含订单明细、总价、折扣等信息的结果Map。
      */
     public Map<String, Object> previewOrder(String userId, List<String> cartItemIds) {
         Map<String, Object> result = new HashMap<>();
@@ -110,7 +121,11 @@ public class OrderService {
     }
 
     /**
-     * 创建订单
+     * 创建订单。
+     *
+     * @param userId      用户ID。
+     * @param cartItemIds 购物车项ID列表，可为空。
+     * @return 包含订单ID、金额等信息的结果Map。
      */
     @Transactional
     public Map<String, Object> createOrder(String userId, List<String> cartItemIds) {
@@ -207,7 +222,14 @@ public class OrderService {
     }
 
     /**
-     * 支付订单
+     * 支付订单。
+     *
+     * @param userId        用户ID。
+     * @param orderId       订单ID。
+     * @param accountNumber 支付账户号。
+     * @param password      支付账户密码。
+     * @param paymentMethod 支付方式（如“立即付款”“先用后付”）。
+     * @return 支付结果信息Map。
      */
     @Transactional
     public Map<String, Object> payOrder(String userId, String orderId, String accountNumber, String password, String paymentMethod) {
@@ -340,7 +362,11 @@ public class OrderService {
     }
 
     /**
-     * 确认订单（发货后确认收货）
+     * 确认订单（发货后确认收货）。
+     *
+     * @param userId  用户ID。
+     * @param orderId 订单ID。
+     * @return 操作结果信息Map。
      */
     @Transactional
     public Map<String, Object> confirmOrder(String userId, String orderId) {
@@ -383,7 +409,11 @@ public class OrderService {
     }
 
     /**
-     * 发货订单
+     * 发货订单。
+     *
+     * @param adminId 管理员ID。
+     * @param orderId 订单ID。
+     * @return 操作结果信息Map。
      */
     @Transactional
     public Map<String, Object> deliverOrder(String adminId, String orderId) {
@@ -428,7 +458,11 @@ public class OrderService {
     }
 
     /**
-     * 取消订单
+     * 取消订单。
+     *
+     * @param userId  用户ID。
+     * @param orderId 订单ID。
+     * @return 操作结果信息Map。
      */
     @Transactional
     public Map<String, Object> cancelOrder(String userId, String orderId) {
@@ -471,7 +505,11 @@ public class OrderService {
     }
 
     /**
-     * 获取订单详情
+     * 获取订单详情。
+     *
+     * @param userId  用户ID。
+     * @param orderId 订单ID。
+     * @return 包含订单及订单项详细信息的结果Map。
      */
     public Map<String, Object> getOrderDetail(String userId, String orderId) {
         Map<String, Object> result = new HashMap<>();
@@ -519,7 +557,14 @@ public class OrderService {
     }
 
     /**
-     * 调用银行账户API接口
+     * 调用银行账户API接口。
+     *
+     * @param endpoint    API接口路径。
+     * @param fromAccount 支付账户号。
+     * @param password    支付账户密码。
+     * @param toAccount   商家账户号。
+     * @param amount      支付金额。
+     * @throws IOException 调用银行API失败时抛出。
      */
     private void callBankApi(String endpoint, String fromAccount, String password, String toAccount, BigDecimal amount) throws IOException {
         String url = bankApiBaseUrl + endpoint + "?fromAccount=" + fromAccount
@@ -544,10 +589,22 @@ public class OrderService {
 
     // ========== 原有方法保留 ==========
 
+    /**
+     * 创建订单（原有方法，建议使用新版）。
+     *
+     * @param order 订单对象。
+     * @return 插入结果。
+     */
     public int createOrder(Order order) {
         return orderMapper.insert(order);
     }
 
+    /**
+     * 取消订单（原有方法，建议使用新版）。
+     *
+     * @param orderId 订单ID。
+     * @return 操作影响的行数。
+     */
     public int cancelOrder(String orderId) {
         Order order = orderMapper.selectById(orderId);
         if (order != null) {
@@ -558,29 +615,66 @@ public class OrderService {
         return 0;
     }
 
+    /**
+     * 更新订单信息。
+     *
+     * @param order 订单对象。
+     * @return 操作影响的行数。
+     */
     public int updateOrder(Order order) {
         order.setUpdatedAt(LocalDateTime.now());
         return orderMapper.update(order);
     }
 
+    /**
+     * 根据ID获取订单。
+     *
+     * @param orderId 订单ID。
+     * @return 对应的订单对象，若不存在则返回null。
+     */
     public Order getOrderById(String orderId) {
         return orderMapper.selectById(orderId);
     }
 
+    /**
+     * 根据用户ID获取所有订单。
+     *
+     * @param userId 用户ID。
+     * @return 该用户的所有订单列表。
+     */
     public List<Order> getOrdersByUserId(String userId) {
         return orderMapper.selectByUserId(userId);
     }
 
+    /**
+     * 获取所有订单。
+     *
+     * @return 所有订单列表。
+     */
     public List<Order> getAllOrders() {
         return orderMapper.selectAll();
     }
 
+    /**
+     * 更新订单状态。
+     *
+     * @param orderId       订单ID。
+     * @param status        新状态。
+     * @param paymentStatus 支付状态。
+     * @return 操作影响的行数。
+     */
     public int updateOrderStatus(String orderId, String status, String paymentStatus) {
         return orderMapper.updateStatus(orderId, status, paymentStatus);
     }
 
     // ========== 私有辅助方法 ==========
 
+    /**
+     * 计算购物车商品总价。
+     *
+     * @param cartItems 购物车项列表。
+     * @return 总价。
+     */
     private BigDecimal calculateTotalAmount(List<Cart> cartItems) {
         BigDecimal total = BigDecimal.ZERO;
 
@@ -596,6 +690,12 @@ public class OrderService {
         return total.setScale(2, RoundingMode.HALF_UP);
     }
 
+    /**
+     * 获取学生折扣率。
+     *
+     * @param userId 用户ID。
+     * @return 折扣率（如1为无折扣）。
+     */
     private BigDecimal getStudentDiscountRate(String userId) {
         try {
             if (studentInfoService != null) {
@@ -616,6 +716,11 @@ public class OrderService {
         return BigDecimal.ONE; // 原价，无折扣
     }
 
+    /**
+     * 生成订单ID。
+     *
+     * @return 新订单ID。
+     */
     private String generateOrderId() {
         return "ORDER" + System.currentTimeMillis() + String.format("%04d", new Random().nextInt(10000));
     }

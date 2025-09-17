@@ -30,6 +30,13 @@ import java.util.logging.Logger;
 import static javafx.scene.control.Alert.AlertType.*;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
+/**
+ * 银行账户状态变更控制器。
+ * <p>
+ * 负责处理银行账户的挂失、销户、取消挂失及密码修改等操作。
+ * </p>
+ */
+
 public class bank_changestatusController {
 
     private final Logger logger = Logger.getLogger(bank_changestatusController.class.getName());
@@ -50,6 +57,11 @@ public class bank_changestatusController {
     @FXML
     private Button changepassword_btn;
 
+    /**
+     * 返回账户管理页面。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void changestatus_back(ActionEvent event) {
         try {
@@ -70,11 +82,21 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 销户操作，弹出确认对话框。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void changestatus_close(ActionEvent event) {
         showConfirmationAlert("确认销户", "您确定要销户吗？此操作不可恢复！", "CLOSED");
     }
 
+    /**
+     * 挂失操作，若账户已挂失则提示，否则弹出确认对话框。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void changestatus_lost(ActionEvent event) {
         String currentStatus = getCurrentAccountStatus();
@@ -85,6 +107,11 @@ public class bank_changestatusController {
         showConfirmationAlert("确认挂失", "您确定要挂失账户吗？", "LOST");
     }
 
+    /**
+     * 取消挂失操作，若账户为正常状态则提示，否则弹出确认对话框。
+     *
+     * @param event 事件对象。
+     */
     @FXML
     void changestatus_nolost(ActionEvent event) {
         String currentStatus = getCurrentAccountStatus();
@@ -96,6 +123,11 @@ public class bank_changestatusController {
     }
 
 
+    /**
+     * 获取当前账户状态。
+     *
+     * @return 当前账户状态字符串，获取失败返回null。
+     */
     // 获取账户当前状态
     private String getCurrentAccountStatus() {
         try {
@@ -111,6 +143,13 @@ public class bank_changestatusController {
     }
 
 
+    /**
+     * 显示确认对话框，根据用户选择执行状态变更。
+     *
+     * @param title     对话框标题。
+     * @param content   对话框内容。
+     * @param newStatus 目标状态。
+     */
     // 显示确认对话框
     private void showConfirmationAlert(String title, String content, String newStatus) {
         Alert confirmAlert = new Alert(AlertType.CONFIRMATION);
@@ -125,6 +164,11 @@ public class bank_changestatusController {
         });
     }
 
+    /**
+     * 更新账户状态。
+     *
+     * @param newStatus 目标状态。
+     */
     // 更新账户状态
     private void updateAccountStatus(String newStatus) {
         try {
@@ -155,6 +199,9 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 关闭所有窗口并打开登录窗口。
+     */
     // 关闭当前窗口并打开登录窗口
     private void openLoginWindowAndCloseCurrent() {
         try {
@@ -191,6 +238,13 @@ public class bank_changestatusController {
     }
 
 
+    /**
+     * 调用后端API更新账户状态。
+     *
+     * @param accountNumber 账户号。
+     * @param newStatus     目标状态。
+     * @return 更新成功返回true，否则返回false。
+     */
     // 调用后端更新状态API
     private boolean callUpdateStatusAPI(String accountNumber, String newStatus) {
         try {
@@ -216,6 +270,12 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 调用后端API获取账户信息。
+     *
+     * @param accountNumber 账户号。
+     * @return 账户状态字符串，失败返回"ERROR"。
+     */
     // 获取账户信息
     private String callGetAccountInfoAPI(String accountNumber) {
         try {
@@ -253,6 +313,11 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 根据账户状态设置状态文本样式。
+     *
+     * @param status 账户状态。
+     */
     // 根据状态设置文本样式
     private void setStatusStyle(String status) {
         switch (status) {
@@ -271,6 +336,9 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 初始化方法，显示当前账户状态。
+     */
     // 初始化方法，用于显示当前账户状态
     @FXML
     public void initialize() {
@@ -290,6 +358,11 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 修改账户密码。
+     *
+     * @param actionEvent 事件对象。
+     */
     @FXML
     public void changepassword(ActionEvent actionEvent) {
         try {
@@ -341,6 +414,14 @@ public class bank_changestatusController {
         }
     }
 
+    /**
+     * 调用后端API修改账户密码。
+     *
+     * @param accountNumber 账户号。
+     * @param oldPassword   旧密码。
+     * @param newPassword   新密码。
+     * @return 修改成功返回true，否则返回false。
+     */
     // 调用后端更新密码API
     private boolean callUpdatePasswordAPI(String accountNumber, String oldPassword, String newPassword) {
         try {

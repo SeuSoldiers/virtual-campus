@@ -31,6 +31,12 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 课程表控制器。
+ * <p>
+ * 用于展示学生的课程表信息，支持课程表的加载、显示和界面交互。
+ * </p>
+ */
 public class TimetableController {
     private static final String[] DAYS = {"周一", "周二", "周三", "周四", "周五", "周六", "周日"};
     private static final String[] PERIODS = {"1-2节", "3-4节", "5-6节", "7-8节", "9-10节", "11-12节"};
@@ -49,6 +55,13 @@ public class TimetableController {
     private Button backButton;
     private String studentId;
 
+    /**
+     * 获取时间段标签。
+     *
+     * @param periodIdx 节次索引
+     * @param period    节次名称
+     * @return 带有时间和节次信息的标签
+     */
     @NotNull
     private static Label getTimePeriodLabel(int periodIdx, String period) {
         String timeSlot = TIME_SLOTS[periodIdx];
@@ -64,11 +77,19 @@ public class TimetableController {
         return timePeriodLabel;
     }
 
+    /**
+     * 设置当前学生ID，并加载其课程表。
+     *
+     * @param studentId 当前学生学号
+     */
     public void setStudentId(String studentId) {
         this.studentId = studentId;
         loadTimetable();
     }
 
+    /**
+     * 加载课程表数据并在界面上显示。
+     */
     private void loadTimetable() {
         loadingLabel.setText("加载中...");
         new Thread(() -> {
@@ -113,6 +134,11 @@ public class TimetableController {
         }).start();
     }
 
+    /**
+     * 在界面上展示课程表。
+     *
+     * @param timetableData 课程表数据，按星期和节次分组
+     */
     private void displayTimetable(Map<String, Map<String, List<Course>>> timetableData) {
         timetableContainer.getChildren().clear();
 
@@ -225,6 +251,9 @@ public class TimetableController {
         timetableContainer.getChildren().add(timetableGrid);
     }
 
+    /**
+     * 返回选课界面。
+     */
     @FXML
     private void handleBack() {
         try {

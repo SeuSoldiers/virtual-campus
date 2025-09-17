@@ -21,7 +21,12 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
 
-
+/**
+ * 银行账户信息管理控制器。
+ * <p>
+ * 负责展示和刷新当前账户的详细信息。
+ * </p>
+ */
 public class bank_manageController {
 
     @FXML
@@ -56,6 +61,10 @@ public class bank_manageController {
     private ObjectMapper mapper = new ObjectMapper();
 
     // 2. 初始化方法（会自动调用）
+
+    /**
+     * 初始化方法，加载账户信息。
+     */
     public void initialize() {
         loadAccountInfo();
     }

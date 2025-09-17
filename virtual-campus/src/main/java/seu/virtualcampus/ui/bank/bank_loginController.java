@@ -17,6 +17,13 @@ import static javafx.scene.control.Alert.AlertType.ERROR;
 import static seu.virtualcampus.ui.DashboardController.showAlert;
 
 
+/**
+ * 银行账户登录控制器。
+ * <p>
+ * 负责普通用户账户的登录验证与页面跳转。
+ * </p>
+ */
+
 public class bank_loginController {
 
 
@@ -38,6 +45,11 @@ public class bank_loginController {
     @FXML
     private Button back_btn; // 添加返回按钮的 @FXML 引用
 
+    /**
+     * 用户登录操作，校验输入并发起验证。
+     *
+     * @param actionEvent 事件对象。
+     */
     public void login(ActionEvent actionEvent) {
         //
         String accountNumber = AccountNumber_text.getText();
@@ -58,6 +70,12 @@ public class bank_loginController {
 
     }
 
+    /**
+     * 验证账户和密码。
+     *
+     * @param accountNumber 账户号。
+     * @param password      密码。
+     */
     private void verifyAccountAndPassword(String accountNumber, String password) {
         // 构造请求URL
         String url = "http://" + MainApp.host + "/api/accounts/" + accountNumber + "/verify-password";

@@ -21,6 +21,12 @@ import java.util.List;
 import java.util.Optional;
 
 
+/**
+ * 银行账户管理控制器。
+ * <p>
+ * 负责管理银行账户、交易记录以及管理员权限的相关操作。
+ * </p>
+ */
 public class bank_administrationController {
 
     // API基础URL
@@ -152,6 +158,12 @@ public class bank_administrationController {
     @FXML
     private TableColumn<Transaction, String> type_column4;
 
+    /**
+     * 初始化控制器。
+     * <p>
+     * 设置表格列的值工厂，检查违约交易，并添加选择监听器。
+     * </p>
+     */
     @FXML
     public void initialize() {
         // 初始化所有表格的列

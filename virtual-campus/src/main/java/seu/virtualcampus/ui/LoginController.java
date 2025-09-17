@@ -18,6 +18,11 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 登录界面控制器。
+ * <p>
+ * 负责处理用户登录、注册及与后端API的交互。
+ */
 public class LoginController {
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
@@ -28,6 +33,9 @@ public class LoginController {
     @FXML
     private Label msgLabel;
 
+    /**
+     * 处理登录按钮点击事件，向后端发送登录请求。
+     */
     @FXML
     private void handleLogin() {
         String username = usernameField.getText();
@@ -88,6 +96,9 @@ public class LoginController {
         });
     }
 
+    /**
+     * 处理注册并登录按钮点击事件，向后端发送注册请求。
+     */
     @FXML
     private void handleRegisterAndLogin() {
         String username = usernameField.getText();

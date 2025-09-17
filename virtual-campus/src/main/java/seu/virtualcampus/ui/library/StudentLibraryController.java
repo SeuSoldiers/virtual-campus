@@ -11,6 +11,12 @@ import javafx.stage.Stage;
 import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
+/**
+ * 学生图书馆主页面控制器。
+ * <p>
+ * 提供图书搜索、借阅、预约、历史查询等入口，负责页面跳转与基础交互。
+ * </p>
+ */
 public class StudentLibraryController {
 
     @FXML
@@ -18,13 +24,18 @@ public class StudentLibraryController {
 
     private String currentUserId;
 
+    /**
+     * 初始化，设置当前用户ID。
+     */
     public void init() {
         // 直接从 MainApp 取 userId
         this.currentUserId = MainApp.username;
     }
 
     /**
-     * 点击“搜索”
+     * 点击“搜索”按钮事件。
+     *
+     * @param event 事件对象
      */
     @FXML
     private void onSearch(ActionEvent event) {
@@ -57,7 +68,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 点击“当前借阅”
+     * 点击“当前借阅”按钮事件。
+     *
+     * @param e 事件对象
      */
     @FXML
     private void onQueryCurrentBorrow(ActionEvent e) {
@@ -65,7 +78,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 点击“全部图书”
+     * 点击“全部图书”按钮事件。
+     *
+     * @param e 事件对象
      */
     @FXML
     private void onAllBooks(ActionEvent e) {
@@ -96,7 +111,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 点击“借阅历史”
+     * 点击“借阅历史”按钮事件。
+     *
+     * @param e 事件对象
      */
     @FXML
     private void onQueryHistoryBorrow(ActionEvent e) {
@@ -104,7 +121,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 点击“预约记录”
+     * 点击“预约记录”按钮事件。
+     *
+     * @param e 事件对象
      */
     @FXML
     private void onQueryReservation(ActionEvent e) {
@@ -112,7 +131,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 打开 BorrowView.fxml，并切换到指定 tab
+     * 打开 BorrowView.fxml，并切换到指定tab。
+     *
+     * @param tab 要打开的tab（current/history/reservation）
      */
     private void openBorrowView(String tab) {
         try {
@@ -136,7 +157,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 点击"返回"
+     * 点击"返回"按钮事件。
+     *
+     * @param event 事件对象
      */
     @FXML
     private void onBack(ActionEvent event) {
@@ -144,7 +167,9 @@ public class StudentLibraryController {
     }
 
     /**
-     * 错误弹窗
+     * 错误弹窗。
+     *
+     * @param message 错误信息
      */
     private void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);

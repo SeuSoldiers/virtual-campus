@@ -24,6 +24,12 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 图书馆管理员主页面控制器。
+ * <p>
+ * 支持图书管理、借阅管理、预约管理等功能，提供多维度查询与操作入口。
+ * </p>
+ */
 public class LibrarianController {
 
     // ---------- HTTP / JSON ----------
@@ -81,6 +87,9 @@ public class LibrarianController {
         return s == null ? "" : s;
     }
 
+    /**
+     * 初始化页面，绑定所有表格列并加载全部数据。
+     */
     @FXML
     private void initialize() {
         bindBookColumns();
@@ -93,7 +102,9 @@ public class LibrarianController {
         loadReservations("");
     }
 
-    // ================== 书籍管理 ==================
+    /**
+     * 绑定图书表格列。
+     */
     private void bindBookColumns() {
         colIsbn.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().isbn));
         colTitle.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().title));
@@ -106,6 +117,9 @@ public class LibrarianController {
         colReservedCount.setCellValueFactory(c -> new ReadOnlyStringWrapper(String.valueOf(c.getValue().reservationCount)));
     }
 
+    /**
+     * 图书搜索按钮事件。
+     */
     @FXML
     private void onSearchBook() {
         String kw = safeText(bookSearchField);
@@ -113,7 +127,9 @@ public class LibrarianController {
     }
 
     /**
-     * 关键字为空=取全部；否则在 title/author/isbn/category 各查一次并去重合并
+     * 加载图书列表，支持多维度查询与去重。
+     *
+     * @param keyword 查询关键词。
      */
     private void loadBooks(String keyword) {
         try {
@@ -137,6 +153,14 @@ public class LibrarianController {
         }
     }
 
+    /**
+     * 查询图书（可指定字段）。
+     *
+     * @param key 字段名。
+     * @param val 字段值。
+     * @return 图书信息列表。
+     * @throws IOException 网络异常。
+     */
     private List<BookInfoVM> doBookSearch(String key, String val) throws IOException {
         HttpUrl.Builder ub = HttpUrl.parse(BASE + "/search").newBuilder();
         if (key != null && val != null) ub.addQueryParameter(key, val);
@@ -148,16 +172,25 @@ public class LibrarianController {
         }
     }
 
+    /**
+     * 返回按钮事件。
+     */
     @FXML
     private void onBack() {
         DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", bookSearchField);
     }
 
+    /**
+     * 新增图书按钮事件。
+     */
     @FXML
     private void onAddBook() {
         openBookEditDialog(null);
     }
 
+    /**
+     * 编辑图书按钮事件。
+     */
     @FXML
     private void onEditBook() {
         BookInfoVM sel = tableViewBooks.getSelectionModel().getSelectedItem();
@@ -168,6 +201,9 @@ public class LibrarianController {
         openBookEditDialog(sel);
     }
 
+    /**
+     * 删除图书按钮事件。
+     */
     @FXML
     private void onDeleteBook() {
         BookInfoVM sel = tableViewBooks.getSelectionModel().getSelectedItem();

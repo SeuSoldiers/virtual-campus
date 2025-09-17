@@ -23,6 +23,12 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+/**
+ * 图书列表页面控制器。
+ * <p>
+ * 用于展示、搜索图书列表，支持多维度查询和详情查看。
+ * </p>
+ */
 public class BookListController {
 
     private final OkHttpClient client = new OkHttpClient();
@@ -37,11 +43,19 @@ public class BookListController {
             colPublishDate, colCategory, colTotalCount, colAvailableCount, colReservationCount;
     private String currentUserId;
 
+    /**
+     * 初始化页面，设置当前用户ID。
+     *
+     * @param userId 当前用户ID。
+     */
     public void init(String userId) {
         this.currentUserId = userId;
         bindColumns();
     }
 
+    /**
+     * 绑定表格列。
+     */
     private void bindColumns() {
         colIsbn.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().isbn));
         colTitle.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().title));
@@ -55,7 +69,9 @@ public class BookListController {
     }
 
     /**
-     * 从学生页传来的关键字加载数据
+     * 从学生页传来的关键词加载数据。
+     *
+     * @param keyword 查询关键词。
      */
     public void loadBooks(String keyword) {
         try {
@@ -83,7 +99,10 @@ public class BookListController {
     }
 
     /**
-     * 把 list 合并进 map（按 ISBN 去重，保持插入顺序即“命中优先级”）
+     * 合并list到map（按ISBN去重，保持插入顺序）。
+     *
+     * @param map  目标map。
+     * @param list 待合并list。
      */
     private void mergeByIsbn(LinkedHashMap<String, BookInfoVM> map, List<BookInfoVM> list) {
         if (list == null) return;
@@ -94,7 +113,10 @@ public class BookListController {
     }
 
     /**
-     * 拉全部图书（无查询参数）
+     * 拉取全部图书（无查询参数）。
+     *
+     * @return 图书信息列表。
+     * @throws IOException 网络异常。
      */
     private List<BookInfoVM> doSearchAll() throws IOException {
         Request req = new Request.Builder().url(BASE + "/search").get().build();
@@ -105,7 +127,14 @@ public class BookListController {
         }
     }
 
-
+    /**
+     * 按指定字段查询图书。
+     *
+     * @param key 字段名。
+     * @param val 字段值。
+     * @return 图书信息列表。
+     * @throws IOException 网络异常。
+     */
     private List<BookInfoVM> doSearch(String key, String val) throws IOException {
         HttpUrl url = HttpUrl.parse(BASE + "/search").newBuilder()
                 .addQueryParameter(key, val).build();
@@ -117,6 +146,9 @@ public class BookListController {
         }
     }
 
+    /**
+     * 查看详情按钮事件。
+     */
     @FXML
     private void onViewDetails() {
         BookInfoVM sel = tableView.getSelectionModel().getSelectedItem();
@@ -144,7 +176,9 @@ public class BookListController {
         }
     }
 
-    // 可选：如果你的 book_list.fxml 加了“返回”按钮并绑定 onBack
+    /**
+     * 返回按钮事件。
+     */
     @FXML
     private void onBack() {
         try {

@@ -22,7 +22,10 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 /**
- * 管理员发货控制器
+ * 管理员发货控制器。
+ * <p>
+ * 负责订单发货、订单状态管理、权限校验等后台发货相关功能。
+ * </p>
  */
 public class AdminShipController implements Initializable {
 
@@ -32,13 +35,13 @@ public class AdminShipController implements Initializable {
             .registerModule(new JavaTimeModule())
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     private final String baseUrl = "http://" + MainApp.host;
+    private final ObservableList<seu.virtualcampus.domain.Order> orderData = FXCollections.observableArrayList();
     @FXML
     private Button shipButton;
     @FXML
     private Label resultLabel;
     @FXML
     private Label currentUserLabel;
-
     // 订单列表视图
     @FXML
     private TableView<seu.virtualcampus.domain.Order> ordersTable;
@@ -53,8 +56,12 @@ public class AdminShipController implements Initializable {
     @FXML
     private TableColumn<seu.virtualcampus.domain.Order, String> timeCol;
 
-    private final ObservableList<seu.virtualcampus.domain.Order> orderData = FXCollections.observableArrayList();
-
+    /**
+     * 初始化方法，完成权限校验、控件初始化、表格加载等。
+     *
+     * @param location  FXML资源URL
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 检查管理员权限
@@ -75,14 +82,16 @@ public class AdminShipController implements Initializable {
     }
 
     /**
-     * 检查是否为管理员
+     * 检查当前用户是否为管理员。
+     *
+     * @return 是否为管理员
      */
     private boolean isAdmin() {
         return "ShopMgr".equalsIgnoreCase(MainApp.role);
     }
 
     /**
-     * 更新当前用户显示
+     * 更新当前用户显示信息。
      */
     private void updateCurrentUserDisplay() {
         String username = MainApp.username != null ? MainApp.username : "未知用户";
@@ -91,7 +100,7 @@ public class AdminShipController implements Initializable {
     }
 
     /**
-     * 处理发货操作
+     * 处理发货操作。
      */
     @FXML
     private void handleShip() {
@@ -165,7 +174,7 @@ public class AdminShipController implements Initializable {
     }
 
     /**
-     * 返回管理页面
+     * 返回管理页面。
      */
     @FXML
     private void handleBack() {
@@ -173,7 +182,10 @@ public class AdminShipController implements Initializable {
     }
 
     /**
-     * 显示结果信息
+     * 显示结果信息。
+     *
+     * @param message   结果信息
+     * @param isSuccess 是否成功
      */
     private void showResult(String message, Boolean isSuccess) {
         resultLabel.setText(message);
@@ -191,7 +203,7 @@ public class AdminShipController implements Initializable {
     }
 
     /**
-     * 清空结果显示
+     * 清空结果显示。
      */
     private void clearResult() {
         resultLabel.setText("");
@@ -203,7 +215,8 @@ public class AdminShipController implements Initializable {
         if (ordersTable == null) return;
         ordersTable.setItems(orderData);
 
-        if (orderIdCol != null) orderIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getOrderId()));
+        if (orderIdCol != null)
+            orderIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getOrderId()));
         if (userIdCol != null) userIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserId()));
         if (statusCol != null) statusCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus()));
         if (amountCol != null) {
@@ -255,7 +268,8 @@ public class AdminShipController implements Initializable {
                             showResult("加载订单失败: HTTP " + response.code() + " " + body, false);
                             return;
                         }
-                        java.util.List<seu.virtualcampus.domain.Order> list = objectMapper.readValue(body, new TypeReference<>(){});
+                        java.util.List<seu.virtualcampus.domain.Order> list = objectMapper.readValue(body, new TypeReference<>() {
+                        });
                         orderData.setAll(list);
                         showResult("加载完成，共 " + list.size() + " 笔订单", true);
                     } catch (Exception ex) {
@@ -267,7 +281,9 @@ public class AdminShipController implements Initializable {
     }
 
     @FXML
-    private void handleRefresh() { loadOrders(); }
+    private void handleRefresh() {
+        loadOrders();
+    }
 
     // 兼容：外部可获取当前选择的订单号
     public String getorderid() {
@@ -277,6 +293,9 @@ public class AdminShipController implements Initializable {
 
     /**
      * 解析错误信息
+     *
+     * @param responseBody 响应体内容
+     * @return 错误信息字符串
      */
     private String parseErrorMessage(String responseBody) {
         try {
@@ -293,6 +312,9 @@ public class AdminShipController implements Initializable {
 
     /**
      * 显示提示对话框
+     *
+     * @param title   标题
+     * @param message 内容
      */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);

@@ -19,6 +19,12 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 
+/**
+ * 银行交易记录查询控制器。
+ * <p>
+ * 负责查询和展示当前账户的交易明细。
+ * </p>
+ */
 public class bank_transactionController {
 
     // API基础URL

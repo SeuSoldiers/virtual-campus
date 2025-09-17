@@ -30,6 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * 购物车页面控制器。
+ * <p>
+ * 负责购物车商品的展示、数量修改、删除、结算等功能。
+ * </p>
+ */
 public class CartViewController {
     private static final Logger logger = Logger.getLogger(CartViewController.class.getName());
     private final OkHttpClient client = new OkHttpClient();
@@ -52,6 +58,9 @@ public class CartViewController {
     // 轮询（购物车）
     private ScheduledExecutorService poller;
 
+    /**
+     * 初始化方法，完成表格、控件、轮询等初始化。
+     */
     @FXML
     public void initialize() {
         try {
@@ -124,6 +133,9 @@ public class CartViewController {
         startPolling();
     }
 
+    /**
+     * 初始化表格列。
+     */
     private void initializeTable() {
         // 初始化表格列
         nameCol.setCellValueFactory(new PropertyValueFactory<>("productName"));
@@ -200,6 +212,9 @@ public class CartViewController {
         });
     }
 
+    /**
+     * 加载购物车数据。
+     */
     private void loadCartData() {
         if (MainApp.username == null) {
             logger.warning("用户未登录，无法加载购物车数据");
@@ -253,6 +268,11 @@ public class CartViewController {
         });
     }
 
+    /**
+     * 加载购物车商品详情。
+     *
+     * @param carts 购物车项列表
+     */
     private void loadProductDetails(List<Cart> carts) {
         cartItems.clear();
         logger.info(" 开始加载商品详情, 购物车项数=" + carts.size());
@@ -315,6 +335,9 @@ public class CartViewController {
         }
     }
 
+    /**
+     * 启动购物车轮询。
+     */
     private void startPolling() {
         if (poller != null && !poller.isShutdown()) return;
         poller = Executors.newSingleThreadScheduledExecutor(r -> {
@@ -333,6 +356,9 @@ public class CartViewController {
         }, 30, 30, TimeUnit.SECONDS);
     }
 
+    /**
+     * 停止购物车轮询。
+     */
     private void stopPolling() {
         if (poller != null) {
             poller.shutdownNow();
@@ -340,6 +366,9 @@ public class CartViewController {
         }
     }
 
+    /**
+     * 刷新购物车UI。
+     */
     private void updateUI() {
         cartTable.getItems().clear();
         cartTable.getItems().addAll(cartItems);
@@ -353,6 +382,9 @@ public class CartViewController {
         calculateTotal();
     }
 
+    /**
+     * 计算购物车总金额。
+     */
     private void calculateTotal() {
         // 以表格中实际展示的数据为准进行合计，避免异步加载时列表与缓存不一致
         double total = cartTable.getItems().stream()
@@ -363,6 +395,12 @@ public class CartViewController {
         checkoutButton.setDisable(total == 0);
     }
 
+    /**
+     * 更新购物车商品数量。
+     *
+     * @param item        购物车项
+     * @param newQuantity 新数量
+     */
     private void updateQuantity(CartItemView item, int newQuantity) {
         if (newQuantity <= 0 || newQuantity > item.getAvailableCount()) {
             showMessage("数量无效", true);

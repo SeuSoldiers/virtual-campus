@@ -17,6 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * 银行账户控制器。
+ * <p>
+ * 提供与银行账户相关的API接口，包括开户、存款、取款、转账、查询、状态更新等功能。
+ * 同时包含了管理员对账户和交易的管理功能，以及特殊的消费功能。
+ */
 @RestController
 @RequestMapping("/api/accounts")
 public class BankAccountController {
@@ -25,7 +31,15 @@ public class BankAccountController {
     @Autowired
     private BankAccountService bankAccountService;
 
-    // 开户业务
+    /**
+     * 开设一个新的银行账户。
+     *
+     * @param userId 用户ID。
+     * @param accountType 账户类型。
+     * @param password 账户密码。
+     * @param initialDeposit 初始存款金额。
+     * @return 创建的银行账户信息。
+     */
     @PostMapping("/open")
     public ResponseEntity<BankAccount> openAccount(
             @RequestParam String userId,
@@ -36,7 +50,13 @@ public class BankAccountController {
         return ResponseEntity.ok(account);
     }
 
-    // 存款业务
+    /**
+     * 向指定账户存款。
+     *
+     * @param accountNumber 账户号码。
+     * @param amount 存款金额。
+     * @return 本次存款的交易记录。
+     */
     @PostMapping("/{accountNumber}/deposit")
     public ResponseEntity<Transaction> deposit(
             @PathVariable String accountNumber,
@@ -45,7 +65,14 @@ public class BankAccountController {
         return ResponseEntity.ok(transaction);
     }
 
-    // 取款业务
+    /**
+     * 从指定账户取款。
+     *
+     * @param accountNumber 账户号码。
+     * @param amount 取款金额。
+     * @param password 账户密码。
+     * @return 本次取款的交易记录。
+     */
     @PostMapping("/{accountNumber}/withdraw")
     public ResponseEntity<Transaction> withdraw(
             @PathVariable String accountNumber,
@@ -55,7 +82,15 @@ public class BankAccountController {
         return ResponseEntity.ok(transaction);
     }
 
-    // 转账业务
+    /**
+     * 从一个账户向另一个账户转账。
+     *
+     * @param fromAccount 转出账户的号码。
+     * @param toAccount 转入账户的号码。
+     * @param amount 转账金额。
+     * @param password 转出账户的密码。
+     * @return 本次转账的交易记录。
+     */
     @PostMapping("/transfer")
     public ResponseEntity<Transaction> transfer(
             @RequestParam String fromAccount,
@@ -66,14 +101,28 @@ public class BankAccountController {
         return ResponseEntity.ok(transaction);
     }
 
-    // 余额查询（***更改为个人信息查询）
+    /**
+     * 查询指定账户的详细信息。
+     *
+     * @param accountNumber 账户号码。
+     * @return 银行账户的详细信息。
+     */
     @GetMapping("/{accountNumber}/accountInfo")
     public ResponseEntity<BankAccount> getAccountInfo(@PathVariable String accountNumber) {
         BankAccount account = bankAccountService.getAccountInfo(accountNumber);
         return ResponseEntity.ok(account);
     }
 
-    // 交易记录查询
+    /**
+     * 查询指定时间范围内的交易记录。
+     * <p>
+     * 如果账户号码为 "all"，则查询所有账户在该时间范围内的交易记录。
+     *
+     * @param accountNumber 账户号码，或 "all" 表示所有账户。
+     * @param start 查询的开始时间。
+     * @param end 查询的结束时间。
+     * @return 符合条件的交易记录列表。
+     */
     @GetMapping("/{accountNumber}/transactions")
     public ResponseEntity<List<Transaction>> getTransactions(
             @PathVariable String accountNumber,
@@ -92,7 +141,13 @@ public class BankAccountController {
         return ResponseEntity.ok(transactions);
     }
 
-    // 更新账户状态
+    /**
+     * 更新账户的状态。
+     *
+     * @param accountNumber 账户号码。
+     * @param newStatus 新的账户状态。
+     * @return 操作是否成功。
+     */
     @PutMapping("/{accountNumber}/status")
     public ResponseEntity<Boolean> updateStatus(
             @PathVariable String accountNumber,
@@ -101,7 +156,13 @@ public class BankAccountController {
         return ResponseEntity.ok(result);
     }
 
-    // 新增：验证账户密码
+    /**
+     * 验证账户密码是否正确。
+     *
+     * @param accountNumber 账户号码。
+     * @param password 待验证的密码。
+     * @return 密码是否有效。
+     */
     @PostMapping("/{accountNumber}/verify-password")
     public ResponseEntity<Boolean> verifyPassword(
             @PathVariable String accountNumber,
@@ -110,8 +171,13 @@ public class BankAccountController {
         return ResponseEntity.ok(isValid);
     }
 
-    // 在 BankAccountController.java 中添加以下方法
-// 新增：验证管理员账户密码
+    /**
+     * 验证管理员账户的密码。
+     *
+     * @param accountNumber 管理员账户号码。
+     * @param password 待验证的密码。
+     * @return 如果密码有效，返回true；否则返回false或错误请求。
+     */
     @PostMapping("/{accountNumber}/verify-admin-password")
     public ResponseEntity<Boolean> verifyAdminPassword(
             @PathVariable String accountNumber,
@@ -127,7 +193,14 @@ public class BankAccountController {
     }
 
 
-    // 新增：更新账户密码
+    /**
+     * 更新账户密码。
+     *
+     * @param accountNumber 账户号码。
+     * @param oldPassword 旧密码。
+     * @param newPassword 新密码。
+     * @return 操作是否成功。
+     */
     @PutMapping("/{accountNumber}/password")
     public ResponseEntity<Boolean> updatePassword(
             @PathVariable String accountNumber,
@@ -137,7 +210,12 @@ public class BankAccountController {
         return ResponseEntity.ok(result);
     }
 
-    // 获取定期存款记录
+    /**
+     * 获取指定账户的所有定期存款记录。
+     *
+     * @param accountNumber 账户号码。
+     * @return 定期存款交易记录的列表。
+     */
     @GetMapping("/{accountNumber}/fixed-deposits")
     public ResponseEntity<List<Transaction>> getFixedDepositRecords(
             @PathVariable String accountNumber) {
@@ -145,7 +223,13 @@ public class BankAccountController {
         return ResponseEntity.ok(fixedDepositTransactions);
     }
 
-    //定期转活期
+    /**
+     * 将一笔定期存款转为活期存款。
+     *
+     * @param accountNumber 账户号码。
+     * @param request 请求体，包含 "transactionId" (定期存款的交易ID) 和 "password" (账户密码)。
+     * @return 操作成功或失败的消息。
+     */
     @PostMapping("/{accountNumber}/fixed-to-current")
     public ResponseEntity<String> convertFixedToCurrent(
             @PathVariable String accountNumber,
@@ -167,7 +251,13 @@ public class BankAccountController {
     }
 
 
-    // 活期转定期
+    /**
+     * 将活期存款转为定期存款。
+     *
+     * @param accountNumber 账户号码。
+     * @param request 请求体，包含 "amount" (金额), "password" (密码), 和 "term" (存款期限)。
+     * @return 包含操作结果和新交易信息的响应。
+     */
     @PostMapping("/{accountNumber}/current-to-fixed")
     public ResponseEntity<Map<String, Object>> convertCurrentToFixed(
             @PathVariable String accountNumber,
@@ -194,30 +284,48 @@ public class BankAccountController {
     }
 
     //管理员部分***********************************************************
-    // 在 BankAccountController.java 中添加以下方法
 
-    // 管理员获取所有账户信息
+    /**
+     * (管理员) 获取所有银行账户信息。
+     *
+     * @return 所有银行账户的列表。
+     */
     @GetMapping("/all-accounts")
     public ResponseEntity<List<BankAccount>> getAllAccounts() {
         List<BankAccount> accounts = bankAccountService.getAllAccounts();
         return ResponseEntity.ok(accounts);
     }
 
-    // 管理员获取所有交易记录
+    /**
+     * (管理员) 获取所有交易记录。
+     *
+     * @return 所有交易记录的列表。
+     */
     @GetMapping("/all-transactions")
     public ResponseEntity<List<Transaction>> getAllTransactions() {
         List<Transaction> transactions = bankAccountService.getAllTransactions();
         return ResponseEntity.ok(transactions);
     }
 
-    // 根据交易ID获取交易记录
+    /**
+     * (管理员) 根据交易ID获取交易记录。
+     *
+     * @param transactionId 交易ID。
+     * @return 对应的交易记录。
+     */
     @GetMapping("/transaction/{transactionId}")
     public ResponseEntity<Transaction> getTransactionById(@PathVariable String transactionId) {
         Transaction transaction = bankAccountService.getTransactionById(transactionId);
         return ResponseEntity.ok(transaction);
     }
 
-    // 更新账户类型(设置管理员权限)
+    /**
+     * (管理员) 更新账户类型，可用于设置管理员权限。
+     *
+     * @param accountNumber 账户号码。
+     * @param newAccountType 新的账户类型。
+     * @return 操作是否成功。
+     */
     @PutMapping("/{accountNumber}/account-type")
     public ResponseEntity<Boolean> updateAccountType(
             @PathVariable String accountNumber,
@@ -251,8 +359,16 @@ public class BankAccountController {
         Transaction transaction = bankAccountService.processShopping(fromAccount, password, toAccount, amount);
         return ResponseEntity.ok(transaction);
     }
-    // 在 BankAccountController.java 中添加以下方法
 
+    /**
+     * 信用支付（花呗）接口。
+     *
+     * @param fromAccount 消费者账户。
+     * @param password 消费者账户密码。
+     * @param toAccount 商家账户。
+     * @param amount 消费金额。
+     * @return 交易记录。
+     */
     @PostMapping("/paylater")
     public ResponseEntity<Transaction> payLater(
             @RequestParam String fromAccount,
@@ -264,9 +380,9 @@ public class BankAccountController {
     }
 
     /**
-     * 检查并更新违约交易状态
+     * 检查并更新所有已违约的信用支付交易的状态。
      *
-     * @return 更新的交易数量
+     * @return 更新状态的交易数量。
      */
     @GetMapping("/check-overdue-transactions")
     public ResponseEntity<Integer> checkOverdueTransactions() {

@@ -10,6 +10,12 @@ import javafx.stage.Stage;
 import okhttp3.*;
 import seu.virtualcampus.ui.MainApp;
 
+/**
+ * 图书信息编辑对话框控制器。
+ * <p>
+ * 负责新增、编辑图书信息并与后端交互。
+ * </p>
+ */
 public class BookEditController {
 
     private final OkHttpClient client = new OkHttpClient();
@@ -22,12 +28,23 @@ public class BookEditController {
     private boolean editing = false;
     private Runnable onSaved;
 
+    /**
+     * 初始化为新增模式。
+     *
+     * @param onSaved 保存成功回调。
+     */
     public void initForAdd(Runnable onSaved) {
         this.editing = false;
         this.onSaved = onSaved;
         tfIsbn.setEditable(true);
     }
 
+    /**
+     * 初始化为编辑模式。
+     *
+     * @param dto     图书信息数据。
+     * @param onSaved 保存成功回调。
+     */
     public void initForEdit(BookInfoDTO dto, Runnable onSaved) {
         this.editing = true;
         this.onSaved = onSaved;
@@ -40,6 +57,9 @@ public class BookEditController {
         tfIsbn.setEditable(false);
     }
 
+    /**
+     * 保存按钮事件，提交图书信息。
+     */
     @FXML
     private void onSave() {
         try {
@@ -73,6 +93,9 @@ public class BookEditController {
         }
     }
 
+    /**
+     * 取消按钮事件，关闭对话框。
+     */
     @FXML
     private void onCancel() {
         close();
@@ -83,6 +106,11 @@ public class BookEditController {
         st.close();
     }
 
+    /**
+     * 显示错误提示。
+     *
+     * @param msg 错误信息。
+     */
     private void showErr(String msg) {
         new Alert(Alert.AlertType.ERROR, msg, ButtonType.OK).showAndWait();
     }

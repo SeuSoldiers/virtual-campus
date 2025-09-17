@@ -25,7 +25,10 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * 订单列表页面控制器
+ * 订单列表页面控制器。
+ * <p>
+ * 负责订单列表的展示、分页、搜索、支付、取消等功能。
+ * </p>
  */
 public class OrderListController implements Initializable {
 
@@ -64,6 +67,12 @@ public class OrderListController implements Initializable {
     private int totalPages = 1;
     private ObservableList<OrderModel> allOrders = FXCollections.observableArrayList();
 
+    /**
+     * 初始化方法，完成表格、控件初始化及事件绑定。
+     *
+     * @param location  FXML资源URL
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // 初始化状态选择框（“已确认”改为“已完成”）
@@ -164,7 +173,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 加载订单列表
+     * 加载订单列表。
      */
     private void loadOrders() {
         String status = getStatusValue(statusChoiceBox.getValue());
@@ -217,6 +226,12 @@ public class OrderListController implements Initializable {
         });
     }
 
+    /**
+     * 提取订单ID中的数字部分。
+     *
+     * @param rawOrderId 原始订单ID
+     * @return 数字ID
+     */
     private Long extractNumericId(String rawOrderId) {
         try {
             String digits = rawOrderId != null ? rawOrderId.replaceAll("\\D", "") : null;
@@ -227,6 +242,12 @@ public class OrderListController implements Initializable {
     }
 
     // 展示指定页（1-based）
+
+    /**
+     * 展示指定页（1-based）。
+     *
+     * @param page 页码
+     */
     private void showPage(int page) {
         if (allOrders.isEmpty()) {
             ordersTable.setItems(FXCollections.observableArrayList());
@@ -245,7 +266,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 搜索订单
+     * 搜索订单。
      */
     @FXML
     private void searchOrders() {
@@ -254,7 +275,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 上一页
+     * 上一页。
      */
     @FXML
     private void goToPreviousPage() {
@@ -265,7 +286,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 下一页
+     * 下一页。
      */
     @FXML
     private void goToNextPage() {
@@ -276,7 +297,9 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 更新订单列表
+     * 更新订单列表。
+     *
+     * @param response 订单列表响应
      */
     private void updateOrderList(OrderListResponse response) {
         // 兼容旧接口（未使用）
@@ -288,7 +311,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 更新分页信息
+     * 更新分页信息。
      */
     private void updatePageInfo() {
         pageInfoLabel.setText(String.format("第 %d 页 / 共 %d 页", currentPage, totalPages));
@@ -297,7 +320,9 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 显示订单详情
+     * 显示订单详情。
+     *
+     * @param orderId 订单ID
      */
     private void showOrderDetail(String orderId) {
         try {
@@ -317,7 +342,9 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 显示支付对话框
+     * 显示支付对话框。
+     *
+     * @param orderId 订单ID
      */
     private void showPaymentDialog(Long orderId) {
         try {
@@ -334,7 +361,9 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 取消订单
+     * 取消订单。
+     *
+     * @param orderId 订单ID
      */
     private void cancelOrder(String orderId) {
         Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
@@ -373,7 +402,7 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 返回上一页（若无历史则回到Dashboard）
+     * 返回上一页（如无历史则回到Dashboard）。
      */
     @FXML
     private void handleBack() {
@@ -381,7 +410,10 @@ public class OrderListController implements Initializable {
     }
 
     /**
-     * 获取状态值
+     * 获取状态值。
+     *
+     * @param statusText 状态文本
+     * @return 状态值
      */
     private String getStatusValue(String statusText) {
         switch (statusText) {

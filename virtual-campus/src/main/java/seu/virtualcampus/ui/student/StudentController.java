@@ -16,9 +16,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
+/**
+ * 学生信息界面控制器，负责学生信息的展示、编辑、提交及审核记录的加载。
+ */
 public class StudentController {
+    /**
+     * 日志记录器
+     */
     private static final Logger logger = Logger.getLogger(StudentController.class.getName());
+    /**
+     * HTTP客户端
+     */
     private final OkHttpClient client = new OkHttpClient();
+    /**
+     * JSON对象映射器
+     */
     private final ObjectMapper mapper = new ObjectMapper();
     @FXML
     private TextField nameField, majorField, addressField, phoneField, ethnicityField, politicalStatusField;
@@ -34,6 +46,9 @@ public class StudentController {
     private TableColumn<AuditRecordView, String> contentCol, createTimeCol, reviewTimeCol, statusCol, remarkCol;
     private StudentInfo originalInfo;
 
+    /**
+     * 初始化方法，设置表格列、下拉选项并加载学生信息和审核记录。
+     */
     @FXML
     public void initialize() {
         // 初始化TableView
@@ -61,6 +76,10 @@ public class StudentController {
         loadAuditRecords();
     }
 
+    /**
+     * 加载当前学生的详细信息。
+     * 若网络异常或请求失败，会在界面显示提示信息。
+     */
     private void loadStudentInfo() {
         Request request = new Request.Builder()
                 .url("http://" + MainApp.host + "/api/student/me")
@@ -105,6 +124,10 @@ public class StudentController {
         });
     }
 
+    /**
+     * 加载当前学生的所有审核记录。
+     * 若网络异常或请求失败，会在界面显示提示信息。
+     */
     private void loadAuditRecords() {
         Request request = new Request.Builder()
                 .url("http://" + MainApp.host + "/api/audit/mine")
@@ -144,6 +167,11 @@ public class StudentController {
         });
     }
 
+    /**
+     * 设置表单是否可编辑。
+     *
+     * @param editable 是否可编辑，true为可编辑，false为只读
+     */
     private void setEditable(boolean editable) {
         nameField.setEditable(editable);
         majorField.setEditable(editable);
@@ -158,11 +186,18 @@ public class StudentController {
         cancelBtn.setVisible(editable);
     }
 
+    /**
+     * 进入编辑模式，使表单可编辑。
+     */
     @FXML
     private void handleEdit() {
         setEditable(true);
     }
 
+    /**
+     * 保存并提交学生信息的更改。
+     * 若提交失败会在界面显示提示信息。
+     */
     @FXML
     private void handleSave() {
         try {
@@ -203,6 +238,9 @@ public class StudentController {
         }
     }
 
+    /**
+     * 取消编辑，恢复原始学生信息。
+     */
     @FXML
     private void handleCancel() {
         if (originalInfo != null) {
@@ -218,12 +256,23 @@ public class StudentController {
         setEditable(false);
     }
 
+    /**
+     * 返回到主面板界面。
+     */
     @FXML
     private void handleBack() {
         DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", nameField);
     }
 
-    // 审核记录视图模型
+    /**
+     * 审核记录表格的数据模型。
+     *
+     * @param content    变更内容描述
+     * @param createTime 创建时间
+     * @param reviewTime 审核时间
+     * @param status     审核状态
+     * @param remark     备注
+     */
     public record AuditRecordView(String content, String createTime, String reviewTime, String status, String remark) {
     }
 }
