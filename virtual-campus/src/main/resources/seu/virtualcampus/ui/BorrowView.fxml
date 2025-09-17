@@ -1,26 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="420.0" prefWidth="640.0"
-            xmlns="http://javafx.com/javafx/24.0.1"
-            xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="seu.virtualcampus.ui.BorrowViewController"
-            style="-fx-font-family: 'Microsoft YaHei';
-                   -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);
-                   -fx-padding: 16;
-                   -fx-background-radius: 12;
-                   -fx-effect: dropshadow(gaussian, #90caf9, 16, 0.25, 0, 4);">
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane prefHeight="420.0" prefWidth="640.0" style="-fx-font-family: 'Microsoft YaHei';                    -fx-background-color: linear-gradient(to bottom, #e3f2fd, #bbdefb);                    -fx-padding: 16;                    -fx-background-radius: 12;                    -fx-effect: dropshadow(gaussian, #90caf9, 16, 0.25, 0, 4);" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="seu.virtualcampus.ui.BorrowViewController">
 
     <children>
-        <TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE"
-                 AnchorPane.topAnchor="0" AnchorPane.leftAnchor="0"
-                 AnchorPane.rightAnchor="0" AnchorPane.bottomAnchor="0"
-                 style="-fx-background-color: white;
-                        -fx-background-radius: 8;
-                        -fx-tab-min-width: 120;
-                        -fx-tab-max-width: 180;
-                        -fx-tab-min-height: 32;">
+        <TabPane fx:id="tabPane" style="-fx-background-color: white;                         -fx-background-radius: 8;                         -fx-tab-min-width: 120;                         -fx-tab-max-width: 180;                         -fx-tab-min-height: 32;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
 
             <tabs>
                 <!-- 当前借阅 -->
@@ -28,25 +19,16 @@
                     <content>
                         <AnchorPane style="-fx-padding: 12;">
                             <children>
-                                <TableView fx:id="tableViewCurrent" AnchorPane.topAnchor="0"
-                                           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-                                           AnchorPane.bottomAnchor="0"
-                                           style="-fx-background-color: white;
-                                                  -fx-background-radius: 10;
-                                                  -fx-border-color: #e0e7ef;
-                                                  -fx-border-radius: 10;
-                                                  -fx-font-size: 14px;
-                                                  -fx-table-cell-border-color: transparent;
-                                                  -fx-selection-bar: #90caf9;
-                                                  -fx-selection-bar-non-focused: #bbdefb;">
+                                <TableView fx:id="tableViewCurrent" style="-fx-background-color: white;                                                   -fx-background-radius: 10;                                                   -fx-border-color: #e0e7ef;                                                   -fx-border-radius: 10;                                                   -fx-font-size: 14px;                                                   -fx-table-cell-border-color: transparent;                                                   -fx-selection-bar: #90caf9;                                                   -fx-selection-bar-non-focused: #bbdefb;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                                     <columns>
-                                        <TableColumn fx:id="col1RecordId"   prefWidth="100.0" text="记录ID"/>
-                                        <TableColumn fx:id="col1BookId"     prefWidth="100.0" text="图书编号"/>
-                                        <TableColumn fx:id="col1Title"      prefWidth="140.0" text="书名"/>
-                                        <TableColumn fx:id="col1BorrowDate" prefWidth="110.0" text="借阅日期"/>
-                                        <TableColumn fx:id="col1DueDate"    prefWidth="110.0" text="应还日期"/>
-                                        <TableColumn fx:id="col1Status"     prefWidth="100.0" text="状态"/>
-                                        <TableColumn fx:id="col1Action" prefWidth="100.0" text="归还"/>
+                                        <TableColumn fx:id="col1RecordId" prefWidth="100.0" text="记录ID" />
+                                        <TableColumn fx:id="col1BookId" prefWidth="100.0" text="图书ID" />
+                                        <TableColumn fx:id="col1Title" prefWidth="160.0" text="书名" />
+                                        <TableColumn fx:id="col1BorrowDate" prefWidth="110.0" text="借阅日期" />
+                                        <TableColumn fx:id="col1DueDate" prefWidth="110.0" text="应还日期" />
+                                        <TableColumn fx:id="colRenewCount" text="续借次数" prefWidth="100"/>
+                                        <TableColumn fx:id="col1Status" prefWidth="100.0" text="状态" />
+                                        <TableColumn fx:id="colActionCurrent" text="操作" prefWidth="160"/>
                                     </columns>
                                 </TableView>
                             </children>
@@ -59,24 +41,15 @@
                     <content>
                         <AnchorPane style="-fx-padding: 12;">
                             <children>
-                                <TableView fx:id="tableViewHistory" AnchorPane.topAnchor="0"
-                                           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"
-                                           AnchorPane.bottomAnchor="0"
-                                           style="-fx-background-color: white;
-                                                  -fx-background-radius: 10;
-                                                  -fx-border-color: #e0e7ef;
-                                                  -fx-border-radius: 10;
-                                                  -fx-font-size: 14px;
-                                                  -fx-table-cell-border-color: transparent;
-                                                  -fx-selection-bar: #90caf9;
-                                                  -fx-selection-bar-non-focused: #bbdefb;">
+                                <TableView fx:id="tableViewHistory" style="-fx-background-color: white;                                                   -fx-background-radius: 10;                                                   -fx-border-color: #e0e7ef;                                                   -fx-border-radius: 10;                                                   -fx-font-size: 14px;                                                   -fx-table-cell-border-color: transparent;                                                   -fx-selection-bar: #90caf9;                                                   -fx-selection-bar-non-focused: #bbdefb;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                                     <columns>
-                                        <TableColumn fx:id="col2RecordId"   prefWidth="100.0" text="记录ID"/>
-                                        <TableColumn fx:id="col2BookId"     prefWidth="100.0" text="图书编号"/>
-                                        <TableColumn fx:id="col2Title"      prefWidth="160.0" text="书名"/>
-                                        <TableColumn fx:id="col2BorrowDate" prefWidth="110.0" text="借阅日期"/>
-                                        <TableColumn fx:id="col2ReturnDate" prefWidth="110.0" text="归还日期"/>
-                                        <TableColumn fx:id="col2Status"     prefWidth="100.0" text="状态"/>
+                                        <TableColumn fx:id="col2RecordId" prefWidth="100.0" text="记录ID" />
+                                        <TableColumn fx:id="col2BookId" prefWidth="100.0" text="图书ID" />
+                                        <TableColumn fx:id="col2Title" prefWidth="160.0" text="书名" />
+                                        <TableColumn fx:id="col2BorrowDate" prefWidth="110.0" text="借阅日期" />
+                                        <TableColumn fx:id="col2ReturnDate" prefWidth="110.0" text="归还日期" />
+                                        <TableColumn fx:id="col2RenewCount" prefWidth="100.0" text="续借次数" />
+                                        <TableColumn fx:id="col2Status" prefWidth="100.0" text="状态" />
                                     </columns>
                                 </TableView>
                             </children>
@@ -89,28 +62,17 @@
                     <content>
                         <VBox spacing="8" style="-fx-padding: 12;">
                             <!-- 刷新按钮 -->
-                            <Button fx:id="btnRefreshReservation" text="刷新预约记录"
-                                    style="-fx-background-color: #42a5f5; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 6 16;"
-                                    onAction="#onRefreshReservation"/>
+                            <Button fx:id="btnRefreshReservation" onAction="#onRefreshReservation" style="-fx-background-color: #42a5f5; -fx-text-fill: white; -fx-background-radius: 6; -fx-padding: 6 16;" text="刷新预约记录" />
 
-                            <TableView fx:id="tableViewReservation"
-                                       VBox.vgrow="ALWAYS"
-                                       style="-fx-background-color: white;
-                              -fx-background-radius: 10;
-                              -fx-border-color: #e0e7ef;
-                              -fx-border-radius: 10;
-                              -fx-font-size: 14px;
-                              -fx-table-cell-border-color: transparent;
-                              -fx-selection-bar: #90caf9;
-                              -fx-selection-bar-non-focused: #bbdefb;">
+                            <TableView fx:id="tableViewReservation" style="-fx-background-color: white;                               -fx-background-radius: 10;                               -fx-border-color: #e0e7ef;                               -fx-border-radius: 10;                               -fx-font-size: 14px;                               -fx-table-cell-border-color: transparent;                               -fx-selection-bar: #90caf9;                               -fx-selection-bar-non-focused: #bbdefb;" VBox.vgrow="ALWAYS">
                                 <columns>
-                                    <TableColumn fx:id="col3Isbn"        prefWidth="140.0" text="ISBN"/>
-                                    <TableColumn fx:id="col3Title"       prefWidth="180.0" text="书名"/>
-                                    <TableColumn fx:id="col3ReserveDate" prefWidth="120.0" text="预约日期"/>
-                                    <TableColumn fx:id="col3Queue"       prefWidth="80.0"  text="排队号"/>
-                                    <TableColumn fx:id="col3Status"      prefWidth="100.0" text="状态"/>
+                                    <TableColumn fx:id="col3Isbn" prefWidth="140.0" text="ISBN" />
+                                    <TableColumn fx:id="col3Title" prefWidth="180.0" text="书名" />
+                                    <TableColumn fx:id="col3ReserveDate" prefWidth="120.0" text="预约日期" />
+                                    <TableColumn fx:id="col3Queue" prefWidth="80.0" text="排队号" />
+                                    <TableColumn fx:id="col3Status" prefWidth="100.0" text="状态" />
                                     <!-- 新增操作列 -->
-                                    <TableColumn fx:id="col3Action"      prefWidth="200.0" text="操作"/>
+                                    <TableColumn fx:id="col3Action" prefWidth="160.0" text="操作" />
                                 </columns>
                             </TableView>
                         </VBox>

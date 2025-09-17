@@ -114,7 +114,9 @@
                                     <TableColumn fx:id="colBorrowTitle" text="书名"/>
                                     <TableColumn fx:id="colBorrowStudentId" text="借阅人ID"/>
                                     <TableColumn fx:id="colBorrowDate" text="借阅日期"/>
+                                    <TableColumn fx:id="colBorrowDueDate" text="应还日期" />
                                     <TableColumn fx:id="colReturnDate" text="归还日期"/>
+                                    <TableColumn fx:id="colBorrowRenewCount" text="续借次数" />
                                     <TableColumn fx:id="colBorrowStatus" text="状态"/>
                                 </columns>
                             </TableView>

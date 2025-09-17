@@ -50,58 +50,41 @@ public class LibraryController {
     }
 
     // ==================== 借阅 ====================
-
     @PostMapping("/borrow")
-    public ResponseEntity<String> borrowBook(@RequestParam String userId,
-                                             @RequestParam String bookId) {
-        // 校验用户是否还能借
-        if (!borrowRecordService.canBorrow(userId, 30)) {
-            return ResponseEntity.badRequest().body("已达借阅上限，无法借阅更多图书");
+    public ResponseEntity<?> borrowBook(@RequestParam String userId, @RequestParam String bookId) {
+        try {
+            borrowRecordService.borrowBook(userId, bookId);
+            return ResponseEntity.ok("借书成功（30天）");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        // 借阅副本
-        boolean success = bookCopyService.borrowBook(bookId);
-        if (!success) {
-            return ResponseEntity.badRequest().body("借阅失败，该副本不可借");
+    }
+
+    /** 续借（最多2次，每次+30天） */
+    @PostMapping("/borrow/{recordId}/renew")
+    public ResponseEntity<?> renewBorrow(@PathVariable String recordId) {
+        try {
+            borrowRecordService.renewBorrow(recordId);
+            return ResponseEntity.ok("续借成功（+30天）");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        // 写入借阅记录
-        BorrowRecord record = new BorrowRecord();
-        record.setRecordId(borrowRecordService.generateRecordId());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setBorrowDate(LocalDate.now());
-        record.setDueDate(LocalDate.now().plusMonths(1));
-        record.setRenewCount(0);
-        record.setStatus("BORROWED");
-        borrowRecordService.addBorrowRecord(record);
-
-        String isbn = resolveIsbnByBookId(bookId);
-        if (isbn != null) bookInfoService.refreshBookByIsbn(isbn);
-
-        return ResponseEntity.ok("借阅成功");
     }
 
     // ==================== 归还 ====================
 
-    @PostMapping("/return")
-    public ResponseEntity<String> returnBook(@RequestParam String recordId,
-                                             @RequestParam String bookId,
-                                             @RequestParam String isbn) {
-        // 归还借阅记录
-        boolean recordOk = borrowRecordService.returnBook(recordId, LocalDate.now().toString());
-        if (!recordOk) {
-            return ResponseEntity.badRequest().body("归还失败，借阅记录无效");
+    @PostMapping("/borrow/{recordId}/return")
+    public ResponseEntity<?> returnBook(@PathVariable String recordId) {
+        try {
+            boolean success = borrowRecordService.returnBook(recordId, java.time.LocalDate.now().toString());
+            if (success) {
+                return ResponseEntity.ok("归还成功");
+            } else {
+                return ResponseEntity.badRequest().body("归还失败：该记录可能已归还或不存在");
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-        // 归还副本
-        bookCopyService.returnBook(bookId);
-        bookInfoService.refreshBookByIsbn(isbn);
-
-        // 检查是否有预约队列
-        ReservationRecord next = reservationRecordService.getFirstActiveByIsbn(isbn);
-        if (next != null) {
-            // 直接保留副本 IN_LIBRARY 状态
-            return ResponseEntity.ok("归还成功，该书已有预约用户，可以去兑现");
-        }
-        return ResponseEntity.ok("归还成功");
     }
 
     // ==================== 预约 ====================
@@ -167,15 +150,11 @@ public class LibraryController {
         }
 
         // 写入借阅记录
-        BorrowRecord record = new BorrowRecord();
-        record.setRecordId(borrowRecordService.generateRecordId());
-        record.setUserId(userId);
-        record.setBookId(bookId);
-        record.setBorrowDate(LocalDate.now());
-        record.setDueDate(LocalDate.now().plusMonths(1));
-        record.setRenewCount(0);
-        record.setStatus("BORROWED");
-        borrowRecordService.addBorrowRecord(record);
+        try {
+            borrowRecordService.borrowBook(userId, bookId);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body("借阅失败：" + e.getMessage());
+        }
 
         String isbn = resolveIsbnByBookId(bookId);
         if (isbn != null) bookInfoService.refreshBookByIsbn(isbn);
@@ -235,8 +214,10 @@ public class LibraryController {
                     d.title = resolveTitleByBookId(br.getBookId());
                     d.userId = br.getUserId();
                     d.borrowDate = br.getBorrowDate();
+                    d.dueDate = br.getDueDate();
                     d.returnDate = br.getReturnDate();
                     d.status = br.getStatus();
+                    d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
                     return d;
                 })
                 .filter(d -> kw.isEmpty()
@@ -296,6 +277,7 @@ public class LibraryController {
             d.borrowDate = br.getBorrowDate();
             d.dueDate = br.getDueDate();
             d.status = br.getStatus();
+            d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
             return d;
         }).collect(java.util.stream.Collectors.toList());
         return ResponseEntity.ok(dto);
@@ -325,6 +307,7 @@ public class LibraryController {
                     d.borrowDate = br.getBorrowDate();
                     d.returnDate = br.getReturnDate();
                     d.status = br.getStatus();
+                    d.renewCount = br.getRenewCount() == null ? 0 : br.getRenewCount();
                     return d;
                 })
                 .collect(java.util.stream.Collectors.toList());
@@ -390,6 +373,7 @@ public class LibraryController {
         public java.time.LocalDate borrowDate;
         public java.time.LocalDate dueDate;
         public String status;
+        public Integer renewCount;
     }
     public static class BorrowHistoryItemDTO {
         public String recordId;
@@ -398,6 +382,7 @@ public class LibraryController {
         public java.time.LocalDate borrowDate;
         public java.time.LocalDate returnDate;
         public String status;
+        public Integer renewCount;
     }
     public static class ReservationItemDTO {
         public String reservationId;
@@ -412,17 +397,17 @@ public class LibraryController {
         public String bookId;
         public String title;
         public String userId;
-        public String userName;
         public java.time.LocalDate borrowDate;
+        public java.time.LocalDate dueDate;
         public java.time.LocalDate returnDate;
         public String status;
+        public Integer renewCount;
     }
     public static class AdminReservationItemDTO {
         public String reservationId;
         public String isbn;
         public String title;
         public String userId;
-        public String userName;
         public java.time.LocalDate reserveDate;
         public Integer queuePosition;
         public String status;

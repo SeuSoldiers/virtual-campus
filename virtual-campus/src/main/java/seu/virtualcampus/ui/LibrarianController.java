@@ -3,6 +3,7 @@ package seu.virtualcampus.ui;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import javafx.beans.property.ReadOnlyIntegerWrapper;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.fxml.FXML;
@@ -46,6 +47,8 @@ public class LibrarianController {
             colBorrowStudentId, colBorrowStatus;
     @FXML
     private TableColumn<AdminBorrowVM, LocalDate> colBorrowDate, colReturnDate;
+    @FXML private TableColumn<AdminBorrowVM, LocalDate> colBorrowDueDate;
+    @FXML private TableColumn<AdminBorrowVM, Number> colBorrowRenewCount;
     // ---------- 预约管理（只读） ----------
     @FXML
     private TextField reservationSearchField;
@@ -260,6 +263,9 @@ public class LibrarianController {
         colBorrowDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().borrowDate));
         colReturnDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().returnDate));
         colBorrowStatus.setCellValueFactory(c -> new ReadOnlyStringWrapper(c.getValue().status));
+        colBorrowDueDate.setCellValueFactory(c -> new ReadOnlyObjectWrapper<>(c.getValue().dueDate));
+        colBorrowRenewCount.setCellValueFactory(c -> new ReadOnlyIntegerWrapper(c.getValue().renewCount));
+
     }
 
     @FXML
@@ -370,10 +376,11 @@ public class LibrarianController {
         public String bookId;
         public String title;
         public String userId;
-        public String userName; // 可选，没有就空
         public LocalDate borrowDate;
+        public LocalDate dueDate;
         public LocalDate returnDate;
         public String status; // BORROWED/OVERDUE/RETURNED...
+        public Integer renewCount;
     }
 
     public static class AdminReservationVM {
@@ -381,7 +388,6 @@ public class LibrarianController {
         public String isbn;
         public String title;
         public String userId;
-        public String userName; // 可选
         public LocalDate reserveDate;
         public Integer queuePosition;
         public String status; // ACTIVE/NOTIFIED/FULFILLED/CANCELLED...
