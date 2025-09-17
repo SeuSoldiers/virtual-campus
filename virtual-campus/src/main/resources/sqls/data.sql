@@ -65,20 +65,18 @@ VALUES
 
 -- 插入借阅记录（bookId 指向具体副本）
 INSERT OR IGNORE INTO borrow_records (recordId, userId, bookId, borrowDate, dueDate, returnDate, renewCount, status)
-VALUES ('R001', '220231', 'B001_1', '2025-07-01', '2025-08-01', NULL, 0, 'BORROWED'),
-       ('R002', '220232', 'B002_1', '2025-07-15', '2025-08-15', NULL, 0, 'BORROWED'),
-       ('R003', '220233', 'B004_1', '2025-07-20', '2025-08-20', NULL, 0, 'BORROWED'),
-       ('R004', '220234', 'B005_1', '2025-06-10', '2025-07-10', NULL, 0, 'BORROWED');
+VALUES ('R001', '220231', 'B001_1', '2025-09-01', '2025-10-01', NULL, 0, 'BORROWED'),
+       ('R002', '220232', 'B002_1', '2025-08-01', '2025-09-01', NULL, 1, 'BORROWED'),
+       ('R003', '220233', 'B003_1', '2025-08-10', '2025-09-10', '2025-09-12', 0, 'RETURNED'),
+       ('R004', '220234', 'B004_1', '2025-08-20', '2025-09-20', NULL, 1, 'BORROWED'),
+       ('R005', '220235', 'B005_1', '2025-07-01', '2025-08-01', NULL, 2, 'BORROWED');
 
 -- 插入预约记录（使用 isbn）
 INSERT OR IGNORE INTO reservation_records (reservationId, userId, isbn, reserveDate, status, queuePosition)
 VALUES
--- Spring实战：只能预约
-('RES001', '220231', '9787115447737', '2025-07-20', 'ACTIVE', 1),
--- 数据库系统概念：测试预约兑现
-('RES002', '220232', '9787111557975', '2025-07-22', 'ACTIVE', 1),
--- 算法导论：全部借出，只能预约
-('RES003', '220233', '9787111407010', '2025-07-25', 'ACTIVE', 1);
+    ('RES001', '220231', '9787115447737', '2025-09-10', 'ACTIVE', 1),
+    ('RES002', '220232', '9787111557975', '2025-09-12', 'ACTIVE', 1),
+    ('RES003', '220233', '9787111407010', '2025-09-15', 'ACTIVE', 1);
 -- 插入测试商品数据
 INSERT OR IGNORE INTO product (productId, productName, productPrice, availableCount, productType, status)
 VALUES ('P001', '笔记本电脑 - ThinkPad X1', 8999.00, 50, '电子产品', 'ACTIVE'),

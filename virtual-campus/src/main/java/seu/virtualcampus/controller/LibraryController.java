@@ -364,6 +364,14 @@ public class LibraryController {
         return ResponseEntity.ok(dto);
     }
 
+    /** 检查并更新逾期记录 */
+    @PostMapping("/borrows/check-overdue")
+    public ResponseEntity<String> checkOverdue() {
+        int updated = borrowRecordService.markOverdueIfNeeded();
+        System.out.println("[OverdueCheck] 更新逾期记录数: " + updated);
+        return ResponseEntity.noContent().build();
+    }
+
     /** —— 以下是轻量 DTO，与前端 BorrowViewController 对齐 —— */
     public static class BorrowItemDTO {
         public String recordId;

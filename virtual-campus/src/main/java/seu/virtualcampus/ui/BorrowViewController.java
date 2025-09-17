@@ -395,6 +395,7 @@ public class BorrowViewController {
 
     public void showCurrentBorrow() {
         try {
+            checkOverdue();
             HttpUrl url = HttpUrl.parse(BASE + "/borrows/current").newBuilder()
                     .addQueryParameter("userId", currentUserId).build();
             Request req = withAuth(new Request.Builder().url(url).get()).build();
@@ -412,6 +413,7 @@ public class BorrowViewController {
 
     public void showHistoryBorrow() {
         try {
+            checkOverdue();
             HttpUrl url = HttpUrl.parse(BASE + "/borrows/history").newBuilder()
                     .addQueryParameter("userId", currentUserId).build();
             Request req = withAuth(new Request.Builder().url(url).get()).build();
@@ -473,15 +475,28 @@ public class BorrowViewController {
         }
     }
 
+    private void checkOverdue() {
+        try {
+            HttpUrl url = HttpUrl.parse(BASE + "/borrows/check-overdue").newBuilder().build();
+            Request req = withAuth(new Request.Builder().url(url)
+                    .post(RequestBody.create(new byte[0], null))).build();
+
+            try (Response resp = client.newCall(req).execute()) {
+                if (!resp.isSuccessful()) {
+                    System.err.println("检查逾期失败: HTTP " + resp.code());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("检查逾期失败: " + e.getMessage());
+        }
+    }
+
     // ============== 返回上一级（student_library） ==============
 
     private void backToStudentLibrary() {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/student_library.fxml"));
             Parent root = loader.load();
-            // 如需把 userId 传回去，可在 StudentLibraryController 增加一个 init(String userId)
-            // StudentLibraryController c = loader.getController();
-            // c.init(currentUserId);
 
             Stage stage = (Stage) tabPane.getScene().getWindow();
             stage.setScene(new Scene(root));

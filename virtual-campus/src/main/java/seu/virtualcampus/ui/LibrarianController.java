@@ -13,10 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -275,6 +272,7 @@ public class LibrarianController {
 
     private void loadBorrows(String keyword) {
         try {
+            checkOverdue();
             HttpUrl url = HttpUrl.parse(BASE + "/admin/borrows").newBuilder()
                     .addQueryParameter("keyword", keyword == null ? "" : keyword)
                     .build();
@@ -297,6 +295,26 @@ public class LibrarianController {
     private void onRefreshBorrows() {
         borrowSearchField.clear();
         loadBorrows("");
+    }
+
+    private void checkOverdue() {
+        try {
+            HttpUrl url = HttpUrl.parse(BASE + "/borrows/check-overdue")
+                    .newBuilder().build();
+
+            Request req = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(new byte[0], null))
+                    .build();
+
+            try (Response resp = client.newCall(req).execute()) {
+                if (!resp.isSuccessful()) {
+                    System.err.println("检查逾期失败: HTTP " + resp.code());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("检查逾期失败: " + e.getMessage());
+        }
     }
 
     // ================== 预约管理（只读） ==================
