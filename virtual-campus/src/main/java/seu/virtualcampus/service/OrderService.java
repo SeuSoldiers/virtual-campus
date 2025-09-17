@@ -360,7 +360,8 @@ public class OrderService {
                 return result;
             }
 
-            if (!"PAID".equals(order.getStatus()) && !"SHIPPED".equals(order.getStatus())) {
+            // 仅允许已发货的订单确认收货
+            if (!"SHIPPED".equals(order.getStatus())) {
                 result.put("success", false);
                 result.put("message", "订单状态不允许确认");
                 return result;

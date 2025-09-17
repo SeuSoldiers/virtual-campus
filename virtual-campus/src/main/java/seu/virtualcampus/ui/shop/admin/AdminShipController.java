@@ -205,7 +205,7 @@ public class AdminShipController implements Initializable {
 
         if (orderIdCol != null) orderIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getOrderId()));
         if (userIdCol != null) userIdCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserId()));
-        if (statusCol != null) statusCol.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getStatus()));
+        if (statusCol != null) statusCol.setCellValueFactory(c -> new SimpleStringProperty(toChineseStatus(c.getValue().getStatus())));
         if (amountCol != null) {
             amountCol.setCellValueFactory(c -> new SimpleObjectProperty<>(c.getValue().getTotalAmount()));
             amountCol.setCellFactory(col -> new TableCell<>() {
@@ -273,6 +273,29 @@ public class AdminShipController implements Initializable {
     public String getorderid() {
         seu.virtualcampus.domain.Order sel = ordersTable != null ? ordersTable.getSelectionModel().getSelectedItem() : null;
         return sel != null ? sel.getOrderId() : null;
+    }
+
+    // 将后端状态翻译为中文展示，保持与用户端一致
+    private static String toChineseStatus(String status) {
+        if (status == null) return "";
+        switch (status) {
+            case "PENDING":
+                return "待支付";
+            case "PAID":
+                return "已支付";
+            case "SHIPPED":
+                return "已发货";
+            case "DELIVERED":
+                return "已发货"; // 与用户端一致
+            case "COMPLETED":
+                return "已完成";
+            case "CONFIRMED":
+                return "已确认";
+            case "CANCELLED":
+                return "已取消";
+            default:
+                return status;
+        }
     }
 
     /**

@@ -318,8 +318,10 @@ public class OrderDetailController implements Initializable {
      */
     private void updateButtonVisibility(String status) {
         logger.info(String.format("[OrderDetail] 按钮可见性检查: status=%s", status));
-        // 仅当状态为 PAID 或 SHIPPED 时显示确认收货按钮
-        confirmButton.setVisible("PAID".equals(status) || "SHIPPED".equals(status) || "DELIVERED".equals(status));
+        // 仅当状态为 SHIPPED 时可点击确认收货
+        boolean allowConfirm = "SHIPPED".equals(status);
+        confirmButton.setVisible(allowConfirm);
+        confirmButton.setDisable(!allowConfirm);
     }
 
     /**
