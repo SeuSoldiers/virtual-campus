@@ -11,6 +11,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
+import lombok.Data;
 import okhttp3.*;
 import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
@@ -404,7 +405,7 @@ public class AdminProductsController implements Initializable {
                                     pr.setPrice(bp.getProductPrice());
                                     pr.setStock(bp.getAvailableCount());
                                     pr.setStatus(normalizeStatus(bp.getStatus()));
-                                    pr.setDescription(null);
+                                    pr.setDescription(bp.getProductType());
                                     mapped.add(pr);
                                 }
                                 wrapped.setProducts(mapped);
@@ -543,6 +544,7 @@ public class AdminProductsController implements Initializable {
             // 将 UI 的 ON/OFF 转换为后端的 ACTIVE/INACTIVE
             String backendStatus = "ON".equalsIgnoreCase(statusChoiceBox.getValue()) ? "ACTIVE" : "INACTIVE";
             payload.put("status", backendStatus);
+            payload.put("productType", descriptionArea.getText());
             String requestBody = objectMapper.writeValueAsString(payload);
 
             Request.Builder requestBuilder;
@@ -1007,6 +1009,7 @@ public class AdminProductsController implements Initializable {
     }
 
     // 与后端领域对象字段对齐的载体
+    @Data
     public static class BackendProduct {
         private String productId;
         private String productName;
@@ -1014,53 +1017,5 @@ public class AdminProductsController implements Initializable {
         private Integer availableCount;
         private String status;
         private String productType;
-
-        public String getProductId() {
-            return productId;
-        }
-
-        public void setProductId(String productId) {
-            this.productId = productId;
-        }
-
-        public String getProductName() {
-            return productName;
-        }
-
-        public void setProductName(String productName) {
-            this.productName = productName;
-        }
-
-        public Double getProductPrice() {
-            return productPrice;
-        }
-
-        public void setProductPrice(Double productPrice) {
-            this.productPrice = productPrice;
-        }
-
-        public Integer getAvailableCount() {
-            return availableCount;
-        }
-
-        public void setAvailableCount(Integer availableCount) {
-            this.availableCount = availableCount;
-        }
-
-        public String getStatus() {
-            return status;
-        }
-
-        public void setStatus(String status) {
-            this.status = status;
-        }
-
-        public String getProductType() {
-            return productType;
-        }
-
-        public void setProductType(String productType) {
-            this.productType = productType;
-        }
     }
 }
