@@ -17,6 +17,7 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.stage.Stage;
 import okhttp3.*;
+import seu.virtualcampus.ui.DashboardController;
 import seu.virtualcampus.ui.MainApp;
 
 import java.io.IOException;
@@ -66,6 +67,8 @@ public class OrderDetailController implements Initializable {
     private Button confirmButton;
     @FXML
     private Button copyOrderIdButton;
+    @FXML
+    public Button backButton;
     @FXML
     private Button refreshButton;
     private String orderId;
@@ -394,23 +397,8 @@ public class OrderDetailController implements Initializable {
      */
     @FXML
     private void goBackToHome() {
-        try {
-            // 如果是从其他页面打开的，关闭当前窗口
-            Stage stage = (Stage) orderIdLabel.getScene().getWindow();
-            if (stage.getTitle().equals("订单详情")) {
-                stage.close();
-                return;
-            }
-
-            // 否则跳转到首页/控制台
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/seu/virtualcampus/ui/dashboard.fxml"));
-            Parent root = loader.load();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
-            stage.setTitle("虚拟校园控制台");
-        } catch (IOException e) {
-            showAlert("错误", "返回首页失败: " + e.getMessage());
-        }
+        Stage stage = (Stage) orderIdLabel.getScene().getWindow();
+        stage.close();
     }
 
     /**

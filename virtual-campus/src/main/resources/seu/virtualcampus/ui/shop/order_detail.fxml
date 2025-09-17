@@ -78,7 +78,7 @@
         <Button fx:id="confirmButton" text="确认收货" onAction="#confirmOrder" visible="false" prefWidth="120"
                 prefHeight="40"
                 style="-fx-font-size: 14px; -fx-background-color: #28a745; -fx-text-fill: white; -fx-background-radius: 6;"/>
-        <Button text="返回首页" onAction="#goBackToHome" prefWidth="120" prefHeight="40"
+        <Button fx:id="backButton" text="返回首页" onAction="#goBackToHome" prefWidth="120" prefHeight="40"
                 style="-fx-font-size: 14px; -fx-background-color: #6c757d; -fx-text-fill: white; -fx-background-radius: 6;"/>
     </HBox>
 </VBox>
