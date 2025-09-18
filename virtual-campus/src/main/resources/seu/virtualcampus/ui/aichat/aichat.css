@@ -1,0 +1,21 @@
+/* sessionListView 选中项：背景变色，文字颜色不变 */
+.session-list .list-cell,
+.session-list .list-cell:selected,
+.session-list .list-cell:selected:focused {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: #222 !important;
+}
+
+/* 消息列表去除选中高亮（无背景变色） */
+#messageListView .list-cell,
+#messageListView .list-cell:selected,
+#messageListView .list-cell:selected:focused {
+    -fx-background-color: transparent !important;
+    -fx-text-fill: inherit;
+}
+
+.session-list .list-cell {
+    -fx-font-size: 14px;
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+}

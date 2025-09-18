@@ -12,6 +12,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import seu.virtualcampus.domain.AiMessage;
 import seu.virtualcampus.domain.AiSession;
 import seu.virtualcampus.ui.DashboardController;
@@ -26,6 +28,9 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -37,6 +42,8 @@ public class AiChatController implements Initializable {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ObservableList<AiSession> sessionList = FXCollections.observableArrayList();
     private final ObservableList<AiMessage> messageList = FXCollections.observableArrayList();
+    @FXML
+    public Button backButton;
     @FXML
     private ListView<AiSession> sessionListView;
     @FXML
@@ -66,15 +73,37 @@ public class AiChatController implements Initializable {
         sessionListView.setItems(sessionList);
         sessionListView.setCellFactory(list -> {
             ListCell<AiSession> cell = new ListCell<>() {
+                private final HBox hbox = new HBox();
+                private final Label label = new Label();
+                private final VBox wrapper = new VBox();
+
+                {
+                    label.setWrapText(true);
+                    label.setStyle("-fx-font-size: 16px; -fx-text-fill: #222; -fx-padding: 10 18 10 18;");
+                    hbox.getChildren().add(label);
+                    hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    hbox.setMinHeight(40);
+                    hbox.setStyle("-fx-background-color: #e3e9f7; -fx-background-radius: 10;");
+                    wrapper.getChildren().add(hbox);
+                    wrapper.setPadding(new javafx.geometry.Insets(0, 0, 4, 0)); // 气泡间距由8改为4
+                }
+
                 @Override
                 protected void updateItem(AiSession session, boolean empty) {
                     super.updateItem(session, empty);
                     if (empty || session == null) {
+                        setGraphic(null);
                         setText(null);
-                        setStyle("");
                     } else {
-                        setText(session.getTitle() + " (最后访问: " + session.getUpdatedAt() + ")");
-                        setStyle("-fx-background-radius: 8; -fx-padding: 6 8 6 8; -fx-background-color: #f0f4ff;");
+                        label.setText(session.getTitle() + "（" + getRelativeTime(session.getUpdatedAt()) + "）");
+                        // 选中时高亮
+                        if (isSelected()) {
+                            hbox.setStyle("-fx-background-color: #a6b4d6; -fx-background-radius: 10;");
+                        } else {
+                            hbox.setStyle("-fx-background-color: #e3e9f7; -fx-background-radius: 10;");
+                        }
+                        setText(null);
+                        setGraphic(wrapper);
                     }
                 }
             };
@@ -90,19 +119,37 @@ public class AiChatController implements Initializable {
         messageListView.setItems(messageList);
         messageListView.setCellFactory(list -> {
             ListCell<AiMessage> cell = new ListCell<>() {
+                private final HBox hbox = new HBox();
+                private final Label label = new Label();
+
+                {
+                    label.setWrapText(true);
+                    label.setMaxWidth(600); // 最大宽度
+                    label.setMinHeight(Label.USE_PREF_SIZE); // 让高度自适应内容
+                    hbox.getChildren().add(label);
+                }
+
                 @Override
                 protected void updateItem(AiMessage message, boolean empty) {
                     super.updateItem(message, empty);
                     if (empty || message == null) {
+                        setGraphic(null);
                         setText(null);
                         setStyle("");
                     } else {
-                        setText(message.getRole() + ": " + message.getContent());
+                        label.setText(message.getContent());
                         if ("user".equals(message.getRole())) {
-                            setStyle("-fx-background-radius: 12; -fx-padding: 8 12 8 32; -fx-background-color: #e0f7fa; -fx-alignment: center-right;");
+                            hbox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                            hbox.setPadding(new javafx.geometry.Insets(4, 0, 4, 40));
+                            label.setStyle("-fx-background-color: #e0f7fa; -fx-background-radius: 16; -fx-padding: 10 18 10 18; -fx-font-size: 15; -fx-text-fill: #222;");
                         } else {
-                            setStyle("-fx-background-radius: 12; -fx-padding: 8 32 8 12; -fx-background-color: #fffde7; -fx-alignment: center-left;");
+                            hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                            hbox.setPadding(new javafx.geometry.Insets(4, 40, 4, 0));
+                            label.setStyle("-fx-background-color: #fffde7; -fx-background-radius: 16; -fx-padding: 10 18 10 18; -fx-font-size: 15; -fx-text-fill: #222;");
                         }
+                        setGraphic(hbox);
+                        setText(null);
+                        setStyle("");
                     }
                 }
             };
@@ -126,9 +173,6 @@ public class AiChatController implements Initializable {
             }
             updateSendBtnState();
         });
-        sendBtn.setOnAction(this::onSend);
-        createSessionBtn.setOnAction(this::onCreateSession);
-        inputField.setOnKeyPressed(this::onInputKey);
         inputField.textProperty().addListener((obs, oldVal, newVal) -> updateSendBtnState());
         logger.info("AI聊天界面初始化完成");
     }
@@ -138,12 +182,14 @@ public class AiChatController implements Initializable {
         sendBtn.setDisable(!canSend);
     }
 
+    @FXML
     private void onInputKey(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
             onSend(null);
         }
     }
 
+    @FXML
     private void onSend(ActionEvent event) {
         String msg = inputField.getText().trim();
         AiSession selected = sessionListView.getSelectionModel().getSelectedItem();
@@ -157,6 +203,7 @@ public class AiChatController implements Initializable {
         sendMessage(sessionId, msg);
     }
 
+    @FXML
     private void onCreateSession(ActionEvent event) {
         logger.info("创建新会话");
         Platform.runLater(() -> {
@@ -179,6 +226,11 @@ public class AiChatController implements Initializable {
                 DashboardController.showAlert("错误", "网络错误: " + e.getMessage(), null, Alert.AlertType.ERROR);
             }
         });
+    }
+
+    @FXML
+    private void onBack() {
+        DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", backButton);
     }
 
     // ========== 网络请求与数据处理 ==========
@@ -328,7 +380,6 @@ public class AiChatController implements Initializable {
                                 aiMessage.setContent(aiMessage.getContent() + data);
                                 Platform.runLater(() -> {
                                     messageListView.refresh();
-                                    messageListView.scrollTo(messageList.size() - 1);
                                 });
                             }
                         });
@@ -395,6 +446,27 @@ public class AiChatController implements Initializable {
                 });
             }
         });
+    }
+
+    /**
+     * 将时间字符串（如 2025-09-18 18:22:32）转为“xx天前/xx小时前/xx分钟前/刚刚”
+     */
+    private String getRelativeTime(String updatedAt) {
+        if (updatedAt == null || updatedAt.isEmpty()) return "未知";
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            LocalDateTime time = LocalDateTime.parse(updatedAt, formatter);
+            Duration duration = Duration.between(time, LocalDateTime.now());
+            long days = duration.toDays();
+            long hours = duration.toHours();
+            long minutes = duration.toMinutes();
+            if (days > 0) return days + "天前";
+            if (hours > 0) return hours + "小时前";
+            if (minutes > 0) return minutes + "分钟前";
+            return "刚刚";
+        } catch (Exception e) {
+            return updatedAt;
+        }
     }
 
 }
