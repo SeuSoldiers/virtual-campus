@@ -129,6 +129,7 @@ public class RegistrarController {
      * 驳回选中记录。
      * 触发审核不通过操作。
      */
+    @FXML
     private void handleReject() {
         reviewSelected(false);
     }
