@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.aichat.AiChatController"
+            style="-fx-background-color:linear-gradient(to bottom right,#f8fafc,#e3e9f7);">
+    <left>
+        <VBox spacing="10"
+              style="-fx-padding: 16; -fx-background-color: #f0f4ff; -fx-background-radius: 12; -fx-effect: dropshadow(gaussian, #b0b8d8, 8, 0.2, 2, 2);">
+            <Label text="会话列表" style="-fx-font-weight:bold; -fx-font-size:15;"/>
+            <ListView fx:id="sessionListView" prefWidth="170"
+                      style="-fx-background-radius: 8; -fx-background-color: #f8fafd;"/>
+            <Button fx:id="createSessionBtn" text="新建会话"
+                    style="-fx-background-radius: 8; -fx-background-color: #4f8cff; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="8" style="-fx-padding: 16;">
+            <Label fx:id="sessionTitle" text="当前会话"
+                   style="-fx-font-size: 16; -fx-font-weight: bold; -fx-padding: 0 0 8 0;"/>
+            <ListView fx:id="messageListView" VBox.vgrow="ALWAYS"
+                      style="-fx-background-radius: 12; -fx-background-color: #f8fafd; -fx-border-color: #e0e7ef; -fx-border-radius: 12;"/>
+            <HBox spacing="8" style="-fx-padding: 8 0 0 0;">
+                <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="请输入消息..."
+                           style="-fx-background-radius: 8; -fx-background-color: #fff; -fx-border-color: #b0b8d8; -fx-border-radius: 8;"/>
+                <Button fx:id="sendBtn" text="发送"
+                        style="-fx-background-radius: 8; -fx-background-color: #4f8cff; -fx-text-fill: white; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+    </center>
+    <top>
+        <HBox style="-fx-padding: 10; -fx-alignment: center-right;">
+            <Label fx:id="userLabel" text="用户："
+                   style="-fx-font-size: 13; -fx-text-fill: #4f8cff; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+</BorderPane>

@@ -159,7 +159,7 @@ public class DashboardController {
         entryBox.add(libraryBtn, cnt % 4, cnt / 4);
 
         Button aiChatBtn = createButtonWithIcon("智能助理", "/seu/virtualcampus/ui/icon/icon.png");
-        aiChatBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/aichat.fxml", entryBox));
+        aiChatBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/aichat/aichat.fxml", entryBox));
         entryBox.add(aiChatBtn, cnt % 4, cnt / 4);
         cnt++;
     }

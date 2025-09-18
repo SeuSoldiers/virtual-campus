@@ -48,19 +48,18 @@
             <version>1.18.30</version>
             <optional>true</optional>
         </dependency>
-
-        <!-- Test -->
+        <!-- Spring WebFlux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+
+        <!-- Reactor Core（Flux/Mono） -->
         <dependency>
-            <groupId>org.mybatis.spring.boot</groupId>
-            <artifactId>mybatis-spring-boot-starter-test</artifactId>
-            <version>3.0.5</version>
-            <scope>test</scope>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
         </dependency>
+
 
         <!-- SQLite JDBC -->
         <dependency>

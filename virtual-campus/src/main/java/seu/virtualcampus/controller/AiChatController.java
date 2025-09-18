@@ -1,8 +1,11 @@
 package seu.virtualcampus.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import seu.virtualcampus.domain.AiMessage;
 import seu.virtualcampus.domain.AiSession;
 import seu.virtualcampus.domain.User;
@@ -11,6 +14,7 @@ import seu.virtualcampus.service.AuthService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -123,25 +127,36 @@ public class AiChatController {
         }
     }
 
-    // 6. 处理用户聊天请求
-    @PostMapping("/chat")
-    public ResponseEntity<String> handleChat(@RequestHeader("Authorization") String token, @RequestBody Map<String, Object> payload) {
-        Integer sessionId = (Integer) payload.get("sessionId");
-        String userMsg = (String) payload.get("userMsg");
-        logger.info("处理聊天请求: sessionId=" + sessionId + ", msg=" + userMsg);
+    // 6. 流式响应用户聊天请求
+    @GetMapping(value = "/chat/stream", produces = "text/event-stream")
+    public SseEmitter streamChat(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Integer sessionId,
+            @RequestParam String userMsg) {
 
         User u = authService.getUserByToken(token);
         if (u == null) {
-            logger.warning("无效token: " + token);
-            return ResponseEntity.status(401).body("无效token");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "无效 token");
         }
-        try {
-            String reply = aiChatService.handleChat(sessionId, userMsg);
-            logger.info("成功处理聊天请求: sessionId=" + sessionId);
-            return ResponseEntity.ok(reply);
-        } catch (Exception e) {
-            logger.log(Level.SEVERE, "处理聊天请求失败: sessionId=" + sessionId, e);
-            return ResponseEntity.badRequest().body("error: " + e.getMessage());
-        }
+
+        SseEmitter emitter = new SseEmitter();
+        CompletableFuture.runAsync(() -> {
+            try {
+                aiChatService.handleChatStream(sessionId, userMsg, chunk -> {
+                    try {
+                        emitter.send(chunk);
+                    } catch (IllegalStateException ise) {
+                        logger.warning("SSE已关闭，忽略后续chunk: " + ise.getMessage());
+                    } catch (Exception e) {
+                        logger.log(Level.SEVERE, "发送 SSE 失败", e);
+                    }
+                });
+            } catch (Exception e) {
+                emitter.completeWithError(e);
+            }
+        });
+
+        return emitter;
     }
+
 }
