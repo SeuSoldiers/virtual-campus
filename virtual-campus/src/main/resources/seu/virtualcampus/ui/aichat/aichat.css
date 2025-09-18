@@ -19,3 +19,25 @@
     -fx-border-width: 0;
     -fx-border-color: transparent;
 }
+
+/* 删除菜单项美化 */
+.delete-menu-item {
+    -fx-text-fill: #e53935;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 2 12 2 18;
+    -fx-font-size: 12px;
+    -fx-graphic-text-gap: 6;
+}
+
+.delete-menu-item:hover {
+    -fx-background-color: #ffebee;
+    -fx-text-fill: #b71c1c;
+}
+
+/* 右键菜单整体美化 */
+.context-menu {
+    -fx-background-radius: 10;
+    -fx-effect: dropshadow(gaussian, #b0b8d8, 12, 0.2, 2, 2);
+    -fx-padding: 6 0 6 0;
+}

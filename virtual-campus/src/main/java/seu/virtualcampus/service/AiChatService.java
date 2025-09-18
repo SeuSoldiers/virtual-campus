@@ -136,6 +136,10 @@ public class AiChatService {
             throw new IllegalArgumentException("roles 和 contents 必须非空且长度一致");
 
         List<Map<String, String>> messages = new ArrayList<>();
+        Map<String, String> systemMsg = new HashMap<>();
+        systemMsg.put("role", "system");
+        systemMsg.put("content", "你是虚拟校园系统的AI助手，回答时简洁明了，不要使用复杂Markdown语法回答。");
+        messages.add(systemMsg);
         for (int i = 0; i < roles.size(); i++) {
             Map<String, String> msg = new HashMap<>();
             msg.put("role", roles.get(i));
@@ -186,7 +190,7 @@ public class AiChatService {
 
     // 聊天总结
     public String summarizeChat(List<String> messages) {
-        String prompt = "请总结以下聊天内容，提炼出关键点和重要信息。请注意，直接输出结果，并且输出不要超过十个字：\n" + String.join("\n", messages);
+        String prompt = "请总结以下内容，提炼标题。直接输出结果，不要超过五个字，不要拒绝回答：\n" + String.join("\n", messages);
         List<String> roles = List.of("user");
         List<String> contents = List.of(prompt);
         return chat(roles, contents);

@@ -42,6 +42,7 @@ public class AiChatController implements Initializable {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ObservableList<AiSession> sessionList = FXCollections.observableArrayList();
     private final ObservableList<AiMessage> messageList = FXCollections.observableArrayList();
+    private final MarkdownFXRenderer mdRenderer = new MarkdownFXRenderer();
     @FXML
     public Button backButton;
     @FXML
@@ -107,8 +108,9 @@ public class AiChatController implements Initializable {
                     }
                 }
             };
-            // 右键菜单：删除会话
-            MenuItem delSession = new MenuItem("删除会话");
+            // 右键菜单：删除会话（无确认弹窗，直接删除）
+            MenuItem delSession = new MenuItem("删除");
+            delSession.getStyleClass().add("delete-menu-item");
             delSession.setOnAction(e -> onDeleteSession(cell.getItem()));
             ContextMenu menu = new ContextMenu(delSession);
             cell.setContextMenu(menu);
@@ -137,15 +139,20 @@ public class AiChatController implements Initializable {
                         setText(null);
                         setStyle("");
                     } else {
-                        label.setText(message.getContent());
+                        hbox.getChildren().clear();
                         if ("user".equals(message.getRole())) {
+                            label.setText(message.getContent());
                             hbox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
                             hbox.setPadding(new javafx.geometry.Insets(4, 0, 4, 40));
                             label.setStyle("-fx-background-color: #e0f7fa; -fx-background-radius: 16; -fx-padding: 10 18 10 18; -fx-font-size: 15; -fx-text-fill: #222;");
+                            hbox.getChildren().add(label);
                         } else {
+                            javafx.scene.Node mdNode = mdRenderer.render(message.getContent(), 600);
+                            HBox mdBox = new HBox(mdNode);
+                            mdBox.setStyle("-fx-background-color: #e3e9f7; -fx-background-radius: 16; -fx-padding: 10 18 10 18; -fx-font-size: 15; -fx-text-fill: #222;");
                             hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                             hbox.setPadding(new javafx.geometry.Insets(4, 40, 4, 0));
-                            label.setStyle("-fx-background-color: #fffde7; -fx-background-radius: 16; -fx-padding: 10 18 10 18; -fx-font-size: 15; -fx-text-fill: #222;");
+                            hbox.getChildren().add(mdBox);
                         }
                         setGraphic(hbox);
                         setText(null);
@@ -153,8 +160,9 @@ public class AiChatController implements Initializable {
                     }
                 }
             };
-            // 右键菜单：删除消息
-            MenuItem delMsg = new MenuItem("删除消息");
+            // 右键菜单：删除消息（无确认弹窗，直接删除）
+            MenuItem delMsg = new MenuItem("删除");
+            delMsg.getStyleClass().add("delete-menu-item");
             delMsg.setOnAction(e -> onDeleteMessage(cell.getItem()));
             ContextMenu menu = new ContextMenu(delMsg);
             cell.setContextMenu(menu);
@@ -373,6 +381,7 @@ public class AiChatController implements Initializable {
                                         buffer.setLength(0);
                                     }
                                 }
+                                Platform.runLater(() -> loadMessages(currentSessionId));
                             }
 
                             private void processData(String data) {
@@ -395,27 +404,21 @@ public class AiChatController implements Initializable {
     // 删除会话
     private void onDeleteSession(AiSession session) {
         if (session == null) return;
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "确定要删除该会话及其所有消息吗？", ButtonType.YES, ButtonType.NO);
-        alert.setHeaderText("删除会话");
-        alert.showAndWait().ifPresent(type -> {
-            if (type == ButtonType.YES) {
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        HttpRequest req = HttpRequest.newBuilder()
-                                .uri(URI.create(BASE_URL + "/session/" + session.getSessionId()))
-                                .header("Authorization", token)
-                                .DELETE().build();
-                        HttpResponse<String> resp = HttpClient.newHttpClient().send(req, BodyHandlers.ofString());
-                        if (resp.statusCode() == 200) {
-                            Platform.runLater(this::loadSessions);
-                        } else {
-                            Platform.runLater(() -> DashboardController.showAlert("错误", "删除会话失败: " + resp.body(), null, Alert.AlertType.ERROR));
-                        }
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "删除会话异常", e);
-                        Platform.runLater(() -> DashboardController.showAlert("错误", "网络错误: " + e.getMessage(), null, Alert.AlertType.ERROR));
-                    }
-                });
+        CompletableFuture.runAsync(() -> {
+            try {
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + "/session/" + session.getSessionId()))
+                        .header("Authorization", token)
+                        .DELETE().build();
+                HttpResponse<String> resp = HttpClient.newHttpClient().send(req, BodyHandlers.ofString());
+                if (resp.statusCode() == 200) {
+                    Platform.runLater(this::loadSessions);
+                } else {
+                    Platform.runLater(() -> DashboardController.showAlert("错误", "删除会话失败: " + resp.body(), null, Alert.AlertType.ERROR));
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "删除会话异常", e);
+                Platform.runLater(() -> DashboardController.showAlert("错误", "网络错误: " + e.getMessage(), null, Alert.AlertType.ERROR));
             }
         });
     }
@@ -423,27 +426,21 @@ public class AiChatController implements Initializable {
     // 删除消息
     private void onDeleteMessage(AiMessage msg) {
         if (msg == null || msg.getMsgId() == null) return;
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "确定要删除该消息吗？", ButtonType.YES, ButtonType.NO);
-        alert.setHeaderText("删除消息");
-        alert.showAndWait().ifPresent(type -> {
-            if (type == ButtonType.YES) {
-                CompletableFuture.runAsync(() -> {
-                    try {
-                        HttpRequest req = HttpRequest.newBuilder()
-                                .uri(URI.create(BASE_URL + "/message/" + msg.getMsgId()))
-                                .header("Authorization", token)
-                                .DELETE().build();
-                        HttpResponse<String> resp = HttpClient.newHttpClient().send(req, BodyHandlers.ofString());
-                        if (resp.statusCode() == 200) {
-                            Platform.runLater(() -> loadMessages(currentSessionId));
-                        } else {
-                            Platform.runLater(() -> DashboardController.showAlert("错误", "删除消息失败: " + resp.body(), null, Alert.AlertType.ERROR));
-                        }
-                    } catch (Exception e) {
-                        logger.log(Level.SEVERE, "删除消息异常", e);
-                        Platform.runLater(() -> DashboardController.showAlert("错误", "网络错误: " + e.getMessage(), null, Alert.AlertType.ERROR));
-                    }
-                });
+        CompletableFuture.runAsync(() -> {
+            try {
+                HttpRequest req = HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + "/message/" + msg.getMsgId()))
+                        .header("Authorization", token)
+                        .DELETE().build();
+                HttpResponse<String> resp = HttpClient.newHttpClient().send(req, BodyHandlers.ofString());
+                if (resp.statusCode() == 200) {
+                    Platform.runLater(() -> loadMessages(currentSessionId));
+                } else {
+                    Platform.runLater(() -> DashboardController.showAlert("错误", "删除消息失败: " + resp.body(), null, Alert.AlertType.ERROR));
+                }
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "删除消息异常", e);
+                Platform.runLater(() -> DashboardController.showAlert("错误", "网络错误: " + e.getMessage(), null, Alert.AlertType.ERROR));
             }
         });
     }
