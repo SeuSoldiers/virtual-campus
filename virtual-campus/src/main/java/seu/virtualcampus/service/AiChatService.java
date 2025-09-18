@@ -12,7 +12,10 @@ import seu.virtualcampus.domain.AiSession;
 import seu.virtualcampus.mapper.AiMessageMapper;
 import seu.virtualcampus.mapper.AiSessionMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class AiChatService {
@@ -35,10 +38,12 @@ public class AiChatService {
     }
 
     // 创建新会话
-    public Integer createSession() {
+    public Integer createSession(Integer username) {
         AiSession session = new AiSession();
+        session.setUsername(username);
         session.setCreatedAt(java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         session.setUpdatedAt(session.getCreatedAt());
+        session.setTitle("新会话");
         aiSessionMapper.insertSession(session);
         return session.getSessionId();
     }
@@ -63,9 +68,8 @@ public class AiChatService {
         addMessage(sessionId, "user", userMsg);
         addMessage(sessionId, "assistant", aiMsg);
         List<AiMessage> history = aiMessageMapper.getMessagesBySessionId(sessionId);
-        history.sort(Comparator.comparing(AiMessage::getCreatedAt));
         List<String> recentContents = history.stream()
-                .limit(4)
+                .skip(Math.max(0, history.size() - 4))
                 .map(AiMessage::getContent)
                 .toList();
         session.setTitle(summarizeChat(recentContents));
@@ -90,7 +94,6 @@ public class AiChatService {
             throw new RuntimeException("会话不存在");
         }
         List<AiMessage> history = aiMessageMapper.getMessagesBySessionId(sessionId);
-        history.sort(Comparator.comparing(AiMessage::getCreatedAt));
         List<String> roles = new ArrayList<>();
         List<String> contents = new ArrayList<>();
         for (AiMessage msg : history) {

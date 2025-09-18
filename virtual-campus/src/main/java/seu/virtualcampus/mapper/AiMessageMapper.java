@@ -7,7 +7,7 @@ import java.util.List;
 
 @Mapper
 public interface AiMessageMapper {
-    @Select("SELECT * FROM ai_message WHERE session_id = #{sessionId} ORDER BY created_at ASC")
+    @Select("SELECT msg_id AS msgId, session_id AS sessionId, role, content, created_at AS createdAt FROM ai_message WHERE session_id = #{sessionId} ORDER BY created_at ASC")
     List<AiMessage> getMessagesBySessionId(@Param("sessionId") Integer sessionId);
 
     @Insert("INSERT INTO ai_message (session_id, role, content, created_at) VALUES (#{sessionId}, #{role}, #{content}, #{createdAt})")
@@ -20,4 +20,3 @@ public interface AiMessageMapper {
     @Delete("DELETE FROM ai_message WHERE session_id = #{sessionId}")
     int deleteMessagesBySessionId(@Param("sessionId") Integer sessionId);
 }
-

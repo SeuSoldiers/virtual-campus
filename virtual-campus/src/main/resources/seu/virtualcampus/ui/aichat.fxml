@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<BorderPane xmlns:fx="http://javafx.com/fxml" fx:controller="seu.virtualcampus.ui.aichat.AiChatController">
+    <left>
+        <VBox spacing="10" style="-fx-padding: 10;">
+            <Label text="会话列表"/>
+            <ListView fx:id="sessionListView" prefWidth="150"/>
+            <Button fx:id="createSessionBtn" text="新建会话"/>
+        </VBox>
+    </left>
+    <center>
+        <VBox spacing="5" style="-fx-padding: 10;">
+            <Label fx:id="sessionTitle" text="当前会话"/>
+            <ListView fx:id="messageListView" VBox.vgrow="ALWAYS"/>
+            <HBox spacing="5">
+                <TextField fx:id="inputField" HBox.hgrow="ALWAYS" promptText="请输入消息..."/>
+                <Button fx:id="sendBtn" text="发送"/>
+            </HBox>
+        </VBox>
+    </center>
+    <top>
+        <HBox style="-fx-padding: 10; -fx-alignment: center-right;">
+            <Label fx:id="userLabel" text="用户："/>
+        </HBox>
+    </top>
+</BorderPane>
+

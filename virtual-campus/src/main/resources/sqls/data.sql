@@ -150,9 +150,9 @@ VALUES
 
 -- AI会话测试数据
 INSERT OR IGNORE INTO ai_session (session_id, username, title, created_at, updated_at)
-VALUES (1, 220231, '学习助手', '2025-09-18T10:00:00', '2025-09-18T10:00:00');
+VALUES (1, 220231, '学习助手', '2025-09-18 10:00:00', '2025-09-18 10:00:00');
 
 -- AI消息测试数据
 INSERT OR IGNORE INTO ai_message (msg_id, session_id, role, content, created_at)
-VALUES (1, 1, 'user', '你好，帮我推荐一本Java书籍。', '2025-09-18T10:01:00'),
-       (2, 1, 'ai', '推荐《Java编程思想》。', '2025-09-18T10:01:05');
+VALUES (1, 1, 'user', '你好，帮我推荐一本Java书籍。', '2025-09-18 10:01:00'),
+       (2, 1, 'assistant', '推荐《Java编程思想》。', '2025-09-18 10:01:05');

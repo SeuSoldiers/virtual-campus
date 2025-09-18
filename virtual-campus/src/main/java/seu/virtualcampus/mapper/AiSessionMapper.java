@@ -7,10 +7,10 @@ import java.util.List;
 
 @Mapper
 public interface AiSessionMapper {
-    @Select("SELECT * FROM ai_session WHERE username = #{username}")
+    @Select("SELECT session_id AS sessionId, username, title, created_at AS createdAt, updated_at AS updatedAt FROM ai_session WHERE username = #{username}")
     List<AiSession> getSessionsByUsername(@Param("username") Integer username);
 
-    @Select("SELECT * FROM ai_session WHERE session_id = #{sessionId}")
+    @Select("SELECT session_id AS sessionId, username, title, created_at AS createdAt, updated_at AS updatedAt FROM ai_session WHERE session_id = #{sessionId}")
     AiSession getSessionById(@Param("sessionId") Integer sessionId);
 
     @Insert("INSERT INTO ai_session (username, title, created_at, updated_at) VALUES (#{username}, #{title}, #{createdAt}, #{updatedAt})")
@@ -23,4 +23,3 @@ public interface AiSessionMapper {
     @Delete("DELETE FROM ai_session WHERE session_id = #{sessionId}")
     int deleteSession(@Param("sessionId") Integer sessionId);
 }
-
