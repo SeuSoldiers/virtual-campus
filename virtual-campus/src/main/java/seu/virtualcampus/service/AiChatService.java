@@ -23,6 +23,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+/**
+ * AI 聊天服务。
+ * <p>
+ * 提供会话管理、消息管理、与 AI 聊天模型的流式和非流式交互、会话摘要等功能。
+ * </p>
+ */
 @Service
 public class AiChatService {
     private static final String DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
@@ -34,17 +40,32 @@ public class AiChatService {
     @Value("${deepseek.api.key}")
     private String deepSeekApiKey;
 
-    // 获取用户所有会话
+    /**
+     * 获取指定用户的所有会话。
+     *
+     * @param username 用户名（用户唯一标识）
+     * @return 该用户的所有会话列表
+     */
     public List<AiSession> getSessionsByUsername(Integer username) {
         return aiSessionMapper.getSessionsByUsername(username);
     }
 
-    // 获取会话消息
+    /**
+     * 获取指定会话的所有消息。
+     *
+     * @param sessionId 会话ID
+     * @return 该会话下的所有消息列表
+     */
     public List<AiMessage> getMessagesBySessionId(Integer sessionId) {
         return aiMessageMapper.getMessagesBySessionId(sessionId);
     }
 
-    // 创建新会话
+    /**
+     * 创建新会话。
+     *
+     * @param username 用户名（用户唯一标识）
+     * @return 新建会话的ID
+     */
     public Integer createSession(Integer username) {
         AiSession session = new AiSession();
         session.setUsername(username);
@@ -56,7 +77,13 @@ public class AiChatService {
         return session.getSessionId();
     }
 
-    // 新增消息
+    /**
+     * 新增一条消息。
+     *
+     * @param sessionId 会话ID
+     * @param role      消息角色（如 user、assistant）
+     * @param content   消息内容
+     */
     public void addMessage(Integer sessionId, String role, String content) {
         AiMessage message = new AiMessage();
         message.setSessionId(sessionId);
@@ -66,7 +93,14 @@ public class AiChatService {
         aiMessageMapper.insertMessage(message);
     }
 
-    // 更新会话
+    /**
+     * 更新会话信息，并将用户和AI的消息写入数据库。
+     *
+     * @param sessionId 会话ID
+     * @param aiMsg     AI回复内容
+     * @param userMsg   用户输入内容
+     * @throws RuntimeException 如果会话不存在
+     */
     public void updateSession(Integer sessionId, String aiMsg, String userMsg) {
         AiSession session = aiSessionMapper.getSessionById(sessionId);
         if (session == null) throw new RuntimeException("会话不存在");
@@ -83,18 +117,38 @@ public class AiChatService {
         aiSessionMapper.updateSession(session);
     }
 
-    // 删除会话及其消息
+    /**
+     * 删除指定会话及其所有消息。
+     *
+     * @param sessionId 会话ID
+     * @return 受影响的行数（通常为1）
+     */
     public int deleteSession(Integer sessionId) {
         aiMessageMapper.deleteMessagesBySessionId(sessionId);
         return aiSessionMapper.deleteSession(sessionId);
     }
 
-    // 删除单条消息
+    /**
+     * 删除指定消息。
+     *
+     * @param msgId 消息ID
+     * @return 受影响的行数（通常为1）
+     */
     public int deleteMessage(Integer msgId) {
         return aiMessageMapper.deleteMessage(msgId);
     }
 
-    // 流式处理用户聊天请求
+    /**
+     * 处理用户聊天请求并以流式方式返回AI响应。
+     * <p>
+     * 会自动将用户消息和AI回复写入数据库，并在AI回复完成后异步更新会话。
+     * </p>
+     *
+     * @param sessionId 会话ID
+     * @param userMsg   用户输入内容
+     * @param callback  每次AI回复新内容时的回调（chunk为本次增量内容）
+     * @throws RuntimeException 如果会话不存在
+     */
     public void handleChatStream(Integer sessionId, String userMsg, Consumer<String> callback) {
         AiSession session = aiSessionMapper.getSessionById(sessionId);
         if (session == null) throw new RuntimeException("会话不存在");
@@ -130,7 +184,14 @@ public class AiChatService {
                 .subscribe();
     }
 
-    // 流式调用 DeepSeek API
+    /**
+     * 以流式方式调用 DeepSeek API 获取AI回复。
+     *
+     * @param roles    消息角色列表（如 user、assistant）
+     * @param contents 消息内容列表
+     * @return AI回复内容的流，每个元素为增量内容
+     * @throws IllegalArgumentException 如果参数不合法
+     */
     public Flux<String> chatStream(List<String> roles, List<String> contents) {
         if (roles == null || contents == null || roles.size() != contents.size())
             throw new IllegalArgumentException("roles 和 contents 必须非空且长度一致");
@@ -174,6 +235,13 @@ public class AiChatService {
                 });
     }
 
+    /**
+     * 阻塞式获取AI回复（非流式）。
+     *
+     * @param roles    消息角色列表
+     * @param contents 消消息内容列表
+     * @return AI完整回复内容
+     */
     public String chat(List<String> roles, List<String> contents) {
         // 使用内部流式接口
         StringBuilder fullResponse = new StringBuilder();
@@ -187,8 +255,12 @@ public class AiChatService {
         return fullResponse.toString();
     }
 
-
-    // 聊天总结
+    /**
+     * 对聊天内容进行总结，生成会话标题。
+     *
+     * @param messages 聊天内容列表
+     * @return 总结后的标题（不超过五个字）
+     */
     public String summarizeChat(List<String> messages) {
         String prompt = "请总结以下内容，提炼标题。直接输出结果，不要超过五个字，不要拒绝回答：\n" + String.join("\n", messages);
         List<String> roles = List.of("user");

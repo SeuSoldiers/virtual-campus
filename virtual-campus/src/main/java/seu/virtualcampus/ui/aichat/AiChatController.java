@@ -36,6 +36,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/**
+ * AI 聊天界面控制器。
+ * <p>
+ * 负责管理 AI 聊天窗口的会话、消息展示、消息发送、会话创建与删除、消息删除等功能，
+ * 并与后端 API 进行交互，支持流式 AI 回复展示。
+ * </p>
+ */
 public class AiChatController implements Initializable {
     private static final Logger logger = Logger.getLogger(AiChatController.class.getName());
     private final String BASE_URL = "http://" + MainApp.host + "/api/ai-chat";
@@ -63,6 +70,16 @@ public class AiChatController implements Initializable {
     private String username = "";
     private String token = "";
 
+    /**
+     * 初始化 AI 聊天界面。
+     * <p>
+     * 设置用户信息、会话列表、消息列表的显示方式，加载会话数据，
+     * 并为输入框、按钮等控件绑定事件。
+     * </p>
+     *
+     * @param location  FXML 资源定位器
+     * @param resources 资源包
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         logger.info("初始化AI聊天界面");
@@ -185,11 +202,22 @@ public class AiChatController implements Initializable {
         logger.info("AI聊天界面初始化完成");
     }
 
+    /**
+     * 更新发送按钮的可用状态。
+     * <p>
+     * 当输入框有内容且选中会话时允许发送。
+     * </p>
+     */
     private void updateSendBtnState() {
         boolean canSend = !inputField.getText().trim().isEmpty() && sessionListView.getSelectionModel().getSelectedItem() != null;
         sendBtn.setDisable(!canSend);
     }
 
+    /**
+     * 处理输入框回车事件，触发消息发送。
+     *
+     * @param event 键盘事件
+     */
     @FXML
     private void onInputKey(KeyEvent event) {
         if (event.getCode() == KeyCode.ENTER) {
@@ -197,6 +225,11 @@ public class AiChatController implements Initializable {
         }
     }
 
+    /**
+     * 发送消息到当前选中会话。
+     *
+     * @param event 事件参数，可为 null
+     */
     @FXML
     private void onSend(ActionEvent event) {
         String msg = inputField.getText().trim();
@@ -211,6 +244,11 @@ public class AiChatController implements Initializable {
         sendMessage(sessionId, msg);
     }
 
+    /**
+     * 创建新会话并刷新会话列表。
+     *
+     * @param event 事件参数
+     */
     @FXML
     private void onCreateSession(ActionEvent event) {
         logger.info("创建新会话");
@@ -236,12 +274,22 @@ public class AiChatController implements Initializable {
         });
     }
 
+    /**
+     * 返回到主面板。
+     */
     @FXML
     private void onBack() {
         DashboardController.handleBackDash("/seu/virtualcampus/ui/dashboard.fxml", backButton);
     }
 
     // ========== 网络请求与数据处理 ==========
+
+    /**
+     * 加载当前用户的所有会话。
+     * <p>
+     * 从后端获取会话列表并刷新界面。
+     * </p>
+     */
     private void loadSessions() {
         logger.info("开始加载用户 " + username + " 的会话列表");
         Platform.runLater(() -> {
@@ -284,6 +332,14 @@ public class AiChatController implements Initializable {
         });
     }
 
+    /**
+     * 加载指定会话的所有消息。
+     * <p>
+     * 从后端获取消息列表并刷新界面。
+     * </p>
+     *
+     * @param sessionId 会话ID
+     */
     private void loadMessages(Integer sessionId) {
         if (sessionId == null) {
             messageList.clear();
@@ -317,6 +373,16 @@ public class AiChatController implements Initializable {
         });
     }
 
+    /**
+     * 发送消息到后端并流式接收 AI 回复。
+     * <p>
+     * 先在界面显示用户消息和空的 AI 回复气泡，
+     * 然后通过 SSE 流式接收 AI 回复内容并实时刷新。
+     * </p>
+     *
+     * @param sessionId 会话ID
+     * @param msg       用户输入内容
+     */
     private void sendMessage(Integer sessionId, String msg) {
         if (sessionId == null || msg.isEmpty()) return;
 
@@ -401,7 +467,14 @@ public class AiChatController implements Initializable {
         });
     }
 
-    // 删除会话
+    /**
+     * 删除指定会话。
+     * <p>
+     * 调用后端接口删除会话并刷新会话列表。
+     * </p>
+     *
+     * @param session 要删除的会话对象
+     */
     private void onDeleteSession(AiSession session) {
         if (session == null) return;
         CompletableFuture.runAsync(() -> {
@@ -423,7 +496,14 @@ public class AiChatController implements Initializable {
         });
     }
 
-    // 删除消息
+    /**
+     * 删除指定消息。
+     * <p>
+     * 调用后端接口删除消息并刷新消息列表。
+     * </p>
+     *
+     * @param msg 要删除的消息对象
+     */
     private void onDeleteMessage(AiMessage msg) {
         if (msg == null || msg.getMsgId() == null) return;
         CompletableFuture.runAsync(() -> {
@@ -446,7 +526,10 @@ public class AiChatController implements Initializable {
     }
 
     /**
-     * 将时间字符串（如 2025-09-18 18:22:32）转为“xx天前/xx小时前/xx分钟前/刚刚”
+     * 将时间字符串（如 2025-09-18 18:22:32）转为“xx天前/xx小时前/xx分钟前/刚刚”。
+     *
+     * @param updatedAt 时间字符串
+     * @return 相对时间描述
      */
     private String getRelativeTime(String updatedAt) {
         if (updatedAt == null || updatedAt.isEmpty()) return "未知";

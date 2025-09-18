@@ -10,14 +10,34 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import javafx.scene.text.Text;
 
+/**
+ * Markdown 渲染器，将 Markdown 文本渲染为 JavaFX 节点。
+ * <p>
+ * 支持标题、段落、加粗、斜体、代码块、无序列表等常见 Markdown 语法，
+ * 并根据不同类型节点设置相应的字体、样式和布局。
+ * </p>
+ */
 public class MarkdownFXRenderer {
 
+    /**
+     * Flexmark 解析器，用于将 Markdown 文本解析为 AST。
+     */
     private final Parser parser;
 
+    /**
+     * 构造方法，初始化 Markdown 解析器。
+     */
     public MarkdownFXRenderer() {
         parser = Parser.builder().build();
     }
 
+    /**
+     * 渲染 Markdown 文本为 JavaFX 节点。
+     *
+     * @param markdown Markdown 源文本
+     * @param maxWidth 渲染区域最大宽度
+     * @return 渲染后的 JavaFX 节点（VBox）
+     */
     public javafx.scene.Node render(String markdown, double maxWidth) {
         Node document = parser.parse(markdown == null ? "" : markdown);
         VBox container = new VBox(4);  // 行间距 4
@@ -25,6 +45,13 @@ public class MarkdownFXRenderer {
         return container;
     }
 
+    /**
+     * 渲染 Markdown AST 的所有块级子节点。
+     *
+     * @param parent    父节点
+     * @param container VBox 容器
+     * @param maxWidth  最大宽度
+     */
     private void renderChildren(Node parent, VBox container, double maxWidth) {
         for (Node child = parent.getFirstChild(); child != null; child = child.getNext()) {
             if (child instanceof Paragraph) {
@@ -89,12 +116,16 @@ public class MarkdownFXRenderer {
                 tf.getChildren().add(t);
                 container.getChildren().add(tf);
             }
-
-            // 每个块后加一个空行（可选）
-            // container.getChildren().add(new TextFlow(new Text("\n")));
         }
     }
 
+    /**
+     * 渲染 Markdown AST 的所有内联子节点。
+     *
+     * @param parent   父节点
+     * @param tf       TextFlow 容器
+     * @param maxWidth 最大宽度
+     */
     private void renderInlines(Node parent, TextFlow tf, double maxWidth) {
         for (Node child = parent.getFirstChild(); child != null; child = child.getNext()) {
             if (child instanceof com.vladsch.flexmark.ast.Text) {
