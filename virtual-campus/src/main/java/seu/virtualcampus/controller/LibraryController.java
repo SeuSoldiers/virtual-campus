@@ -88,17 +88,25 @@ public class LibraryController {
                 return ResponseEntity.badRequest().body("借阅失败：该副本不可借（当前状态：" + copy.getStatus() + "）");
             }
 
-            ReservationRecord firstRes = reservationRecordService.getFirstActiveByIsbn(copy.getIsbn());
-            if (firstRes != null) {
-                // 如果当前用户就是队首预约者，允许直接借阅
-                if (!firstRes.getUserId().equals(userId)) {
-                    return ResponseEntity.badRequest().body("该书已有预约，只有队首用户可兑付");
+            var bookInfo = bookInfoService.getBookByIsbn(copy.getIsbn());
+            int available = bookInfo.getAvailableCount();
+            int reserved = bookInfo.getReservationCount();
+
+            if (reserved > 0 && available <= reserved) {
+                // 有预约，并且可借副本数不足以覆盖预约队列
+                ReservationRecord firstRes = reservationRecordService.getFirstActiveByIsbn(copy.getIsbn());
+                if (firstRes == null) {
+                    return ResponseEntity.badRequest().body("该书已有预约，只有队首用户可借阅");
                 }
 
-                // 队首用户 -> 借阅成功，同时标记预约为 FULFILLED
-                boolean fulfilled = reservationRecordService.fulfillReservation(firstRes.getReservationId());
-                if (!fulfilled) {
-                    return ResponseEntity.badRequest().body("预约兑现失败，请稍后再试");
+                // 如果当前用户是队首预约者 -> 允许借阅并兑现预约
+                if (firstRes.getUserId().equals(userId)) {
+                    boolean fulfilled = reservationRecordService.fulfillReservation(firstRes.getReservationId());
+                    if (!fulfilled) {
+                        return ResponseEntity.badRequest().body("预约兑现失败，请稍后再试");
+                    }
+                } else {
+                    return ResponseEntity.badRequest().body("该书已有预约，只有队首用户可借阅");
                 }
             }
 
