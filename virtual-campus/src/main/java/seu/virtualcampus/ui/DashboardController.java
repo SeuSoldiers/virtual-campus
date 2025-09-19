@@ -157,6 +157,7 @@ public class DashboardController {
         Button libraryBtn = createButtonWithIcon("图书馆", "/seu/virtualcampus/ui/icon/lib.png");
         libraryBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/library/student_library.fxml", entryBox));
         entryBox.add(libraryBtn, cnt % 4, cnt / 4);
+        cnt++;
 
         Button aiChatBtn = createButtonWithIcon("智能助理", "/seu/virtualcampus/ui/icon/ai.png");
         aiChatBtn.setOnAction(e -> navigateToScene("/seu/virtualcampus/ui/aichat/aichat.fxml", entryBox));
