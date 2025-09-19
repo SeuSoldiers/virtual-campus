@@ -283,8 +283,8 @@ public class BookCopyManagementController {
             }
         }
         if (lblCounts != null) {
-            lblCounts.setText(String.format("数量：总 %d，在馆 %d，借出 %d，预约 %d，损坏 %d，遗失 %d",
-                    total, available, borrowed, reserved, damaged, lost));
+            lblCounts.setText(String.format("数量：总 %d，在馆 %d，借出 %d，预约 %d",
+                    total, available, borrowed, reserved));
         }
     }
 
